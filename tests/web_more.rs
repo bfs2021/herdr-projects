@@ -54,7 +54,7 @@ fn a_draft_goes_to_who_it_was_typed_for_a_merge_has_no_filled_yes_and_the_page_s
     let out = send(&w, "For a machine that left", json!({ "id": "", "reply": false, "scope": "vm-c" }));
     assert_eq!(out.at("kept"), &json!(true)); assert!(out.at("msg").s("text").contains("vm-c is not among the machines you can reach now. Nothing was sent."));
     assert_eq!(far.asked().len(), 1);
-    { let c = client(); let mut g = c.lock().unwrap(); g.s.scope.clear(); g.s.remotes.clear(); sw::webui::web::reload(&mut g); }
+    { let c = client(); let mut g = c.lock().unwrap(); g.s.scope.clear(); g.s.level = 0; g.s.remotes.clear(); sw::webui::web::reload(&mut g); }
     // The merge question of work whose review failed: what it is, what failed, and `danger`: neither answer is filled.
     web(&w, "pick", json!({ "id": bad, "open": true }));
     let s = web(&w, "press", json!({ "id": "yes" }));
