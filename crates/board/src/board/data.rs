@@ -34,6 +34,8 @@ pub struct Data {
     /// How this machine's other coordinators stand, by level, as far as the board wants them (update/coords.rs:
     /// looks_wanted): the filter row's list of coordinators, the selected one's panel.
     pub looks: BTreeMap<String, Look>,
+    /// This machine's coordinators that were ever talked to, by level ("machine", "project:<repo>"): one folder read.
+    pub coords: Vec<String>,
     /// This machine's coordinators' autopilot as each shows it, by level ("" the main one, "machine", "project:<repo>").
     pub pilots: Value,
     pub keys: Keys, pub repos: Vec<String>, pub roots: BTreeMap<String, String>, pub session: String, pub notify: String,
@@ -91,8 +93,9 @@ pub fn load(wants: &Wants) -> Data {
     let sub = (!wants.coord.is_empty()).then(|| { let co = crate::coordinator::co::Co::of(&socket, &wants.coord); let v = look(&co); let sc = if !v.readable && v.status.is_some() { screen_text(&screen(&v, &co)) } else { String::new() }; (wants.coord.clone(), v, sc) });
     let here = repo_here(&wants.cwd);
     let looks = looks(&socket, &wants.looks);
+    let coords = crate::coordinator::state::all(&socket).into_iter().filter(|c| !c.is_top()).map(|c| c.to()).collect();
     Data {
-        items, autos, jobs, coord, coord_screen, sub, looks, can_dispatch: crate::coordinator::who::ready(&socket), keys: repo_keys(), repos: roots.keys().cloned().collect(), roots, lately,
+        items, autos, jobs, coord, coord_screen, sub, looks, coords, can_dispatch: crate::coordinator::who::ready(&socket), keys: repo_keys(), repos: roots.keys().cloned().collect(), roots, lately,
         session: session_name(&socket), notify: setting("board.notify", None).as_str().unwrap_or("").to_string(),
         repo: here.0, repo_root: here.1, host: crate::remote::check::hostname(),
         // herdr's approve action and a line left by the board key are for a board in a terminal, never the web board.

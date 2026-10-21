@@ -83,7 +83,7 @@ fn coordinators_lists_every_coordinator_of_every_machine_and_enter_talks_to_it()
     assert!(s.text().contains("Send message to far coordinator"), "{}", s.text());
     // enter on the main Coordinator: the chat is the Coordinator's
     s.s.sel = sw::board::update::pilot::main_id(""); s.load();
-    s.press(&["enter"]); assert!(!s.s.reply);
+    s.press(&["enter"]); assert!(s.s.reply, "by its row");
     assert!(s.text().contains("Send message to Coordinator"), "{}", s.text());
 }
 
@@ -99,4 +99,32 @@ fn alt_s_groups_by_status_by_repo_by_machine_and_round_again() {
     assert_eq!(heads(&s), vec![host.clone()], "the machine's heading alone, no status heading under it");
     assert_eq!(tasks_shown(&s).len(), 2);
     s.press(&["alt+s"]); assert!(!s.s.by_machine && !s.s.by_repo); assert_eq!(heads(&s), vec!["to do"]);
+}
+
+#[test]
+fn enter_on_this_machines_coordinator_talks_to_it_whatever_machine_shows_and_the_count_holds() {
+    let w = coord_world("otherbox");
+    w.add("Fix the login");
+    w.script(json!({ "coordinator": [{ "said": "Proj is quiet." }] }));
+    let mut s = open(&w.root, 40); s.s.side = false;
+    // a project coordinator, saved: counted under every filter, not only under Coordinators
+    s.press(&["alt+s"]); s.s.sel = sw::board::update::heads::group_id(&s.s, "", "proj"); s.load();
+    s.press(&["space"]); s.typed("hello"); s.press(&["enter"]); drain(); s.press(&["space", "alt+s", "alt+s"]); s.load();
+    let n = |s: &mut common::board::Board| s.screen(120)[1].clone();
+    assert!(n(&mut s).ends_with("Coordinators 3"), "{}", n(&mut s));
+    s.press(&["shift+tab"]); s.load(); assert!(n(&mut s).ends_with("Coordinators 3"), "{}", n(&mut s));
+    s.press(&["tab"]); s.load(); assert!(n(&mut s).ends_with("Coordinators 3"), "{}", n(&mut s));
+    // one other machine's board shown: its Coordinator is the chat's own, yet enter on this machine's goes here
+    update(&mut s.s, Event::Machines(sw::remote::machines()));
+    update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "idle" }, "coordinators": {}, "tasks": [] })) });
+    s.s.scope = "otherbox".into();
+    s.press(&["shift+tab"]); assert!(sw::board::update::shows::coords(&s.s));
+    s.s.sel = sw::board::update::pilot::main_id(""); s.load();
+    assert!(s.text().contains("enter talk to it"), "{}", s.text());
+    s.press(&["enter"]);
+    assert!(s.text().contains("Send message to Coordinator") && !s.text().contains("enter talk to it"), "{}", s.text());
+    s.typed("hello local coordinator");
+    let fx = s.hold("enter");
+    let jobs: Vec<String> = fx.iter().filter_map(|e| match e { sw::board::update::Effect::Run(j) => Some(format!("{j:?}")), _ => None }).collect();
+    assert!(jobs.iter().any(|j| j.starts_with("CoordSend") && j.contains("hello local coordinator")) && !jobs.iter().any(|j| j.starts_with("Dispatch")), "{jobs:?}");
 }

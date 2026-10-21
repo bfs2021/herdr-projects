@@ -42,15 +42,15 @@ pub fn set(s: &mut State, n: usize, fx: &mut Vec<Effect>) {
     if coords(s) { fx.push(Effect::Poll(true)); }
     relist(s);
 }
-/// Enter or space on a coordinator in the list: talk to it. The main Coordinator is who the chat talks to anyway.
+/// Enter or space on a coordinator in the list: talk to it, by its row, whichever machine's board shows (this
+/// machine's main Coordinator too: with one other machine's board shown, the chat's own Coordinator is that machine's).
 pub fn talk(s: &mut State, id: &str) {
-    if *id == super::pilot::main_id("") { s.reply = false; return; }
     s.sel = id.to_string();
     super::coords::flip(s);
 }
 /// The projects of a machine ("" this one) that have a project coordinator, as far as the board knows.
 fn projects(s: &State, host: &str) -> Vec<String> {
-    let keys: Vec<String> = if host.is_empty() { s.data.looks.keys().cloned().collect() } else { s.remotes.get(host).and_then(|m| m.coords.as_object().map(|o| o.keys().cloned().collect())).unwrap_or_default() };
+    let keys: Vec<String> = if host.is_empty() { s.data.coords.clone() } else { s.remotes.get(host).and_then(|m| m.coords.as_object().map(|o| o.keys().cloned().collect())).unwrap_or_default() };
     let mut out: Vec<String> = keys.iter().filter_map(|k| k.strip_prefix("project:").map(String::from)).collect();
     out.sort_by_key(|r| r.to_lowercase());
     out

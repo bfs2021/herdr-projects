@@ -1,5 +1,5 @@
  herdr-projects  proj · PRJ
- All 1 · Needs you 0 · Working 0 · Ready 0 · To do 1 · Done 0 · Coordinators 2
+ All 1 · Needs you 0 · Working 0 · Ready 0 · To do 1 · Done 0 · Coordinators 3
 
  ◎   Coordinator · 1 other on                                               0 of 5 added  next in 1h
      On · woke 0s ago: autopilot was turned on
@@ -16,7 +16,7 @@
   ctrl+s put an agent on this task · space talk about this task · ? all keys
 
  herdr-projects  proj · PRJ
- All 1 · To do 1 · Coords 2
+ All 1 · To do 1 · Coords 3
 
  ◎   Coordinator · 1 other on   0 of 5 added  next in 1h
      On · woke 0s ago: autopilot was turned on
