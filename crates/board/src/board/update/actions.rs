@@ -198,18 +198,18 @@ pub fn remove(s: &mut State, r: &Obj) {
 pub fn undo(s: &mut State, fx: &mut Vec<Effect>) {
     // A draft comes back only to whoever it was for: a reply stays a reply to that task, never a new task.
     if let Some(mut d) = s.draft_away.clone() {
-        if !d.to.is_empty() && !s.items.iter().any(|r| r.s("id") == d.to && !r.b("archivedAt")) && super::coords::of_head(s, &d.to).filter(|_| super::coords::exists(s, &d.to)).is_none() {
+        if !d.to.is_empty() && !s.items.iter().any(|r| r.s("id") == d.to && !r.b("archivedAt")) && !super::coords::reachable(s, &d.to) {
             if !d.warned { d.warned = true; s.draft_away = Some(d); return s.flash(format!("The task that reply was for is gone. {} again brings the words back as a draft of their own.", key_name("undo")), Ink::Yellow); }
             d.to.clear();
         }
-        let now = if s.reply && (s.current().is_some() || super::coords::talking(s).is_some()) { s.sel.clone() } else { String::new() };
+        let now = super::coords::draft_for(s);
         if d.to != now {
             let title = s.items.iter().find(|r| r.s("id") == d.to).map(|r| r.t("title")).or_else(|| super::coords::of_head(s, &d.to).map(|c| c.name)).unwrap_or_else(|| d.to.clone());
             let nm = format!("\"{}\"", crate::text::cut(&clean(&title), 40));
             s.draft_away = Some(d.clone());
-            return s.flash(if d.to.is_empty() { format!("Those words were for the Coordinator. {} goes back to it, then {} brings them back.", key_name("talk"), key_name("undo")) }
-                else if !now.is_empty() { format!("Those words were for {nm}. Move to it, then {} brings them back.", key_name("undo")) }
-                else if super::heads::is_head(&d.to) { format!("Those words were for the {}. Select its heading and press {}, then {} brings them back.", clean(&title), key_name("talk"), key_name("undo")) }
+            return s.flash(if d.to.is_empty() { format!("Those words were for the Coordinator. {} goes back to it, then {} brings them back.", if s.reply { key_name("talk") } else { format!("{} to All on the scope bar", key_name("scopeOut")) }, key_name("undo")) }
+                else if !now.is_empty() && !super::heads::is_head(&d.to) { format!("Those words were for {nm}. Move to it, then {} brings them back.", key_name("undo")) }
+                else if super::heads::is_head(&d.to) { format!("Those words were for the {}. Select its heading and press {} (or go to it on the scope bar), then {} brings them back.", clean(&title), key_name("talk"), key_name("undo")) }
                 else { format!("Those words were for the agent on {nm}. Select it and press {}, then {} brings them back.", key_name("talk"), key_name("undo")) }, Ink::Yellow);
         }
         s.draft_away = None;

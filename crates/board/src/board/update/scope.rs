@@ -11,6 +11,11 @@ use crate::board::state::{Pick, State};
 use crate::json::*;
 use crate::shown::ink::Ink;
 
+/// The heading's id of the scope's coordinator (None on All, or where none can run): whom a draft typed for it is for.
+pub fn coord_id(s: &State) -> Option<String> {
+    coord(s)?;
+    Some(if s.level >= 2 { repo_id(&s.scope, &s.project) } else { machine_id(&s.scope) })
+}
 /// A project's step, as a heading's id: its project coordinator's (coords.rs: of_head).
 pub fn repo_id(host: &str, repo: &str) -> String { format!("{HEAD}repo\t{host}\t{repo}") }
 /// The coordinator of the scope the bar stands on: None on All, which talks to the Coordinator as ever.

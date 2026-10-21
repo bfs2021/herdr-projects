@@ -53,6 +53,14 @@ pub fn talking(s: &State) -> Option<Target> {
     if s.reply { return if is_head(&s.reply_id) && s.reply_id == s.sel { of_head(s, &s.sel) } else { None }; }
     super::scope::coord(s)
 }
+/// Whom words typed now are for, as words put away keep it: the task or heading you reply to, else the scope bar's
+/// coordinator (by its heading's id), "" the Coordinator.
+pub fn draft_for(s: &State) -> String {
+    if s.reply { return if s.current().is_some() || talking(s).is_some() { s.sel.clone() } else { String::new() }; }
+    super::scope::coord_id(s).unwrap_or_default()
+}
+/// A coordinator a draft was for is still there to get it: its heading is on the board, or its machine is.
+pub fn reachable(s: &State, id: &str) -> bool { of_head(s, id).is_some_and(|t| exists(s, id) || t.host.is_empty() || s.remotes.contains_key(&t.host)) }
 /// The coordinators of this machine the board reads how they stand of, as the coordinator code names their level:
 /// the scope bar's steps, the selected row's, and with the list of coordinators every one ("*").
 pub fn looks_wanted(s: &State) -> Vec<String> {

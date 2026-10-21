@@ -178,3 +178,32 @@ fn with_a_long_host_name_and_another_machine_a_narrow_bar_counts_both_and_cuts_n
     let l = &s.screen(40)[0]; assert!(l.ends_with("› +2") && !l.contains('…'), "{l}");
     let l = &s.screen(100)[0]; assert!(l.contains("runnervmxehtw-with-a-long-name  otherbox"), "{l}");
 }
+
+#[test]
+fn words_put_away_stay_with_the_scopes_coordinator_and_a_paste_into_the_picker_picks() {
+    let w = coord_world();
+    w.add("Fix the login");
+    let mut s = open(&w.root, 34);
+    s.press(&["right", "right", "enter"]); assert_eq!(s.s.level, 2);
+    s.typed("Draft for proj coordinator only"); s.press(&["esc"]);
+    assert_eq!(s.s.draft_away.as_ref().map(|d| d.to.clone()), Some(sw::board::update::scope::repo_id("", "proj")));
+    // on All, undo does not bring them back to the Coordinator: it says where they belong
+    s.press(&["left", "left", "ctrl+z"]);
+    assert_eq!(s.s.value(), "");
+    assert!(s.s.msg.contains("Those words were for the proj coordinator.") && s.s.msg.contains("or go to it on the scope bar"), "{}", s.s.msg);
+    // back on the project: they come back, for its coordinator
+    s.press(&["right", "right", "enter", "ctrl+z"]);
+    assert_eq!(s.s.value(), "Draft for proj coordinator only");
+    assert!(s.text().contains("enter send to the proj coordinator"), "{}", s.text());
+    // and the other way round: words for the Coordinator do not come back to the project's
+    s.press(&["esc", "left", "left"]); s.typed("For the Coordinator"); s.press(&["esc"]);
+    s.press(&["right", "right", "enter"]);
+    s.press(&["ctrl+z"]); assert!(s.s.msg.contains("were for the Coordinator") && s.s.msg.contains("to All on the scope bar"), "{}", s.s.msg);
+    // a paste into the open picker is letters for it, never words for the chat
+    s.press(&["left", "left"]); s.s.input.set_text("");
+    s.press(&["right", "right"]); assert!(s.s.pick.is_some());
+    s.paste("no-such-project\n");
+    assert_eq!((s.s.pick.as_ref().unwrap().typed.as_str(), s.s.value()), ("no-such-project", String::new()));
+    s.press(&["enter"]); assert!(s.s.msg.contains("Nothing matches \"no-such-project\""), "{}", s.s.msg);
+    assert_eq!((s.s.level, s.s.value()), (1, String::new()));
+}

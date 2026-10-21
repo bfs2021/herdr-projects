@@ -84,6 +84,8 @@ fn paste(s: &mut State, text: &str) {
     if s.leaving || s.ask.is_some() || s.menu.is_some() || !s.paste_text.is_empty() { return; }
     if let Some(st) = &s.setup { if !st.typing { return; } }
     if s.editing.as_ref().map(|e| e.typing.is_empty()).unwrap_or(false) { return; }
+    // The scope bar's picker takes it as typed letters: its first line (update/scope.rs).
+    if let Some(p) = s.pick.as_mut() { p.typed.push_str(text.lines().map(str::trim).find(|l| !l.is_empty()).unwrap_or("")); p.at = 0; return; }
     s.input.insert(text);
     if s.mode == super::state::Mode::Find { list::relist(s); }
 }
