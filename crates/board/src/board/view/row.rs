@@ -3,7 +3,7 @@
 //! are laid out once for the whole list, so each starts at the same place on every row; what is shown of them is
 //! decided one section at a time (row_fit.rs). One cell between two columns, and one wider gap of two cells on a row:
 //! right of the progress (bar, percent, minutes left), before the review, the pull request and the time.
-use super::fields::{fields, is_auto, mark, name_ink, own_cols, row_title, says_beside, says_under, two_lines, F};
+use super::fields::{fields, is_auto, mark, name_ink, row_title, says_beside, says_under, F};
 use super::row_fit::{label_room, shown_from, Cell, Fit, ETA_STEADY, PERCENT_MIN, PERCENT_STEADY};
 use super::row_tall::{tall_at, tall_layout, Third};
 use super::row_wrap::{wrapped_lines, wraps};
@@ -12,6 +12,7 @@ use crate::board::tags::{number_cells, numbering, row_tag, tag_cells, Numbering}
 use crate::board::theme::Theme;
 use crate::json::*;
 use crate::shown::ink::{Ink, Inked};
+use crate::shown::states::is_live;
 use crate::text::width;
 use std::collections::HashMap;
 
@@ -24,9 +25,9 @@ pub struct Layout {
     pub now: i64, pub pr: usize, pub elapsed: usize, pub cols: Vec<(&'static str, usize)>, pub auto_cols: Vec<(&'static str, usize)>,
     pub num: usize, pub numbering: Numbering, pub ago: bool, pub show: HashMap<String, (usize, bool, usize)>, pub tall: bool, pub third: Option<Third>,
 }
-fn say_need(said: &Inked, r: &Obj) -> usize { if own_cols(r) { said.width() } else { said.width().min(SENTENCE_MIN) } }
+fn say_need(said: &Inked, r: &Obj) -> usize { if is_auto(r) { said.width() } else { said.width().min(SENTENCE_MIN) } }
 pub fn number_wide(s: &State, r: &Obj, cells: usize) -> usize {
-    if own_cols(r) { return if cells > 0 { cells + 1 } else { 0 }; }
+    if is_auto(r) { return if cells > 0 { cells + 1 } else { 0 }; }
     let w = if cells > 0 { tag_cells(width(&row_tag(r, &s.data.keys)), cells) } else { 0 };
     if w > 0 { w + 1 } else if cells > 0 { cells + 1 } else { 0 }
 }
@@ -62,15 +63,15 @@ pub fn row_layout(s: &mut State, t: &Theme, records: &[crate::board::state::Rec]
     let mut cols: Vec<(&'static str, usize)> = [("bar", max("bar")), ("percent", pct), ("eta", max("eta")), ("review", max("review")), ("pr", pr), ("time", if tall { 0 } else { elapsed })].into_iter().filter(|(_, w)| *w > 0).collect();
     // The wider gap is a column with nothing in it, right of the progress.
     if let Some(g) = cols.iter().position(|(k, _)| !PROGRESS.contains(k)) { if g > 0 { cols.insert(g, ("gap", 0)); } }
-    let own = |k: &str| records.iter().enumerate().filter(|(_, r)| own_cols(r)).map(|(n, _)| fmap.get(&n).map(|f| f.get(k).width()).unwrap_or(0)).max().unwrap_or(0);
+    let own = |k: &str| records.iter().enumerate().filter(|(_, r)| is_auto(r)).map(|(n, _)| fmap.get(&n).map(|f| f.get(k).width()).unwrap_or(0)).max().unwrap_or(0);
     let auto_cols: Vec<(&'static str, usize)> = [("tag", own("tag")), ("lead", own("lead")), ("time", if tall { 0 } else { elapsed })].into_iter().filter(|(_, w)| *w > 0).collect();
     let mut lay = Layout { now, pr, elapsed, cols: cols.clone(), auto_cols: auto_cols.clone(), num, numbering: nb, ago: !tall && fields_of.iter().any(|(_, f)| f.ago), show: HashMap::new(), tall, third: None };
     if tall {
-        let live: Vec<F> = records.iter().filter(|r| tall && two_lines(r)).map(|r| fields(s, t, r, now)).collect();
+        let live: Vec<F> = records.iter().filter(|r| tall && is_live(r)).map(|r| fields(s, t, r, now)).collect();
         lay.third = Some(tall_layout(&live, width_, 3 + if num > 0 { num + 1 } else { 0 }));
     }
     let cells = |ago: bool, cols: &[(&'static str, usize)]| -> Vec<Cell> { cols.iter().map(|(k, w)| Cell { key: k, w: match *k { "percent" => (*w).max(PERCENT_STEADY), "eta" => (*w).max(ETA_STEADY), "time" if ago => w + 4, _ => *w } }).collect() };
-    let cols_of = |recs: &[crate::board::state::Rec]| if recs.first().map(|r| own_cols(r)).unwrap_or(false) { auto_cols.clone() } else { cols.clone() };
+    let cols_of = |recs: &[crate::board::state::Rec]| if recs.first().map(|r| is_auto(r)).unwrap_or(false) { auto_cols.clone() } else { cols.clone() };
     let fit = |r: &Obj, f: Option<&F>, s: &State| Fit {
         room: width_.saturating_sub(mark(t, r).width() + 2 + number_wide(s, r, num)), name: width(&row_title(s, r)),
         has: ["bar", "percent", "eta", "review", "pr", "tag", "lead"].into_iter().filter(|k| f.map(|f| f.has(k)).unwrap_or(false)).chain(if tall { None } else { Some("time") }).collect(),
@@ -100,7 +101,7 @@ pub fn row_keeps(s: &State, t: &Theme, r: &Obj, lay: &Layout) -> Inked {
     let f = fields(s, t, r, lay.now);
     let time = Inked::of(format!("{}{}", crate::text::pad_left(&f.elapsed, lay.elapsed), if lay.ago { if f.ago { " ago" } else { "    " } } else { "" }), Ink::Muted);
     let text = |k: &str| -> Inked { match k { "pr" => if f.pr.is_empty() { Inked::new() } else { fill(&f.pr.cut(lay.pr), lay.pr, true) }, "time" => time.clone(), "gap" => Inked::new(), k => f.get(k) } };
-    let cols = if own_cols(r) { &lay.auto_cols } else { &lay.cols };
+    let cols = if is_auto(r) { &lay.auto_cols } else { &lay.cols };
     let mut cells: Vec<(&str, Inked, usize)> = cols.iter().map(|(k, w)| (*k, text(k), w + if *k == "time" && lay.ago { 4 } else { 0 })).collect();
     // An automation that never fired has no time: "never fired" stands where the others have their word and their time.
     if f.never && cells.len() >= 2 && cells[cells.len() - 2].0 == "lead" {
@@ -147,6 +148,6 @@ pub fn status_line(s: &State, t: &Theme, r: &Obj, w: usize, lay: &Layout) -> Ink
 /// A row as the list draws it: one line, two for a live task (an automation that says something under its name).
 pub fn row_lines(s: &State, t: &Theme, r: &Obj, w: usize, lay: &Layout) -> Vec<Inked> {
     if wraps(s, r, lay.tall) { return wrapped_lines(s, t, r, w, lay); }
-    let two = if is_auto(r) { !says_under(s, r, lay.show.get(r.s("id")).map(|x| x.1).unwrap_or(true)).is_empty() } else { two_lines(r) };
+    let two = if is_auto(r) { !says_under(s, r, lay.show.get(r.s("id")).map(|x| x.1).unwrap_or(true)).is_empty() } else { is_live(r) };
     if two { vec![row(s, t, r, w, lay), status_line(s, t, r, w, lay)] } else { vec![row(s, t, r, w, lay)] }
 }

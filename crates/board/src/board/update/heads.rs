@@ -26,8 +26,9 @@ pub fn label(s: &State, host: &str) -> String {
 }
 /// Folding holds while nothing is filtered: every task that matches a filter shows.
 pub fn folded(s: &State, id: &str) -> bool { filter_now(s).is_empty() && s.folded.contains(id) }
-/// Whether a machine with nothing in view has its heading: not while a filter or the archive narrows the list.
-pub fn empty_shown(s: &State) -> bool { filter_now(s).is_empty() && !s.archive_view }
+/// Whether a machine with nothing in view has its heading: not while a find, the filter row or the archive narrows the
+/// list.
+pub fn empty_shown(s: &State) -> bool { filter_now(s).is_empty() && !s.archive_view && s.show == 0 }
 /// Whether the repo `name` of the machine `host` has its heading with nothing in view: by repo, on this machine, for a
 /// repo used lately (data.rs: used_lately), and not while a filter or the archive narrows the list. It shows folded
 /// (`0 tasks`), so that its project coordinator is still a space away.
@@ -53,22 +54,24 @@ pub fn autos_in(s: &State, host: &str, name: &str) -> Vec<Obj> {
     if !s.by_repo && name != AUTOMATIONS { return vec![]; }
     s.autos.iter().filter(|a| (s.scope != "*" || a.s("host") == host) && (!s.by_repo || a.s("repo") == name)).cloned().collect()
 }
-/// What a folded heading says it holds: `7 tasks`, `7 tasks, 1 automation`, `1 automation`, `1 coordinator`.
-pub fn holds(folded: usize, autos: usize, coords: usize) -> String {
+/// What a folded heading says it holds: `7 tasks`, `7 tasks, 1 automation`, `1 automation`.
+pub fn holds(folded: usize, autos: usize) -> String {
     let tasks = folded.saturating_sub(autos);
     let say = |n: usize, what: &str| format!("{n} {what}{}", if n == 1 { "" } else { "s" });
-    [(tasks > 0 || (autos == 0 && coords == 0)).then(|| say(tasks, "task")), (autos > 0).then(|| say(autos, "automation")), (coords > 0).then(|| say(coords, "coordinator"))].into_iter().flatten().collect::<Vec<_>>().join(", ")
+    [(tasks > 0 || autos == 0).then(|| say(tasks, "task")), (autos > 0).then(|| say(autos, "automation"))].into_iter().flatten().collect::<Vec<_>>().join(", ")
 }
 /// The selected heading, when the selection is on one.
 pub fn selected(s: &State) -> Option<&Row> { if !is_head(&s.sel) { return None; } s.rows.iter().find(|r| matches!(r, Row::Head { id, .. } if *id == s.sel)) }
 /// What enter does on the selected heading, in words: for the hint line ("" nothing).
 pub fn says(s: &State) -> Option<String> {
     let Some(Row::Head { machine, folded, empty, id, .. }) = selected(s) else { return None };
+    // Under Coordinators a project's row holds nothing to fold.
+    if super::shows::coords(s) && !*machine && *folded == 0 { return Some(String::new()); }
     if super::pilot::is_main(id) { return Some(String::new()); } // the main Coordinator's row folds nothing
     // An empty machine's has nothing to unfold.
     if *empty { return Some(String::new()); }
     let what = if *machine { "this machine" } else if s.by_repo { "this repo" } else { "this group" };
-    Some(format!("{} {what}", if *folded > 0 || selected(s).is_some_and(|r| r.shut()) { "unfold" } else { "fold" }))
+    Some(format!("{} {what}", if *folded > 0 { "unfold" } else { "fold" }))
 }
 /// Fold the heading `id`, or unfold it. The selection stays on it.
 pub fn toggle(s: &mut State, id: &str, fx: &mut Vec<Effect>) {
@@ -80,6 +83,7 @@ pub fn toggle(s: &mut State, id: &str, fx: &mut Vec<Effect>) {
         s.sel = id.to_string();
         return s.flash(say, Ink::Muted);
     }
+    if super::shows::coords(s) && id.starts_with(&format!("{HEAD}repo\t")) { s.sel = id.to_string(); return s.flash(format!("Nothing to fold here: {} talks to its project coordinator.", crate::board::keys::key_name("talk")), Ink::Muted); }
     if !s.folded.remove(id) { s.folded.insert(id.to_string()); }
     s.sel = id.to_string();
     fx.push(Effect::Save);

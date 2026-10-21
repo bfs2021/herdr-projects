@@ -7,7 +7,7 @@ use common::board::open;
 use common::*;
 use serde_json::{json, Value};
 use sw::board::job::{Done, Job};
-use sw::board::update::coord_rows::row_id;
+use sw::board::update::heads::{group_id, machine_id};
 use sw::board::update::{update, Effect, Event};
 use sw::json::*;
 
@@ -64,9 +64,8 @@ fn a_repos_coordinator_here_shows_your_words_at_once_until_its_own_conversation_
     w.add("Fix the login");
     w.script(json!({ "coordinator": [{ "said": "Proj has one task open." }] }));
     let mut s = open(&w.root, 34);
-    // the project's coordinator never ran: its row is under the filter Coordinators (shift+tab: the last filter)
-    s.press(&["shift+tab"]);
-    s.s.sel = row_id("", "project:proj"); s.load();
+    s.press(&["alt+s"]);
+    s.s.sel = group_id(&s.s, "", "proj"); s.load();
     s.press(&["space"]);
     s.typed("what is open here?");
     let fx = s.hold("enter");
@@ -86,8 +85,8 @@ fn another_machines_coordinators_show_your_words_at_once_with_no_row_on_its_way_
     let mut s = open(&w.root, 34);
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: otherbox("Done.", quiet()) });
-    for _ in 0..5 { if s.s.scope == "*" { break; } s.press(&["alt+m"]); } assert_eq!(s.s.scope, "*");
-    s.s.sel = row_id("otherbox", "machine"); s.load();
+    s.press(&["alt+m"]);
+    s.s.sel = machine_id("otherbox"); s.load();
     s.press(&["space"]);
     s.typed("anything to do?");
     let fx = s.hold("enter");

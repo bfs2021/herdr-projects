@@ -82,15 +82,19 @@ pub fn unread_lines(s: &State, width: usize) -> Vec<Inked> {
 /// Coordinator's row, on top, is its name and what it sums up of the others.
 fn heading(s: &State, t: &Theme, rows: &[Row], at: usize, width: usize) -> (Inked, Option<Inked>) {
     let r = &rows[at];
-    let Row::Head { name, autos, machine, folded, folded_autos, folded_coords, id, .. } = r else { return (Inked::new(), None) };
-    let pilot = super::pilot::shown(s, t, id);
-    if crate::board::update::pilot::is_main(id) { return super::pilot::placed(Inked::plain("  "), super::pilot::main_head(s, id), pilot, false, width); }
+    let Row::Head { name, autos, machine, folded, folded_autos, id, .. } = r else { return (Inked::new(), None) };
+    if crate::board::update::pilot::is_main(id) { return super::pilot::placed(Inked::plain("  "), super::pilot::main_head(s, id), super::pilot::shown(s, t, id), false, width); }
+    // A machine's or a project's row stands for its coordinator: drawn as a task agent's (coord_head.rs).
+    let pilot = super::coord_head::shown(s, t, id);
+    let project = id.starts_with(&format!("{}repo\t", crate::board::update::heads::HEAD));
     let key = if s.by_repo { crate::board::tags::heading_key(s, at) } else { String::new() };
-    let named = if *autos { Inked::of(name.clone(), Ink::Auto) } else if *machine { Inked::of(name.clone(), MACHINE_INK).bold() } else if s.by_repo { Inked::of(repo_label(name), REPO_HEAD_INK).bold() } else { Inked::of(name.clone(), group_ink(name)) };
+    let named = if *autos { Inked::of(name.clone(), Ink::Auto) } else if *machine { Inked::of(name.clone(), MACHINE_INK).bold() } else if s.by_repo || project { Inked::of(repo_label(name), REPO_HEAD_INK).bold() } else { Inked::of(name.clone(), group_ink(name)) };
     let mut named = if key.is_empty() { named } else { named.add(Inked::of(format!(" · {key}"), Ink::Muted)) };
     let caret = if id.is_empty() { Inked::plain("  ") } else { Inked::of(if r.shut() { "▸ " } else { "▾ " }, Ink::Muted) };
-    if r.shut() { named = named.add(Inked::of(format!("  {}", crate::board::update::heads::holds(*folded, *folded_autos, *folded_coords)), Ink::Muted)); }
-    super::pilot::placed(caret, named, pilot, *machine, width)
+    // What a folded row holds: its tasks and automations; under Coordinators its projects' coordinators.
+    let holds = if crate::board::update::shows::coords(s) { format!("{folded} project coordinator{}", if *folded == 1 { "" } else { "s" }) } else { crate::board::update::heads::holds(*folded, *folded_autos) };
+    if r.shut() { named = named.add(Inked::of(format!("  {holds}"), Ink::Muted)); }
+    super::pilot::placed(caret, named, pilot, false, width)
 }
 struct L { text: Inked, sel: bool, head: bool, n: usize, rest: usize, id: String, auto: bool }
 fn line(text: Inked) -> L { L { text, sel: false, head: false, n: 0, rest: 0, id: String::new(), auto: false } }
@@ -125,10 +129,8 @@ pub fn list_lines(s: &mut State, t: &Theme, width: usize, h: usize, screen: usiz
     let mut sections: Vec<Vec<Rec>> = vec![];
     let auto_rec = |a: &Obj| Rec::new(obj(json!({ "id": a.s("row"), "auto": a })));
     // A section is the rows of one heading of one kind: by repo, a repo's automations are a section after its tasks'.
-    // Tasks, automations and coordinators each a section of their own: their columns are not the same.
-    let kind_of = |r: &Row| match r { Row::Auto(_) => 1, Row::Rec(o) if super::fields::is_coord(o) => 2, _ => 0 };
-    let mut kind = 0;
-    for r in &s.rows { let auto = kind_of(r); if matches!(r, Row::Head { .. }) || sections.is_empty() || (auto != kind && matches!(r, Row::Rec(_) | Row::Auto(_))) { sections.push(vec![]); kind = auto; } match r { Row::Rec(o) => sections.last_mut().unwrap().push(o.clone()), Row::Auto(a) => sections.last_mut().unwrap().push(auto_rec(a)), _ => {} } }
+    let mut kind = false;
+    for r in &s.rows { let auto = matches!(r, Row::Auto(_)); if matches!(r, Row::Head { .. }) || sections.is_empty() || (auto != kind && matches!(r, Row::Rec(_) | Row::Auto(_))) { sections.push(vec![]); kind = auto; } match r { Row::Rec(o) => sections.last_mut().unwrap().push(o.clone()), Row::Auto(a) => sections.last_mut().unwrap().push(auto_rec(a)), _ => {} } }
     let flat: Vec<Rec> = sections.iter().flatten().cloned().collect();
     let lay = row_layout(s, t, &flat, width, &sections, screen);
     let rows = s.rows.clone();

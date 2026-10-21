@@ -93,7 +93,6 @@ pub mod autos;
 pub mod beat;
 pub mod call;
 pub mod chat;
-pub mod coord_rows;
 pub mod coords;
 pub mod done;
 pub mod edit;

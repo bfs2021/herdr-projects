@@ -4,13 +4,6 @@
 use crate::common;
 use common::board::open;
 use common::*;
-/// The chat's part of the screen: the line that says who you talk to, its box, what is said under it and the hints. The
-/// list over it may show a coordinator's last line on its row.
-fn chat_part(b: &mut common::board::Board) -> String {
-    let l = b.lines();
-    let from = l.iter().rposition(|x| x.starts_with("╭─")).map(|n| n.saturating_sub(1)).or_else(|| l.iter().rposition(|x| x.starts_with('❯')).map(|n| n.saturating_sub(2))).unwrap_or(0);
-    l[from..].join("\n")
-}
 use serde_json::json;
 use sw::board::keys::key_name;
 
@@ -77,7 +70,7 @@ fn the_coordinators_chat_keeps_what_you_sent_until_it_says_something_new() {
     let look = sw::coordinator::look::look(&socket);
     assert_eq!((look.said.as_str(), look.sent.as_str()), ("Six tasks are in progress.", "archive the last one"));
     assert_eq!(s.chat(120).boxed, v(&["You:", "archive the last one", "", "❯ Send message to Coordinator"]));
-    assert!(!chat_part(&mut s).contains("Six tasks"));
+    assert!(!s.text().contains("Six tasks"));
     assert_eq!(open(&w.root, 34).chat(120).boxed, v(&["You:", "archive the last one", "", "❯ Send message to Coordinator"]), "a board opened now shows the same");
     sw::coordinator::requests::typed_there(&socket); s.load();
     assert_eq!(s.chat(120).boxed, v(&["Coordinator:", "Six tasks are in progress.", "", "❯ Send message to Coordinator"]));

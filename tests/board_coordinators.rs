@@ -1,13 +1,12 @@
-//! Space (or enter) on a coordinator's row talks to that machine's or that repo's coordinator, as space on a task talks
-//! to its agent: the chat names it, what you type goes to it, and space again goes back to the Coordinator. Another
-//! machine's are reached there, from what it sends with its tasks. A heading is no coordinator.
+//! Space on a machine's heading or a repo's heading (grouped by repo) talks to that machine's or that repo's
+//! coordinator, as space on a task talks to its agent: the chat names it, what you type goes to it, and space again goes
+//! back to the Coordinator. Another machine's are reached there, from what it sends with its tasks.
 use crate::common;
 use common::board::open;
 use common::*;
 use serde_json::{json, Value};
 use sw::board::job::Job;
-use sw::board::update::coord_rows::row_id;
-use sw::board::update::heads::group_id;
+use sw::board::update::heads::{group_id, machine_id};
 use sw::board::update::{update, Effect, Event};
 use sw::coordinator::co::Co;
 use sw::json::*;
@@ -26,18 +25,15 @@ fn prompts(w: &World, name: &str) -> Vec<String> { w.state().arr("panes").iter()
 fn has(text: &str, re: &str) -> bool { regex::Regex::new(re).unwrap().is_match(text) }
 
 #[test]
-fn space_on_a_repos_coordinator_row_talks_to_its_project_coordinator_and_space_again_goes_back() {
+fn space_on_a_repos_heading_talks_to_its_project_coordinator_and_space_again_goes_back() {
     let w = coord_world(json!({}));
     let id = w.add("Fix the login");
     w.script(json!({ "coordinator": [{ "said": "Proj has one task open." }] }));
     let mut s = open(&w.root, 34);
     s.press(&["alt+s"]); assert!(s.s.by_repo);
-    // never talked to: its row is under the filter Coordinators
-    s.press(&["shift+tab"]);
-    let head = row_id("", "project:proj");
+    let head = group_id(&s.s, "", "proj");
     s.s.sel = head.clone(); s.load();
-    assert_eq!(s.s.sel, head);
-    assert!(s.text().contains("talk to the proj coordinator"), "{}", s.text());
+    assert!(s.text().contains("space talk to the proj coordinator"), "{}", s.text());
     s.press(&["space"]);
     assert!(s.s.reply && s.s.reply_id == head);
     let t = s.text();
@@ -53,23 +49,22 @@ fn space_on_a_repos_coordinator_row_talks_to_its_project_coordinator_and_space_a
     assert!(has(&t, r"\n[ ▌]○ proj coordinator  idle *\n") && t.contains("│ proj coordinator:") && t.contains("Proj has one task open."), "{t}");
     // the tab it is in says whose it is
     assert!(w.state().arr("tabs").iter().any(|x| x.s("label") == "proj coordinator"));
-    // talked to, it stands under All too: the chat follows the selection, as with tasks: to the task's agent and back
-    s.press(&["tab"]); assert_eq!((s.s.show, s.s.sel.as_str()), (0, head.as_str()));
+    // the chat follows the selection, as with tasks: to the task's agent and back to the repo's coordinator
     s.press(&["down"]); assert_eq!((s.s.sel.as_str(), s.s.reply_id.as_str()), (id.as_str(), id.as_str()));
     assert!(!s.text().contains("proj coordinator  idle"));
     s.press(&["up"]); assert!(s.text().contains("proj coordinator  idle"));
     // space again: back to the Coordinator
     s.press(&["space"]); assert!(!s.s.reply);
     assert!(has(&s.text(), r"\n[ ▌]· Coordinator  not started"), "{}", s.text());
-    // a heading has no coordinator: space says where they are
+    // a status group's heading has no coordinator: space says where they are
     s.press(&["alt+s", "alt+s"]); assert!(!s.s.by_repo && !s.s.by_machine); // by machine, then by status
     s.s.sel = group_id(&s.s, "", "to do"); s.load();
     s.press(&["space"]);
-    assert!(!s.s.reply && s.s.msg.contains("Space on a coordinator's row talks to it"), "{}", s.s.msg);
+    assert!(!s.s.reply && s.s.msg.contains("Space on a machine's heading or a repo's heading talks to its coordinator"), "{}", s.s.msg);
 }
 
 #[test]
-fn space_on_a_machines_coordinator_row_talks_to_that_machines_coordinator_here_or_there() {
+fn space_on_a_machines_heading_talks_to_that_machines_coordinator_here_or_there() {
     let w = coord_world(json!({ "board.machines": "otherbox" }));
     w.add("Here");
     w.script(json!({ "coordinator": [{ "said": "This machine is busy." }] }));
@@ -80,19 +75,17 @@ fn space_on_a_machines_coordinator_row_talks_to_that_machines_coordinator_here_o
     let far = |coords: Value| Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "none" }, "coordinators": coords,
         "tasks": [{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: far(json!({ "machine": { "state": "idle", "readable": true, "said": "Otherbox is quiet.", "talk": [{ "you": true, "text": "how is it?" }, { "you": false, "text": "Otherbox is quiet." }] } })) });
-    for _ in 0..3 { if s.s.scope != "*" { s.press(&["alt+m"]); } }
-    assert_eq!(s.s.scope, "*");
-    // this machine's coordinator's row (never talked to: under the filter Coordinators): started here
-    s.press(&["shift+tab"]);
-    s.s.sel = row_id("", "machine"); s.load();
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    // this machine's heading: its machine coordinator, started here
+    s.s.sel = machine_id(""); s.load();
     s.press(&["space"]);
     assert!(s.text().contains(&format!("{host} coordinator  not started")), "{}", s.text());
     s.typed("how busy are you?"); s.press(&["enter"]); drain(); s.load();
     assert_eq!(prompts(&w, "sw-coordinator-machine"), vec!["how busy are you?"]);
     assert!(s.text().contains("This machine is busy."), "{}", s.text());
     assert_eq!(sw::coordinator::look::look(Co::machine(&w.socket)).said, "This machine is busy.");
-    // otherbox's: what that machine sent of its own machine coordinator; your words go there
-    s.s.sel = row_id("otherbox", "machine"); s.load(); // the chat follows the selection
+    // otherbox's heading: what that machine sent of its own machine coordinator; your words go there
+    s.s.sel = machine_id("otherbox"); s.load();
     let t = s.text();
     assert!(has(&t, r"\n[ ▌]○ otherbox coordinator  idle *\n") && t.contains("Otherbox is quiet."), "{t}");
     s.typed("anything to do?");
@@ -102,25 +95,22 @@ fn space_on_a_machines_coordinator_row_talks_to_that_machines_coordinator_here_o
     assert_eq!(s.s.value(), "", "sent: the box is empty again");
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "0.2.0", "coordinator": { "state": "none" },
         "tasks": [{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] })) });
-    s.s.sel = row_id("otherbox", "machine"); s.load();
+    s.s.sel = machine_id("otherbox"); s.load();
     let t = s.text();
     assert!(t.contains("otherbox runs an older herdr-projects, which has no machine or project coordinators: update it there."), "{t}");
 }
 
 #[test]
-fn the_web_board_names_a_coordinators_row_and_sends_it_your_words() {
+fn the_web_board_names_a_headings_coordinator_and_sends_it_your_words() {
     let w = coord_world(json!({}));
     w.add("Fix the login");
     w.script(json!({ "coordinator": [{ "said": "Proj is fine." }] }));
     let web = |call: &str, args: Value| common::board::web(&w, call, args);
     web("press", json!({ "id": "byRepo" }));
-    // never talked to: its row is under the filter Coordinators (tab goes round to it)
-    for _ in 0..6 { web("press", json!({ "id": "filter" })); }
-    let head = row_id("", "project:proj");
     let s = web("board", json!({}));
-    assert!(s.at("list").arr("groups").iter().any(|g| g.arr("rows").iter().any(|r| r.s("id") == head)), "{}", s.at("list"));
-    // a tap on its row selects it: the switch's other choice is its coordinator
-    let s = web("pick", json!({ "id": head }));
+    let head = s.at("list").arr("groups").iter().find(|g| g.s("id").starts_with("head:repo")).map(|g| g.t("id")).unwrap_or_else(|| panic!("{}", s.at("list")));
+    // a tap on the heading selects it (and folds it): the switch's other choice is its coordinator
+    let s = web("fold", json!({ "id": head }));
     assert_eq!(s.at("chat").s("head"), "proj coordinator", "{}", s.at("chat"));
     let s = web("press", json!({ "id": "talk" }));
     assert_eq!((s.at("chat").at("toAgent"), s.at("chat").s("name")), (&json!(true), "proj coordinator"), "{}", s.at("chat"));
@@ -133,18 +123,18 @@ fn the_web_board_names_a_coordinators_row_and_sends_it_your_words() {
 }
 
 #[test]
-fn words_put_away_for_a_coordinators_row_come_back_only_to_it() {
+fn words_put_away_for_a_headings_coordinator_come_back_only_to_it() {
     let w = coord_world(json!({}));
     w.add("Fix the login");
     let mut s = open(&w.root, 34);
-    s.press(&["alt+s", "shift+tab"]);
-    let head = row_id("", "project:proj");
+    s.press(&["alt+s"]);
+    let head = group_id(&s.s, "", "proj");
     s.s.sel = head.clone(); s.load();
     s.press(&["space"]); s.typed("half a thought"); s.press(&["esc"]);
     assert_eq!(s.s.value(), ""); assert_eq!(s.s.draft_away.as_ref().map(|d| d.to.clone()), Some(head.clone()));
     s.press(&["space"]); assert!(!s.s.reply);
     s.press(&["ctrl+z"]);
-    assert_eq!(s.s.value(), "", "not to the Coordinator"); assert!(s.s.msg.contains("Those words were for the proj coordinator."), "{}", s.s.msg);
+    assert_eq!(s.s.value(), "", "not to the Coordinator"); assert!(s.s.msg.contains("Those words were for the proj coordinator. Select its heading and press space"), "{}", s.s.msg);
     s.press(&["space"]); s.press(&["ctrl+z"]);
     assert_eq!(s.s.value(), "half a thought");
 }

@@ -9,6 +9,7 @@ use crate::board::theme::Theme;
 use crate::json::*;
 use crate::shown::ink::{Ink, Inked};
 use crate::shown::queue::queued;
+use crate::shown::states::is_live;
 
 /// The most lines a live task's name takes, and the most what it says takes.
 const WRAP_LINES: usize = 2;
@@ -18,7 +19,7 @@ const SAY_MIN: usize = 20;
 const LONG_TAG: usize = 13;
 /// Every mark is one cell wide, in every theme (theme/marks.rs).
 const MARK: usize = 1;
-fn has_under(r: &Obj) -> bool { super::fields::two_lines(r) || is_auto(r) }
+fn has_under(r: &Obj) -> bool { is_live(r) || is_auto(r) }
 /// Does this row wrap? Live rows, automations and the selected one, on a narrow screen.
 pub fn wraps(s: &State, r: &Obj, tall: bool) -> bool { tall && (has_under(r) || r.s("id") == s.sel) }
 /// At most `max` lines of a wrapped text: the last one takes what is left and is cut at its end.
@@ -45,8 +46,7 @@ pub fn wrap_parts(s: &State, r: &Obj, width: usize, cells: Option<usize>) -> Par
     // waits for a free slot its place in the queue with it (`Q#2  2m`).
     let time = Inked::of(format!("{}{}", f.elapsed, if f.ago { " ago" } else { "" }), Ink::Muted);
     let bare = f.bar.is_empty() && f.eta.is_empty() && f.review.is_empty() && f.pr.is_empty();
-    let coord = super::fields::is_coord(r);
-    let lone = if is_auto(r) { Inked::of(f.when.clone(), Ink::Muted) } else if coord { time } else if bare && f.percent.is_empty() { time } else if bare && queued(r) { f.percent.clone().add(Inked::plain("  ")).add(time) } else { Inked::new() };
+    let lone = if is_auto(r) { Inked::of(f.when.clone(), Ink::Muted) } else if bare && f.percent.is_empty() { time } else if bare && queued(r) { f.percent.clone().add(Inked::plain("  ")).add(time) } else { Inked::new() };
     let mut says = up_to(said.wrap(say_room), WRAP_LINES, say_room);
     let lw = lone.width();
     if !lone.is_empty() && is_auto(r) && says.last().map(|l| l.width()).unwrap_or(0) as i64 > say_room as i64 - lw as i64 - 2 { says.push(Inked::new()); }
@@ -59,12 +59,11 @@ pub fn wrap_parts(s: &State, r: &Obj, width: usize, cells: Option<usize>) -> Par
         let joined = line.add(Inked::spaces(gap)).add(lone.clone());
         if says.is_empty() { says.push(joined); } else { says[last] = joined; }
     }
-    // A coordinator has no line of columns: its time, if any, ends what it says.
-    Parts { indent, cells, lead: say_lead, name, says, lone: !lone.is_empty() || coord }
+    Parts { indent, cells, lead: say_lead, name, says, lone: !lone.is_empty() }
 }
 /// The lines a row takes in the list.
 pub fn row_height(s: &State, r: &Obj, width: usize, tall: bool) -> usize {
-    if !wraps(s, r, tall) { return if super::fields::two_lines(r) { 2 } else { 1 }; }
+    if !wraps(s, r, tall) { return if is_live(r) { 2 } else { 1 }; }
     let p = wrap_parts(s, r, width, None);
     if has_under(r) { p.name.len() + p.says.len() + if p.lone { 0 } else { 1 } } else { p.name.len() }
 }

@@ -14,7 +14,7 @@ fn words(s: &str) -> Vec<String> { s.to_lowercase().split(|c: char| !c.is_alphan
 const COORD: [&str; 6] = ["coordinator", "koordinator", "koordinatorn", "coordinatorn", "back", "tillbaka"];
 pub fn find(s: &State, said: &str) -> Result<Found, String> {
     let w = words(said);
-    let heads: Vec<(String, String)> = s.rows.iter().filter_map(|r| match r { Row::Head { id, .. } => Some(id.clone()), Row::Rec(o) => Some(o.t("id")), _ => None }).filter_map(|id| of_head(s, &id).map(|t| (id, t.name))).collect();
+    let heads: Vec<(String, String)> = s.rows.iter().filter_map(|r| match r { Row::Head { id, .. } => of_head(s, id).map(|t| (id.clone(), t.name)), _ => None }).collect();
     // a heading's coordinator, named
     let named: Vec<&(String, String)> = heads.iter().filter(|(_, n)| { let nw = words(n); nw.iter().any(|x| !COORD.contains(&x.as_str()) && w.contains(x)) }).collect();
     let wants_coord = w.iter().any(|x| COORD.contains(&x.as_str()));

@@ -154,8 +154,7 @@ fn the_mouse_wheel_scrolls_the_chat_under_the_pointer_also_while_you_type_elsewh
     b.apply(); b.b.typed("a draft"); b.wheel(c.top + 1, 2); assert_eq!(b.first(), "Line 10 of the answer."); assert_eq!(b.b.s.value(), "a draft");
     b.wheel(c.top + 1, -100); assert_eq!(b.first(), "Line 1 of the answer."); b.key(&["esc"]);
     // Over the list: the selection moves a task a step, and the message stays where it is.
-    // (the tasks: the main Coordinator's row on top is a coordinator's)
-    let ids: Vec<String> = b.b.s.rows.iter().filter_map(|r| if let sw::board::state::Row::Rec(x) = r { (!x.has("coord")).then(|| x.t("id")) } else { None }).collect();
+    let ids: Vec<String> = b.b.s.rows.iter().filter_map(|r| if let sw::board::state::Row::Rec(x) = r { Some(x.t("id")) } else { None }).collect();
     b.b.s.sel = ids[0].clone();
     b.wheel(2, 1); assert_eq!(b.b.s.sel, ids[1]); b.wheel(2, 3); assert_eq!(b.b.s.sel, ids[2]); b.wheel(2, -1); assert_eq!(b.b.s.sel, ids[1]);
     assert_eq!(b.first(), "Line 1 of the answer.");

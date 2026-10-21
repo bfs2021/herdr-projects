@@ -4,13 +4,6 @@
 use crate::common;
 use common::board::open;
 use common::*;
-/// The chat's part of the screen: the line that says who you talk to, its box, what is said under it and the hints. The
-/// list over it may show a coordinator's last line on its row.
-fn chat_part(b: &mut common::board::Board) -> String {
-    let l = b.lines();
-    let from = l.iter().rposition(|x| x.starts_with("╭─")).map(|n| n.saturating_sub(1)).or_else(|| l.iter().rposition(|x| x.starts_with('❯')).map(|n| n.saturating_sub(2))).unwrap_or(0);
-    l[from..].join("\n")
-}
 use serde_json::json;
 use sw::board::keys::key_name;
 use sw::coordinator::{requests::{send, tab_note, where_text}, rules::rules, state};
@@ -47,7 +40,7 @@ fn esc_hides_but_never_shows_the_chat_and_a_task_with_no_agent_is_talked_about_t
     assert!(has(&s.text(), &format!(r"\n  {} closes the board · the Coordinator keeps running *$", regex::escape(&key_name("close")))), "{}", s.text()); s.s.closing = None;
     // Shown, with nothing else to step back from, esc hides it as its own key does (the chat's line names only that key).
     s.press(&["alt+c"]); assert!(s.s.chat_open && s.text().contains("Added proj/1.")); assert!(has(&s.text(), &format!("{chat_key} hide the latest message"))); assert!(!s.text().contains("esc hide"));
-    s.press(&["esc"]); assert!(!s.s.chat_open && s.s.ask.is_none() && !s.closed && s.s.closing.is_none() && !chat_part(&mut s).contains("Added proj/1."));
+    s.press(&["esc"]); assert!(!s.s.chat_open && s.s.ask.is_none() && !s.closed && s.s.closing.is_none() && !s.text().contains("Added proj/1."));
     assert_eq!(sw::store::files::read_obj(&sw::store::files::data_dir().join("view.json")).unwrap().s("chat"), "closed");
     s.press(&["alt+c"]); assert!(s.s.chat_open && s.text().contains("Added proj/1."));
     // With a draft, esc puts the words away and the message stays up; only the next esc hides it.

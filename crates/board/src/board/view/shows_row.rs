@@ -11,10 +11,12 @@ use crate::shown::ink::{Ink, Inked};
 
 /// What a click on the machine item says it is, among the filters' places.
 pub const MACHINE: usize = usize::MAX;
-const SHORT: [&str; 7] = ["All", "Needs", "Working", "Ready", "To do", "Done", "Coords"];
-const TINY: [&str; 7] = ["All", "Need", "Work", "Rdy", "Todo", "Done", "Co"];
+const SHORT: [&str; 8] = ["All", "Coords", "Needs", "Working", "Ready", "To do", "Done", "Autos"];
+const TINY: [&str; 8] = ["All", "Co", "Need", "Work", "Rdy", "Todo", "Done", "Au"];
+/// Each filter's own colour, the one its rows and marks have: lit, it is the highlight's.
+const INKS: [Ink; 8] = [Ink::Text, Ink::Accent, Ink::Red, Ink::Yellow, Ink::Green, Ink::Text, Ink::Text, Ink::Auto];
 /// The row, `w` cells wide, and where each filter landed: (first cell, last cell, which).
-pub fn shows_line(s: &State, t: &Theme, w: usize) -> (Inked, Vec<(usize, usize, usize)>) {
+pub fn shows_line(s: &State, _t: &Theme, w: usize) -> (Inked, Vec<(usize, usize, usize)>) {
     // `only`: 0 every filter, 1 those with something in them (and the one shown), 2 the one shown alone.
     // Whose board: the first item, where there is another machine (alt+m goes round, a click too).
     let machine = (!s.remotes.is_empty() || s.all()).then(|| {
@@ -30,10 +32,8 @@ pub fn shows_line(s: &State, t: &Theme, w: usize) -> (Inked, Vec<(usize, usize, 
             if (only == 2 && n != s.show) || (only == 1 && n != s.show && n != 0 && count == 0) { continue; }
             if line.width() > 1 && !line.text().ends_with("│ ") { line = line.add(Inked::of(" · ", Ink::Muted)); }
             let lit = n == s.show;
-            let named = if lit { Inked::of(*name, Ink::Accent).bold() } else { Inked::of(*name, Ink::Muted) };
-            let num = Inked::of(format!(" {count}"), if n == 1 && count > 0 { Ink::Red } else if lit { Ink::Accent } else { Ink::Muted });
-            let piece = named.add(num);
-            let piece = if lit { if t.paints_selection() { piece.on(Ink::Selection) } else { piece.inv() } } else { piece };
+            // The one shown is lit in its own colour (reversed: the colour is its ground); the others greyed.
+            let piece = if lit { Inked::of(format!(" {name} {count} "), INKS[n]).bold().inv() } else { Inked::of(*name, Ink::Muted).add(Inked::of(format!(" {count}"), if n == crate::board::update::shows::NEEDS && count > 0 { Ink::Red } else { Ink::Muted })) };
             let from = line.width();
             line = line.add(piece);
             hits.push((from, line.width(), n));
