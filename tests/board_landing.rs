@@ -37,13 +37,13 @@ fn tab_on_task_after_task_goes_down_the_group_then_up_from_its_last_row_then_to_
     let mut s = board(&w, &c);
     assert_eq!(under(&s, TODO), vec![d.clone(), c.clone(), b.clone(), a.clone()], "the newest first");
     // An agent on the selected task takes it to the working group; the selection is on the task that was below it.
-    s.press(&["tab"]);
+    s.press(&["ctrl+s"]);
     assert!(under(&s, WORKING).contains(&c)); assert_eq!(s.s.sel, b);
-    s.press(&["tab"]); assert_eq!(s.s.sel, a);
+    s.press(&["ctrl+s"]); assert_eq!(s.s.sel, a);
     // The last task of its group: the one above it.
-    s.press(&["tab"]); assert_eq!(s.s.sel, d); assert_eq!(under(&s, TODO), vec![d.clone()]);
+    s.press(&["ctrl+s"]); assert_eq!(s.s.sel, d); assert_eq!(under(&s, TODO), vec![d.clone()]);
     // The group is empty after it: with no group below, the one above, from its bottom row.
-    s.press(&["tab"]);
+    s.press(&["ctrl+s"]);
     assert!(under(&s, TODO).is_empty()); assert_eq!(under(&s, WORKING).len(), 4);
     assert_eq!(&s.s.sel, under(&s, WORKING).last().unwrap()); assert_ne!(s.s.sel, d);
     for id in [&a, &b, &c, &d] { assert!(task(id).b("agent"), "{id} has an agent"); }
@@ -142,7 +142,7 @@ fn a_pinned_task_keeps_its_row_whatever_its_status_so_an_action_on_it_leaves_the
     let pinned = under(&s, PINNED);
     assert_eq!(pinned.len(), 2); assert!(under(&s, TODO).is_empty());
     // An agent put on it, then stopped: its status changes twice, its row in the pinned group never moves.
-    s.press(&["tab"]); assert!(task(&b).b("agent")); assert_eq!(under(&s, PINNED), pinned); assert_eq!(s.s.sel, b);
+    s.press(&["ctrl+s"]); assert!(task(&b).b("agent")); assert_eq!(under(&s, PINNED), pinned); assert_eq!(s.s.sel, b);
     settle(&b); s.load(); assert_eq!(task(&b).s("stage"), "working"); assert_eq!(s.s.sel, b);
     s.press(&["ctrl+x"]); assert_eq!(task(&b).s("stage"), "stopped"); assert_eq!(under(&s, PINNED), pinned); assert_eq!(s.s.sel, b);
     assert!(s.s.ask.is_none(), "a stop, not the question to remove");

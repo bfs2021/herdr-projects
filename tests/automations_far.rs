@@ -107,10 +107,10 @@ fn other_machines_automations_are_in_the_list_with_their_machine_named_and_are_c
     like(&folded, r"\n▌▸ vm-b {2}1 task, 1 automation ─+\n"); assert!(!folded.contains("Theirs nightly"), "{folded}");
     s.press(&["enter"]); assert!(t(&mut s, 140).contains("Theirs nightly  every 5m"));
     s.s.sel = "vm-b:auto:0a1b2c3d".into(); s.load(); assert_eq!(s.s.auto().unwrap().s("host"), "vm-b");
-    assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation off · tab fire it now · ctrl+x remove it · ctrl+e its settings · ? all keys");
+    assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation off · ctrl+s fire it now · ctrl+x remove it · ctrl+e its settings · ? all keys");
     // each key is sent to that machine, and its answer is what the board says
     s.press(&["space"]); assert_eq!(asked(&f), json!({ "action": "auto-turn", "id": "0a1b2c3d", "on": false })); assert!(t(&mut s, 120).contains("done there")); assert_eq!(automation(mine.s("id")).unwrap().at("on"), &json!(true));
-    s.press(&["tab"]); assert_eq!(asked(&f), json!({ "action": "auto-run", "id": "0a1b2c3d" }));
+    s.press(&["ctrl+s"]); assert_eq!(asked(&f), json!({ "action": "auto-run", "id": "0a1b2c3d" }));
     // ctrl+e opens its settings, the page a task has: the rows are that machine's, and each change is made there
     s.press(&["ctrl+e"]);
     let e = s.s.editing.clone().unwrap(); assert_eq!((e.id.as_str(), e.whose == sw::board::state::Whose::Auto, s.s.auto_open), ("vm-b:auto:0a1b2c3d", true, true));

@@ -96,7 +96,7 @@ pub fn step_out(s: &mut State, fx: &mut Vec<Effect>) {
 /// The keys while the picker is open: letters pick, the arrows go through the matches, enter picks, esc cancels.
 pub fn pick_key(s: &mut State, p: &Press, fx: &mut Vec<Effect>) -> bool {
     let Some(mut pk) = s.pick.clone() else { return false };
-    if is(p, K::Close) { s.pick = None; return false; }
+    if is(p, K::Close) || is(p, K::Focus) { s.pick = None; return false; }
     if is(p, K::Back) || is(p, K::ScopeOut) { s.pick = None; return true; }
     let found = matches(s);
     if is(p, K::Enter) || is(p, K::ScopeIn) {

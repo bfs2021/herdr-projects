@@ -15,22 +15,22 @@ fn the_hint_line_names_the_task_once_and_says_what_esc_goes_back_from() {
     assert_eq!(hints(&mut s, 120), "? all keys");
     let id = w.add("Add a greeting"); w.add("Other");
     s.s.sel = id.clone(); s.load();
-    assert_eq!(hints(&mut s, 120), "tab put an agent on this task · space talk about this task · ? all keys");
+    assert_eq!(hints(&mut s, 120), "ctrl+s put an agent on this task · space talk about this task · ? all keys");
     s.press(&["ctrl+f"]); assert_eq!(hints(&mut s, 120), "enter keep the filter · esc cancel");
     s.typed("greet"); s.press(&["enter"]);
-    assert_eq!(hints(&mut s, 120), "tab put an agent on this task · space talk about this task · esc clear the filter · ? all keys");
+    assert_eq!(hints(&mut s, 120), "ctrl+s put an agent on this task · space talk about this task · esc clear the filter · ? all keys");
     s.press(&["esc"]); assert_eq!(s.s.filter, ""); assert!(!hints(&mut s, 120).contains("esc"));
     s.press(&["ctrl+f"]); s.typed("zzz"); s.press(&["enter"]); assert_eq!(hints(&mut s, 120), "esc clear the filter · ? all keys"); s.press(&["esc"]);
     s.press(&["alt+a"]); assert_eq!(hints(&mut s, 120), "esc back to the board · ? all keys");
     s.press(&["alt+a"]); s.s.sel = id.clone(); s.load(); s.press(&["ctrl+a", "alt+a"]);
     assert_eq!(hints(&mut s, 120), "ctrl+a restore this task · ctrl+x remove this task · esc back to the board · ? all keys");
     s.press(&["ctrl+a", "alt+a"]); s.s.sel = id.clone(); s.load();
-    s.press(&["alt+t"]); assert_eq!(hints(&mut s, 120), "tab put an agent on this task · space talk about this task · esc back to the list");
+    s.press(&["alt+t"]); assert_eq!(hints(&mut s, 120), "ctrl+s put an agent on this task · space talk about this task · esc back to the list");
     sw::store::tasks::update(&id, |t| { t.put("description", (1..=80).map(|n| format!("Line {n}.")).collect::<Vec<_>>().join("\n\n")); Ok(sw::store::tasks::Change::Write) }).unwrap(); s.load();
-    assert_eq!(hints(&mut s, 120), "tab put an agent on this task · space talk about this task · ↑↓ scroll the task · esc back to the list");
+    assert_eq!(hints(&mut s, 120), "ctrl+s put an agent on this task · space talk about this task · ↑↓ scroll the task · esc back to the list");
     s.press(&["esc"]); assert!(!s.s.full);
     sw::store::tasks::update(&id, |t| { t.put("stage", "progress"); Ok(sw::store::tasks::Change::Write) }).unwrap(); s.s.stick = id.clone(); s.load();
-    assert_eq!(hints(&mut s, 120), "tab put an agent on this task · ctrl+x put it back in to do · ? all keys");
+    assert_eq!(hints(&mut s, 120), "ctrl+s put an agent on this task · ctrl+x put it back in to do · ? all keys");
     assert_eq!(sw::board::update::menu::items(&s.s).into_iter().find(|i| i.key == "ctrl+x").map(|i| i.label).unwrap_or_default(), "put this task back in to do");
     s.press(&["?"]); assert_eq!(hints(&mut s, 120), "↑↓ pick a key · enter press it · esc close the menu"); s.press(&["esc"]);
     let job = sw::store::inbox::new_dispatch("@far fix the build", obj(json!({ "remote": "far" }))).unwrap();
@@ -75,7 +75,7 @@ fn while_you_type_the_hint_line_says_who_gets_the_words_and_the_box_edge_names_n
     let w = world();
     let mut s = open(&w.root, 34); s.s.side = false;
     s.typed("a new thing");
-    assert_eq!(hints(&mut s, 120), "enter add it as a task · tab add it and put an agent on it · shift+enter new line · esc put away");
+    assert_eq!(hints(&mut s, 120), "enter add it as a task · ctrl+s add it and put an agent on it · shift+enter new line · esc put away");
     // a task with no agent yet: in a narrow window too the line names the task the words are locked to
     s.press(&["esc"]); w.add("Add pebbles"); s.load(); s.press(&["space"]); s.typed("Please add pebbles");
     assert_eq!(hints(&mut s, 60), "enter send, and start an agent on PRJ-1 · esc put away");

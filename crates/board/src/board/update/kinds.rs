@@ -31,14 +31,25 @@ pub fn set(s: &mut State, kind: usize, fx: &mut Vec<Effect>) {
     fx.push(Effect::Save);
     relist(s);
 }
-/// The keys while the kinds row has them: the left and right arrows choose, up stays, enter, down, esc or the kinds
-/// key again go back to the list. Any other key goes back to the list and does what it always does there.
+/// Tab from the list: the keys to the scope bar, then the kinds row, then back (shift+tab the other way round).
+pub fn focus(s: &mut State, p: &Press) {
+    let back = p.chord.starts_with("shift+");
+    let at = if s.bar_focus { 1 } else if s.kinds_focus { 2 } else { 0 };
+    let to = if back { (at + 2) % 3 } else { (at + 1) % 3 };
+    s.pick = None; s.bar_focus = to == 1; s.kinds_focus = to == 2;
+}
+/// The keys while the scope bar or the kinds row has them: the left and right arrows move along it (on the bar a level
+/// up or into the next, on the row the kind), up stays, tab moves on, enter, down or esc go back to the list. Any other
+/// key goes back to the list and does what it always does there.
 pub fn key(s: &mut State, p: &Press, fx: &mut Vec<Effect>) -> bool {
-    if is(p, K::ScopeOut) { let k = s.kind.checked_sub(1).unwrap_or(KINDS.len() - 1); set(s, k, fx); return true; }
-    if is(p, K::ScopeIn) { let k = (s.kind + 1) % KINDS.len(); set(s, k, fx); return true; }
+    if is(p, K::Focus) { focus(s, p); return true; }
+    if s.bar_focus && is(p, K::ScopeOut) { super::scope::step_out(s, fx); return true; }
+    if s.bar_focus && is(p, K::ScopeIn) { super::scope::step_in(s, fx); return true; }
+    if s.kinds_focus && is(p, K::ScopeOut) { let k = s.kind.checked_sub(1).unwrap_or(KINDS.len() - 1); set(s, k, fx); return true; }
+    if s.kinds_focus && is(p, K::ScopeIn) { let k = (s.kind + 1) % KINDS.len(); set(s, k, fx); return true; }
     if is(p, K::Up) { return true; }
-    s.kinds_focus = false;
-    is(p, K::Enter) || is(p, K::Down) || is(p, K::Back) || is(p, K::Kinds)
+    s.bar_focus = false; s.kinds_focus = false;
+    is(p, K::Enter) || is(p, K::Down) || is(p, K::Back)
 }
 /// The projects of a machine ("" this one) that have a project coordinator, as far as the board knows.
 fn projects(s: &State, host: &str) -> Vec<String> {

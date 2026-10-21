@@ -30,7 +30,7 @@ impl Line {
     }
 }
 /// The steps: each its dot and its name, the one you are on in bold.
-fn steps(s: &State, l: &mut Line) {
+fn steps(s: &State, th: &Theme, l: &mut Line) {
     let mut all: Vec<(Option<Target>, String)> = vec![(None, "All".into())];
     if s.level >= 1 { all.push((crate::board::update::coords::of_head(s, &crate::board::update::heads::machine_id(&s.scope)), remotes::shown(s, &s.scope))); }
     if s.level >= 2 { all.push((crate::board::update::coords::of_head(s, &scope::repo_id(&s.scope, &s.project)), repo_label(&s.project))); }
@@ -39,6 +39,8 @@ fn steps(s: &State, l: &mut Line) {
         if n > 0 { l.put(Inked::of(" › ", Ink::Muted), ""); }
         let (mark, ink, _) = dot(s, t.as_ref());
         let named = if n == last { Inked::of(name, Ink::Text).bold() } else { Inked::of(name, Ink::Soft) };
+        // The step you are on is lit while the bar has the keys (tab).
+        let named = if n == last && s.bar_focus { if th.paints_selection() { named.on(Ink::Selection) } else { named.inv() } } else { named };
         l.put(Inked::of(mark, ink).add(Inked::plain(" ")).add(named), &format!("level\t{n}"));
     }
 }
@@ -84,7 +86,7 @@ fn kinds_row(s: &State, th: &Theme, l: &mut Line, w: usize) {
 /// in each group. With where a click on each piece goes, by line.
 pub fn bar_lines(s: &State, th: &Theme, w: usize, tally: &str) -> (Vec<Inked>, Vec<(usize, usize, usize, String)>) {
     let mut bar = Line { text: Inked::plain(" "), hits: vec![], row: 0 };
-    steps(s, &mut bar);
+    steps(s, th, &mut bar);
     next(s, th, &mut bar, w);
     let mut row = Line { text: Inked::new(), hits: vec![], row: 1 };
     kinds_row(s, th, &mut row, w);

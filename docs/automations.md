@@ -191,12 +191,12 @@ is no separate list behind a key any more: `Alt+O` is no key of the board.)
   |---|---|
   | `Enter` | open it |
   | `Space` | turn it on or off |
-  | `Tab` | fire it now |
+  | `Ctrl+S` | fire it now |
   | `Ctrl+X` | remove it (it asks first, as removing a task does; the tasks it made stay) |
   | `Ctrl+E` | its settings |
 
   The hint line shows these keys while such a row is selected, and only the ones that act (an automation that is off
-  never fires, so `Tab` is not offered). The `?` menu lists them in the same words. A key that acts on a task (approve,
+  never fires, so `Ctrl+S` is not offered). The `?` menu lists them in the same words. A key that acts on a task (approve,
   send back, archive, pin) does nothing on it.
 - **One automation, whole** (`Enter`, or `Alt+T`; beside the list with `Alt+P` on a wide screen): its state, its trigger,
   when it is next due, its repo, its prompt, its own settings (marked `*`), and its firings, newest first, each with the

@@ -19,13 +19,13 @@ fn typing_adds_a_task_tab_delegates_space_replies_and_enter_opens_the_agent() {
     s.typed("Add a greeting");
     let t = s.text();
     assert!(has(&t, r"\n *\n \+ New task  [^\n]*\n─[^\n]*\n❯ Add a greeting"), "{t}");
-    assert!(t.contains("enter add it as a task · tab add it and put an agent on it · shift+enter new line · esc put away"), "{t}");
+    assert!(t.contains("enter add it as a task · ctrl+s add it and put an agent on it · shift+enter new line · esc put away"), "{t}");
     s.press(&["enter"]);
     assert_eq!(task("proj/1").s("title"), "Add a greeting");
     assert_eq!((s.s.sel.as_str(), s.s.value()), ("proj/1", String::new()));
-    assert!(has(&s.text(), r"\n[ ▌] tab put an agent on this task · space talk about this task · esc close · \? all keys"), "{}", s.text());
+    assert!(has(&s.text(), r"\n[ ▌] ctrl\+s put an agent on this task · space talk about this task · esc close · \? all keys"), "{}", s.text());
     s.press(&["enter"]); assert!(s.text().contains("No agent has been on this yet"));
-    s.press(&["tab"]);
+    s.press(&["ctrl+s"]);
     settle("proj/1"); s.load();
     let t = s.text();
     assert!(has(&t, r"\n ▾ working +[^\n]*\n[ ▌]◐ PRJ-\d+ +Add a greeting"), "{t}");
@@ -87,7 +87,7 @@ fn while_the_text_box_holds_words_no_shortcut_fires_and_ctrl_c_twice_closes() {
     s.s.sel = id.clone(); s.load();
     s.typed("half a thought");
     let before = (task(&id).t("stage"), task(&id).b("pinned"), task(&id).b("archivedAt"), sw::store::tasks::list(Default::default()).len());
-    for k in ["ctrl+l", "ctrl+r", "ctrl+x", "ctrl+x", "ctrl+p", "ctrl+f", "alt+c", "alt+p", "alt+t", "alt+a", "alt+s", "alt+d", "alt+m", "ctrl+e", "ctrl+g", "ctrl+t", "ctrl+d", "ctrl+b", "ctrl+s", "ctrl+o", "alt+h", "alt+v", "alt+r", "alt+n", "ctrl+a", "ctrl+e", "?", "space", "up", "down"] { s.press(&[k]); }
+    for k in ["ctrl+l", "ctrl+r", "ctrl+x", "ctrl+x", "ctrl+p", "ctrl+f", "alt+c", "alt+p", "alt+t", "alt+a", "alt+s", "alt+d", "alt+m", "ctrl+e", "ctrl+g", "ctrl+t", "ctrl+d", "ctrl+b", "ctrl+o", "alt+h", "alt+v", "alt+r", "alt+n", "ctrl+a", "ctrl+e", "?", "space", "up", "down"] { s.press(&[k]); }
     assert_eq!((task(&id).t("stage"), task(&id).b("pinned"), task(&id).b("archivedAt"), sw::store::tasks::list(Default::default()).len()), before, "nothing happened to any task");
     assert!(s.s.sel == id && s.s.ask.is_none() && s.s.menu.is_none() && !s.s.full && !s.s.archive_view && !s.s.all_done && !s.s.by_repo && s.s.chat_open && s.s.msg.is_empty());
     assert!(s.s.value().contains("half a thought") && s.s.value().contains('?'), "\"?\" and space are typed, not acted on: {}", s.s.value());

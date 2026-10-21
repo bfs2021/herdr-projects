@@ -157,10 +157,9 @@
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its text)
    → ←          into a machine or a project: type to pick, enter picks; ← back up
-   shift+tab    the kinds row: all, tasks, agents, coordinators, automations
+   tab          move between the list, the scope bar and the kinds row
    enter        send what is typed; else open this task's agent, or fold a heading
    space        flip who you talk to: the Coordinator, or this task's agent
-   tab          put an agent on this task
    esc          back, one step at a time (as a popup, the board closes on the last one)
    ?            this menu
    y  n         answer a question: y yes, n or esc no (enter never confirms)
@@ -168,6 +167,7 @@
  ctrl: does something
    ctrl+l       yes: approve the merge, say yes, retry, take it as it is
    ctrl+r       send it back: tell the agent to fix it, or to continue
+   ctrl+s       put an agent on this task
    ctrl+x       stop this task's agent
    ctrl+a       archive this task
    ctrl+p       pin this task to the top
@@ -252,4 +252,4 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ❯ Hello 日本 🚀
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-  enter add it as a task · tab add it and put an agent on it · shift+enter new line · esc put away
+  enter add it as a task · ctrl+s add it and put an agent on it · shift+enter new line · esc put away

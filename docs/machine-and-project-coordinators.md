@@ -16,7 +16,7 @@ The Coordinator stays as it is. The others sit beside it: talking to one never t
   who the chat talks to: All the Coordinator, a machine its machine coordinator, a project its project coordinator.
   `→` steps in (type a name to pick, `Enter` goes in), `←` goes back up, a click on a step goes there. Each step has its
   coordinator's dot: working, idle, needs you, on autopilot, or not started ([the scope bar](board.md#the-scope-bar)).
-- **Every coordinator at once**: the kinds row's `coordinators` (`Shift+Tab`, then `→`) lists the scope's coordinators,
+- **Every coordinator at once**: the kinds row's `coordinators` (`Tab` twice, then `→`) lists the scope's coordinators,
   on All every one of every machine, each with its dot, where it stands and its last line. `Enter` on one goes into its
   scope ([the kinds row](board.md#the-kinds-row)).
 - **A machine's heading** shows when the board shows every machine (`Alt+M`). `Space` on it opens that machine's
@@ -61,7 +61,7 @@ A machine's heading and a repo's heading stand for their coordinator, as a row s
 - `Alt+P` shows it beside the list, `Alt+T` whole, in the [task panel](task-panel.md)'s form.
 - `Ctrl+E` opens its settings page: its own rows first, under `This coordinator`, then what that heading's page always
   showed (on this machine's heading your own settings, on a repo's your entry for that repo).
-- `Tab`, with nothing typed, puts it on [autopilot](autopilot.md) with its saved goal and settings; `Ctrl+X` takes it
+- `Ctrl+S`, with nothing typed, puts it on [autopilot](autopilot.md) with its saved goal and settings; `Ctrl+X` takes it
   off. While on, the heading reads as a task's row: autopilot's mark, its timing on the right, what it
   does under its name ([autopilot](autopilot.md)).
 - Grouped by status, or on one machine, these coordinators have no heading: change the grouping to reach them.

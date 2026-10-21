@@ -95,8 +95,16 @@ fn the_kinds_row_narrows_the_list_and_coordinators_lists_each_one_enter_goes_int
     s.press(&["right", "right", "enter"]); s.typed("hello"); s.press(&["enter"]); drain();
     s.press(&["left", "left"]); s.load();
     // the kinds row has the keys: the arrows choose
-    s.press(&["shift+tab"]); assert!(s.s.kinds_focus);
+    // tab: the scope bar has the keys (its step lit), the arrows step; tab again: the kinds row; shift+tab back
+    s.press(&["tab"]); assert!(s.s.bar_focus && !s.s.kinds_focus);
+    assert!(s.text().contains("tab the kinds row"), "{}", s.text());
+    s.press(&["right"]); assert_eq!(s.s.level, 1);
+    s.press(&["left"]); assert_eq!(s.s.level, 0);
+    s.press(&["tab", "shift+tab"]); assert!(s.s.bar_focus);
+    s.press(&["tab"]); assert!(s.s.kinds_focus && !s.s.bar_focus);
     assert!(s.text().contains("→ ← choose a kind"), "{}", s.text());
+    // tab never puts an agent on the selected task any more: the start key does
+    assert!(sw::store::tasks::list(Default::default()).iter().all(|t| t.s("stage") == "todo"));
     s.press(&["right"]); assert_eq!(s.s.kind, 1);
     s.press(&["right"]); assert_eq!(s.s.kind, 2);
     // agents: only tasks an agent is on (none here)
@@ -126,7 +134,7 @@ fn all_with_coordinators_lists_another_machines_own_coordinators_too() {
         "tasks": [{ "id": "far/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] });
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(answer) });
     assert_eq!(s.s.scope, "*");
-    s.press(&["shift+tab", "right", "right", "right", "enter"]); assert_eq!(s.s.kind, 3);
+    s.press(&["tab", "tab", "right", "right", "right", "enter"]); assert_eq!(s.s.kind, 3);
     let ids: Vec<String> = s.s.rows.iter().filter_map(|r| match r { sw::board::state::Row::Head { id, .. } => Some(id.clone()), _ => None }).collect();
     assert!(ids.contains(&sw::board::update::pilot::main_id("otherbox")), "{ids:?}");
     let t = s.text();

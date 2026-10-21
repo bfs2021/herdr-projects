@@ -110,7 +110,7 @@ fn ctrl_does_something_alt_only_shows_or_hides_and_no_old_key_is_left() {
     // The keys that are gone do nothing at all: not their old action, not a new one, and nothing is typed.
     use KeyCode::*;
     let (a, c, sh, n) = (KeyModifiers::ALT, KeyModifiers::CONTROL, KeyModifiers::SHIFT, KeyModifiers::NONE);
-    for (code, mods) in [(Char('v'), a), (Char('h'), a), (Char('r'), a), (Char('n'), a), (Delete, n), (Char('s'), c), (Char('d'), c), (Char('o'), c), (Char('t'), c), (Char('g'), c), (Right, n), (Up, a), (Down, a), (Up, c), (Down, c), (Home, n), (End, n), (Char('w'), a), (Up, sh), (Down, sh), (Right, sh), (Up, c | sh), (Down, c | sh), (Up, a | sh), (Down, a | sh)] {
+    for (code, mods) in [(Char('v'), a), (Char('h'), a), (Char('r'), a), (Char('n'), a), (Delete, n), (Char('d'), c), (Char('o'), c), (Char('t'), c), (Char('g'), c), (Right, n), (Up, a), (Down, a), (Up, c), (Down, c), (Home, n), (End, n), (Char('w'), a), (Up, sh), (Down, sh), (Right, sh), (Up, c | sh), (Down, c | sh), (Up, a | sh), (Down, a | sh)] {
         let k = format!("{code:?} {mods:?}");
         key(&mut s, code, mods);
         assert_eq!(tasks(), first, "{k}"); assert_eq!(shown(&s), start, "{k}"); assert!(s.s.ask.is_none() && s.s.menu.is_none(), "{k}"); assert_eq!(s.s.value(), "", "{k}"); assert_eq!(s.s.sel, id, "{k}"); assert!(!s.closed, "{k}");

@@ -21,6 +21,7 @@ pub fn label(s: &State, k: K, r: Option<&Obj>) -> String {
     match k {
         K::Yes => if st("pick") { "yes: keep the selected attempt".into() } else { "yes: approve the merge, say yes, retry, take it as it is".into() },
         K::SendBack => "send it back: tell the agent to fix it, or to continue".into(),
+        K::Delegate => if r.is_some_and(|r| !r.b("archivedAt")) { "put an agent on this task".into() } else { String::new() },
         K::NextAttempt => if r.map(|r| choosing(s, r)).unwrap_or(false) { "move to this task's next attempt".into() } else { String::new() },
         K::Stop => match r { None => "stop the agent, or remove the task".into(), Some(r) if r.s("stage") == "progress" => "put this task back in to do".into(), Some(r) if running(r) => "stop this task's agent".into(), _ => "remove this task".into() },
         K::Archive => match super::archive_done::counts(s).filter(|_| r.is_none()) {

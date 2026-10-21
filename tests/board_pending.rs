@@ -27,7 +27,7 @@ fn tab_says_starting_at_once_and_the_real_state_replaces_it() {
     let id = w.add("Make f");
     let mut s = open(&w.root, 34);
     s.s.sel = id.clone(); s.load();
-    let fx = s.hold("tab");
+    let fx = s.hold("ctrl+s");
     // Nothing is done yet, and the board already says what is under way: on the row, with the working mark, and in the panel.
     assert_eq!(task(&id).s("stage"), "todo");
     assert_eq!(jobs(&fx).len(), 1, "{fx:?}");
@@ -35,7 +35,7 @@ fn tab_says_starting_at_once_and_the_real_state_replaces_it() {
     assert!(has(&row(&lines, "Make f"), r"^[ ▌]\S PRJ-1 +Make f +Starting…"), "{}", lines.join("\n"));
     assert!(has(&lines.join("\n"), r"│  Now +Starting…") && !lines.join("\n").contains("No agent is on this yet"), "{}", lines.join("\n"));
     // The same key again while it starts: nothing is started twice, and the message says it is under way.
-    let again = s.hold("tab");
+    let again = s.hold("ctrl+s");
     assert!(jobs(&again).is_empty(), "{again:?}");
     assert!(s.text().contains("Still starting PRJ-1. One moment."), "{}", s.text());
     // The job ends and the board reads again: the real state stands on the row.
@@ -105,7 +105,7 @@ fn a_job_that_fails_says_so_in_red_on_its_row_and_in_its_panel() {
     let id = w.add("Breaks");
     let mut s = open(&w.root, 34);
     s.s.sel = id.clone(); s.load();
-    let fx = s.hold("tab");
+    let fx = s.hold("ctrl+s");
     // Gone before its job runs: the job fails, and the row says it could not start, and why.
     let j = jobs(&fx).remove(0);
     sw::store::tasks::update(&id, |t| { t.put("archivedAt", sw::clock::now()); Ok(sw::store::tasks::Change::Write) }).unwrap();
@@ -137,7 +137,7 @@ fn another_machines_row_waits_for_that_machine_to_show_what_was_done() {
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: theirs("todo", "idle") });
     assert_eq!(s.s.scope, "*");
     s.s.sel = "otherbox:proj/151".into(); sw::board::update::list::relist(&mut s.s);
-    let fx = s.hold("tab");
+    let fx = s.hold("ctrl+s");
     assert!(matches!(jobs(&fx).as_slice(), [Job::Far { action, .. }] if action == "delegate"), "{fx:?}");
     assert!(has(&row(&s.screen(120), "Theirs"), r"Starting…"), "{}", s.text());
     // That machine answered the action; its list, asked before, still shows the task as it was: the word stays.

@@ -66,7 +66,7 @@ pub fn activity(co: &Co, ap: &Obj, board: &[Obj], now: i64) -> String {
 }
 /// Today's adds against their limit, for its row's column: `2 of 5 added`.
 pub fn added_words(co: &Co, ap: &Obj, board: &[Obj], now: i64) -> String { let t = today(co, ap, board, now); format!("{} of {} added", t.added, t.per_day) }
-/// Its line, all of it in one: `autopilot on · every 1h + events · last HSW-92 · next in 40m` (the command line, and what `Tab` says while it is on).
+/// Its line, all of it in one: `autopilot on · every 1h + events · last HSW-92 · next in 40m` (the command line, and what the start key says while it is on).
 pub fn line_of(co: &Co, ap: &Obj, board: &[Obj], now: i64) -> String {
     let st = state_word(co, ap, board, now);
     if st.is_empty() { return String::new(); }

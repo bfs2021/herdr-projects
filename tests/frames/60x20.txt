@@ -69,8 +69,8 @@
                 task: a page of its text)
    → ←          into a machine or a project: type to pick,
                 enter picks; ← back up
-   shift+tab    the kinds row: all, tasks, agents,
-                coordinators, automations
+   tab          move between the list, the scope bar and
+                the kinds row
    enter        send what is typed; else open this task's
                 agent, or fold a heading
    space        flip who you talk to: the Coordinator, or

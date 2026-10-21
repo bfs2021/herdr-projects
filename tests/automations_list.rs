@@ -59,10 +59,10 @@ fn the_group_has_a_colour_of_its_own_narrow_rows_a_menu_of_its_own_and_stays_wit
     // off, tab would only say so: its hint goes
     s.press(&["space"]); like(&s.screen(120)[7], r"^▌⟳ off {3}Look for old dependencies {2}every 2h +never fired");
     assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation on · ctrl+x remove it · ctrl+e its settings · ? all keys");
-    s.press(&["space", "tab"]);
+    s.press(&["space", "ctrl+s"]);
     like(&t(&mut s, 120), r"\n▌⟳ on {4}Look for old dependencies {2}every 2h +◇ PRJ-2 next in {2}2h\n"); // the task its last firing made, by that task's own mark and number
     assert_eq!(task("proj/2").at("settings"), &serde_json::json!({ "reviewer.agent": "claude", "merge.by": "itself" }));
-    s.press(&["tab"]); l::turn(all[0].s("id"), false).unwrap(); s.load();
+    s.press(&["ctrl+s"]); l::turn(all[0].s("id"), false).unwrap(); s.load();
     like(&t(&mut s, 120), r"⟳ off {3}Look for old dependencies {2}every 2h +◇ PRJ-2 skipped +\d+s ago"); l::turn(all[0].s("id"), true).unwrap(); s.load();
     // the key the old list had is no key here; what is typed is no reply to anyone: with no Coordinator on, it is a new task
     s.press(&["down", "down", "down"]); assert_eq!(s.s.sel, row_id(&all[2])); s.press(&["up"]); assert_eq!(s.s.sel, row_id(&all[1]));
@@ -75,7 +75,7 @@ fn the_group_has_a_colour_of_its_own_narrow_rows_a_menu_of_its_own_and_stays_wit
     s.rows = 70; s.press(&["?"]);
     let menu = t(&mut s, 120);
     like(&menu, r#"^ Menu {2}for the automation "Nightly audit""#);
-    for line in [r"enter +send what is typed; with nothing typed, open this automation".to_string(), r"space +turn this automation on or off".into(), r"tab +fire this automation now".into(),
+    for line in [r"enter +send what is typed; with nothing typed, open this automation".to_string(), r"space +turn this automation on or off".into(), r"ctrl\+s +fire this automation now".into(),
         format!(r"{} +remove this automation \(it asks first\)", regex::escape(&key_name("stop"))), format!(r"{} +this automation's settings: see and change each one", regex::escape(&key_name("settings"))),
         format!(r"{} +show the whole automation, full screen", regex::escape(&key_name("panel"))), r"⟳ +an automation \(dimmed while it is off; the word after it says on or off\)".into()] { like(&menu, &line); }
     assert!(!regex::Regex::new(r"archive this task|pin this task|yes: approve|alt\+o").unwrap().is_match(&menu), "{menu}");

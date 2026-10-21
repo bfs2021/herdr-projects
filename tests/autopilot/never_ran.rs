@@ -46,7 +46,7 @@ fn tab_on_another_machines_repo_whose_coordinator_never_ran_sends_autopilot_on_a
     b.press(&["ctrl+x"]);
     assert!(b.text().contains("is not on autopilot"), "off, not an older version: {}", b.text());
     f.answers("vm-b", "do", &json!({ "ok": true, "msg": "Autopilot on for the web coordinator." }));
-    b.press(&["tab"]);
+    b.press(&["ctrl+s"]);
     assert!(!b.text().contains("older version") && b.s.msg.is_empty(), "on says nothing: {}", b.text());
     let (who, what, req) = f.asked().pop().unwrap();
     assert_eq!((who.as_str(), what.as_str(), req.s("action"), req.s("to")), ("vm-b", "do", "autopilot-on", "project:web"));
@@ -66,7 +66,7 @@ fn a_machine_that_sends_no_autopilot_at_all_still_says_to_update_it() {
     let (w, f) = far_world();
     let mut b = far_board(&w, &f, json!({ "host": "vm-b", "version": "1.0.0", "tasks": their_task() }));
     b.s.sel = sw::board::update::heads::group_id(&b.s, "vm-b", "web"); b.load();
-    b.press(&["tab"]);
+    b.press(&["ctrl+s"]);
     assert!(b.text().contains("vm-b runs an older version that has no autopilot: update herdr-projects there first."), "{}", b.text());
     b.press(&["ctrl+x"]);
     assert!(b.text().contains("runs an older version"), "{}", b.text());

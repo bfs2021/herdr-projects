@@ -13,7 +13,7 @@
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ❯ Send message to Coordinator                                                                    │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
-  tab put an agent on this task · space talk about this task · ? all keys
+  ctrl+s put an agent on this task · space talk about this task · ? all keys
 
  ◎ All › HOST
  all · tasks · agents · coordinators · automations
@@ -30,4 +30,4 @@
 ╭──────────────────────────────────────────────────────╮
 │ ❯ Send message to Coordinator                        │
 ╰──────────────────────────────────────────────────────╯
-  tab put an agent on this task · ? all keys
+  ctrl+s put an agent on this task · ? all keys

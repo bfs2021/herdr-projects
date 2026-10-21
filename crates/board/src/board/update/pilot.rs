@@ -1,9 +1,9 @@
 //! Autopilot from the board's side: a coordinator's row (the main Coordinator's on top of the list, a machine's heading
-//! with every machine shown, a repo's heading grouped by repo) stands for its coordinator. `Tab` there turns autopilot
-//! on, with its saved goal and settings, and `Ctrl+X` turns it off, as those keys put an agent on a task and stop it.
+//! with every machine shown, a repo's heading grouped by repo) stands for its coordinator. The start key there turns
+//! autopilot on, with its saved goal and settings, and `Ctrl+X` turns it off, as those keys put an agent on a task and stop it.
 //! What each shows of its autopilot is what its machine read (data.rs: pilots), this one's or another's (sent with its
 //! tasks); a machine on an older version sends no autopilot at all, and the keys say to update it there. One of its
-//! coordinators missing from what it sent never ran: it is off, and `Tab` starts it.
+//! coordinators missing from what it sent never ran: it is off, and the start key starts it.
 use super::coords::{of_head, Target};
 use super::heads::HEAD;
 use super::Effect;
@@ -42,7 +42,7 @@ pub fn others(s: &State, main: &Target) -> String {
     for m in super::remotes::in_view(s) { if s.scope == "*" || m.machine.label == main.host { mine(&m.pilots, &m.machine.label, &mut views); } }
     crate::autopilot::shown::others_words(&views)
 }
-/// `Tab` on a coordinator's row: autopilot on, with its saved goal and settings, and nothing said: its heading shows it.
+/// The start key on a coordinator's row: autopilot on, with its saved goal and settings, and nothing said: its heading shows it.
 /// Already on: it says so; at `needs you`: it resumes.
 pub fn turn_on(s: &mut State, t: &Target, fx: &mut Vec<Effect>) {
     let v = view(s, t);
@@ -68,6 +68,7 @@ pub fn menu_label(s: &State, k: crate::board::keys::K) -> Option<String> {
     use crate::board::keys::K;
     let t = selected(s)?;
     Some(match k {
+        K::Delegate => format!("put the {} on autopilot", t.name),
         K::Stop => format!("turn the {}'s autopilot off", t.name),
         K::Settings => if s.editing.is_some() { format!("back from the {}'s settings", t.name) } else if t.host.is_empty() { format!("the {}'s settings: see and change each one", t.name) } else { format!("the {}'s settings, as {} has them", t.name, t.host) },
         K::Side => format!("{} the side panel: this coordinator, beside the list", if s.side { "hide" } else { "show" }),

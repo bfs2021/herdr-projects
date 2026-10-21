@@ -37,7 +37,7 @@ fn the_automations_are_a_group_of_the_main_list_with_keys_that_turn_fire_and_rem
     // the arrows go from the tasks on to the automations' heading and their rows; the hint line shows the keys that act there
     s.press(&["down"]); assert_eq!(s.s.sel, "head:status\t\tautomations"); s.press(&["down"]); assert_eq!(s.s.sel, row_id(&all[0])); assert!(s.s.current().is_none());
     assert!(s.screen(120)[7].starts_with("▌⟳ on    Look for old dependencies "));
-    assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation off · tab fire it now · ctrl+x remove it · ctrl+e its settings · ? all keys");
+    assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation off · ctrl+s fire it now · ctrl+x remove it · ctrl+e its settings · ? all keys");
     // a narrow screen: two lines each, nothing cut
     let narrow = s.screen(60);
     assert_eq!(narrow[7..14].to_vec(), vec![" ▾ automations", "▌⟳ on    Look for old dependencies", "▌        every 2h                                 next in 2h", " ⟳ on    Release note after a merge", "         when a task is merged, in every repo    never fired", " ⟳ off   Nightly audit", "         daily 03:00                             never fired"]);
@@ -45,15 +45,15 @@ fn the_automations_are_a_group_of_the_main_list_with_keys_that_turn_fire_and_rem
     // space: off and on
     s.press(&["space"]); assert_eq!(sw::store::automations::automation(all[0].s("id")).unwrap().at("on"), &json!(false));
     assert!(s.text().contains("\"Look for old dependencies\" is off: it never fires, and keeps everything."));
-    s.press(&["tab"]); assert!(s.text().contains("\"Look for old dependencies\" is off, and off it never fires. space turns it on."), "{}", s.text());
+    s.press(&["ctrl+s"]); assert!(s.text().contains("\"Look for old dependencies\" is off, and off it never fires. space turns it on."), "{}", s.text());
     s.press(&["space"]);
     // tab: fire it now. A task is added and an agent put on it; the selection stays on the automation
-    s.press(&["tab"]);
+    s.press(&["ctrl+s"]);
     assert!(s.text().contains("\"Look for old dependencies\" fired: PRJ-2 was added and an agent is on it."), "{}", s.text());
     assert_eq!(task("proj/2").s("stage"), "starting");
     assert_eq!(s.s.sel, row_id(&all[0]));
     assert!(regex::Regex::new(r"\n[ ▌]. PRJ-2 Look for old dependencies \[auto\]").unwrap().is_match(&s.text()), "{}", s.text());
-    s.press(&["tab"]); assert!(s.text().contains("did not fire: its last task, PRJ-2, is still being worked on."));
+    s.press(&["ctrl+s"]); assert!(s.text().contains("did not fire: its last task, PRJ-2, is still being worked on."));
     // a key that acts on a task does nothing here
     s.press(&["down"]); assert_eq!(s.s.sel, row_id(&all[1]));
     s.press(&["ctrl+a", "ctrl+p", "ctrl+l", "ctrl+r"]); assert_eq!(s.s.msg, ""); assert_eq!(s.s.value(), ""); assert_eq!(s.s.sel, row_id(&all[1]));

@@ -59,7 +59,7 @@
                 task: a page of its
                 text)
    → ←          into a machine or a
- ↓ 100 more
+ ↓ 99 more
 
  + New task  added word for word
 ────────────────────────────────────────

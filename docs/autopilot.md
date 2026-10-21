@@ -23,10 +23,10 @@ On the board, on a coordinator's row (below), with nothing typed:
 
 | Key | Does |
 |---|---|
-| `Tab` | autopilot on, with its saved goal and settings. On one that says `needs you` or `could not start`, it starts again |
+| `Ctrl+S` | autopilot on, with its saved goal and settings. On one that says `needs you` or `could not start`, it starts again |
 | `Ctrl+X` | autopilot off |
 
-These are the keys that put an agent on a task and stop it. `Tab` with words typed sends them, as always.
+These are the keys that put an agent on a task and stop it. `Ctrl+S` with words typed sends them, as always.
 
 From a shell:
 
@@ -148,7 +148,7 @@ another machine) reaches it as `(not a wake) Autopilot woke: …`. A coordinator
 the same conversation, as your first message would start it.
 
 - **Answered** is a wake whose turn ended within 15 minutes. After `autopilot.needsYouAfter` unanswered in a row, its row
-  says `needs you` and no more wakes are sent until `Tab` or `autopilot on`. One answered sets the count back to zero.
+  says `needs you` and no more wakes are sent until `Ctrl+S` or `autopilot on`. One answered sets the count back to zero.
 - **A start that failed** is not a wake: it counts toward no limit, waits for the gap before the next try, and the row
   says `autopilot could not start: <reason>` until a start works.
 
@@ -272,9 +272,9 @@ What each means in full is in [the list](settings.md#the-list).
 ## Other machines
 
 **Each machine runs its own coordinators' autopilot**, with its own settings and limits. This board shows their lines
-and panels as that machine sends them with its tasks, and sends `Tab` and `Ctrl+X` there. `Ctrl+E` on one shows its
+and panels as that machine sends them with its tasks, and sends `Ctrl+S` and `Ctrl+X` there. `Ctrl+E` on one shows its
 settings whole, to read, and says to change them there. Each coordinator with a row is sent, its machine's and every
-repo's that machine knows, one that never ran as off: `Tab` there starts it, as a first message would. A machine on an
+repo's that machine knows, one that never ran as off: `Ctrl+S` there starts it, as a first message would. A machine on an
 older version sends no autopilot at all, and the keys say to update it there.
 
 **The main Coordinator sees other machines only while a board is open.** The keeper does not ask other machines for

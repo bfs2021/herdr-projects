@@ -81,16 +81,16 @@
                 text)
    → ←          into a machine or a project: type to pick, enter picks; ← back
                 up
-   shift+tab    the kinds row: all, tasks, agents, coordinators, automations
+   tab          move between the list, the scope bar and the kinds row
    enter        send what is typed; else open this task's agent, or fold a
                 heading
    space        flip who you talk to: the Coordinator, or this task's agent
-   tab          put an agent on this task
    esc          back, one step at a time (as a popup, the board closes on the
                 last one)
    ?            this menu
    y  n         answer a question: y yes, n or esc no (enter never confirms)
 
+ ctrl: does something
  ↓ 46 more
 
  + New task  added word for word
@@ -122,4 +122,4 @@
 ────────────────────────────────────────────────────────────────────────────────
 ❯ Hello 日本 🚀
 ────────────────────────────────────────────────────────────────────────────────
-  enter add it as a task · tab add it and put an agent on it · esc put away
+  enter add it as a task · ctrl+s add it and put an agent on it · esc put away

@@ -36,7 +36,7 @@ first task: `↑` reaches it. `Space` there talks to it.
 - Its settings (`coordinator.*`) are looked up as a task's are: **this coordinator → you → built in**. One set for it
   alone goes in the `coordinators` part of your `config.json` (`set … --main-coordinator`). A change counts from its next
   fresh chat ([settings](settings.md)).
-- `Tab` there puts it on [autopilot](autopilot.md), `Ctrl+X` takes it off. While on, its row reads as a task's (autopilot's mark,
+- `Ctrl+S` there puts it on [autopilot](autopilot.md), `Ctrl+X` takes it off. While on, its row reads as a task's (autopilot's mark,
   its timing on the right, what it does under its name), and it sums up the other coordinators on autopilot: `Coordinator · 2 others on · 1 needs you`.
 
 ## Your message, and where you were
@@ -51,7 +51,7 @@ A board opened from the Coordinator's own pane stays in the repo it was last in:
 
 You just send your message; the Coordinator works out what to do with it. It adds the tasks, and starts them when you
 ask for that in your words ("fix the login page and start it"). On autopilot it starts what it adds by itself
-([autopilot](autopilot.md)). `Tab` with words typed does nothing: there is no second way to send.
+([autopilot](autopilot.md)). `Ctrl+S` with words typed does nothing: there is no second way to send.
 
 - `coordinator tell <text> --delegate` from a shell has every task it adds from that message delegated at once, however
   many, with nothing more to confirm. The message carries one line under your words saying so (the board's chat shows

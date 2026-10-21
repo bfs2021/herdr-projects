@@ -46,7 +46,7 @@ fn ready_to_approve_the_merge_asks_first_the_menu_acts_remove_asks_and_messages_
     assert!(sw::actions::finish_line::approve(&id, Some((json!(null), json!("f".repeat(40)))), false).unwrap_err().msg.contains("changed while you were asked. Nothing was merged"));
     // enter never confirms; n says no, in either case, and is not typed
     s.press(&["ctrl+l", "enter"]); assert!(s.s.ask.is_some()); assert_eq!(task(&id).s("stage"), "approval");
-    s.press(&["x", "space", "tab"]); assert!(s.s.ask.is_some());
+    s.press(&["x", "space", "ctrl+s"]); assert!(s.s.ask.is_some());
     s.press(&["n"]); assert!(s.s.ask.is_none() && s.s.value().is_empty());
     s.press(&["ctrl+l", "N"]); assert!(s.s.ask.is_none() && s.s.value().is_empty());
     s.press(&["ctrl+l", "Y"]); assert!(s.s.value().is_empty());
@@ -59,14 +59,14 @@ fn ready_to_approve_the_merge_asks_first_the_menu_acts_remove_asks_and_messages_
     let text = s.text();
     assert!(text.starts_with(" Menu  for PRJ-2 \"Other\""), "{text}");
     let keys: Vec<String> = text.split("\n on a row").next().unwrap().lines().filter(|l| has(l, r"^ (❯| ) \S")).map(|l| l.chars().skip(3).take(8).collect::<String>().trim().to_string()).filter(|x| !x.is_empty()).collect();
-    assert_eq!(keys, vec!["↑ ↓", "pgup pgd", "→ ←", "shift+ta", "enter", "space", "tab", "esc", "?", "y  n", "ctrl+l", "ctrl+r", "ctrl+x", "ctrl+a", "ctrl+p", "ctrl+e", "ctrl+z", "ctrl+f", "ctrl+c", "ctrl+t", "alt+c", "alt+k", "alt+j", "alt+p", "alt+t", "alt+a", "alt+s", "alt+d", "alt+m"]);
+    assert_eq!(keys, vec!["↑ ↓", "pgup pgd", "→ ←", "tab", "enter", "space", "esc", "?", "y  n", "ctrl+l", "ctrl+r", "ctrl+s", "ctrl+x", "ctrl+a", "ctrl+p", "ctrl+e", "ctrl+z", "ctrl+f", "ctrl+c", "ctrl+t", "alt+c", "alt+k", "alt+j", "alt+p", "alt+t", "alt+a", "alt+s", "alt+d", "alt+m"]);
     assert_eq!(s.s.menu.as_ref().unwrap().at, -1, "no line is picked when the menu opens");
     s.press(&["enter"]); assert!(s.s.menu.is_some());
     let k = |id: &str| regex::escape(&key_name(id));
     for line in [format!("{} +remove this task", k("stop")), format!("{} +archive this task", k("archive")), format!(r"{} +look for other machines \(now: All, this machine only\)", k("scope")), "◆ +ready to approve".into(), "@ +needs a login".into()] { assert!(has(&text, &line), "{line}: {text}"); }
     assert!(has(&text, r"\n[ ▌]  y  n +answer a question: y yes, n or esc no \(enter never confirms\)"));
     s.press(&["x", "ctrl+l"]); assert!(s.s.menu.is_some(), "a stray key neither acts nor closes the menu");
-    s.press(&["down", "down", "down", "down", "enter"]);
+    s.press(&["down", "down", "down", "down", "down", "enter"]);
     assert!(task("proj/2").b("archivedAt") && s.s.menu.is_none());
     assert!(s.text().contains(&format!("Archived PRJ-2 \"Other\". {} undoes it; {} shows the archive. Now on PRJ-1 \"Make f\".", key_name("undo"), key_name("archiveView"))), "{}", s.text());
     s.rows = 34;

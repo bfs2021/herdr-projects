@@ -125,8 +125,8 @@ fn the_chats_bar_has_a_switch_hide_full_screen_and_a_grip_and_the_boards_own_con
     // its parts are no automation's mark: that one is `.sw-turn`, a 0.72em ring
     assert!(BOARD_CSS.contains(".sw-turn { display: inline-block; position: relative; width: 0.72em;") && !SAID.contains("div.sw-turn\""));
     // tab sends, and puts an agent on what it adds, where that applies (no Coordinator); otherwise it moves on as tab does
-    assert!(COMPOSE.contains(r#"if (e.key === "Tab" && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && !e.isComposing && box.value.trim() && onTab()) e.preventDefault();"#));
-    assert!(CHAT.contains("onTab: () => { if (also.hidden || busy) return false; go(true); return true; }"));
+    assert!(COMPOSE.contains(r#"if (e.key.toLowerCase() === "s" && e.ctrlKey && !e.altKey && !e.metaKey && !e.isComposing && box.value.trim() && onStart()) e.preventDefault();"#));
+    assert!(CHAT.contains("onStart: () => { if (also.hidden || busy) return false; go(true); return true; }"));
     // a thumb's size on touch
     assert!(regex::Regex::new(r"@media \(pointer: coarse\) \{ \.sw-chatbar \.icon-button \{ min-width: var\(--touch-target, 40px\); min-height: var\(--touch-target").unwrap().is_match(CSS));
 }

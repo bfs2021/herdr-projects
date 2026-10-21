@@ -74,12 +74,13 @@ fit beside the kinds, it has a line of its own.
 | `coordinators` | the scope's coordinators: on All every one of every machine (the Coordinator, each machine's, each project's that was ever talked to) |
 | `automations` | the automations only |
 
-- **`Shift+Tab` gives the row the keys**: `←` `→` choose, `Enter`, `↓`, `Esc` or `Shift+Tab` go back to the list. A
-  click on a kind picks it. (`Tab` stays what it always was: put an agent on the selected task.)
+- **`Tab` moves the keys** from the list to the scope bar, then to the kinds row, then back to the list (`Shift+Tab`
+  the other way). On the bar `←` `→` go up a level and into the next, the step you are on lit; on the row they choose a
+  kind. `Enter`, `↓` or `Esc` go back to the list. A click on a kind picks it. Putting an agent on a task is `Ctrl+S`.
 - **The kind stays while the scope changes**: All with `coordinators` lists every coordinator on every machine, a
   project with `coordinators` only its own.
 - **In the list of coordinators** each one has two lines: its dot, its name (another machine's with that machine beside
-  it) and where it stands, then the last thing it said. `Enter` on one goes into its scope; `Space`, `Tab`, `Ctrl+X`,
+  it) and where it stands, then the last thing it said. `Enter` on one goes into its scope; `Space`, `Ctrl+S`, `Ctrl+X`,
   `Ctrl+E` and `Alt+P` do what they do on its heading ([machine and project coordinators](machine-and-project-coordinators.md)).
 - A filter has a line of its own under the row, in the accent colour, saying what it is, how many tasks match, and the
   key that clears it: `filter "import" · 1 of 33 · esc clears`. With nothing found, the list says `Nothing matches "zzz".`
@@ -744,7 +745,7 @@ other tasks. The box's edge names no one. That does not change until the words a
 draft's, the mouse wheel moves only the view of the list, and a click selects nothing. So an answer typed for one task's
 agent can never be sent to another's.
 
-**While the text box holds text, it owns the keyboard**: only `Enter`, `Tab`, `Esc` and `Ctrl+C` act on the board, so no
+**While the text box holds text, it owns the keyboard**: only `Enter`, `Ctrl+S`, `Esc` and `Ctrl+C` act on the board, so no
 shortcut fires in the middle of a draft.
 
 - `Esc` puts a draft away. `Ctrl+Z` brings it back only to whoever it was for, so a reply stays a reply.

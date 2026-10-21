@@ -78,7 +78,7 @@ fn sent_with_tab_every_task_the_coordinator_adds_from_that_message_gets_an_agent
     w.script(json!({ "coordinator": [{ "status": "working" }] }));
     send(&w.root, "a login page, and dark mode", true, "", &w.socket).unwrap(); drain();
     assert_eq!(prompts_of(&w)[0], format!("a login page, and dark mode\n\n{}", tab_note()));
-    assert!(has(&rules("board"), r"A message sent with tab ends with a line in square brackets saying so\.[^\n]*every task you add from that message gets an agent at once, with no question back"));
+    assert!(has(&rules("board"), r"A message sent with ctrl\+s ends with a line in square brackets saying so\.[^\n]*every task you add from that message gets an agent at once, with no question back"));
     let pane = get(&w).t("pane");
     // A task added from anywhere else is only added: the human's shell, a working agent's pane.
     assert_eq!(board(&["add", "Mine"]), "proj/1: added");
@@ -86,8 +86,8 @@ fn sent_with_tab_every_task_the_coordinator_adds_from_that_message_gets_an_agent
     assert_eq!(board(&["add", "A worker's follow-up"]), "proj/2: added");
     // Added from the Coordinator's pane, with no flag at all (it forgot): the board delegates it. Every one of them.
     pane_env(Some(&pane));
-    assert_eq!(board(&["add", "Login page"]), "proj/3: added, an agent is on it (the message was sent with tab)");
-    assert_eq!(board(&["add", "Dark mode"]), "proj/4: added, an agent is on it (the message was sent with tab)");
+    assert_eq!(board(&["add", "Login page"]), "proj/3: added, an agent is on it (the message was sent with ctrl+s)");
+    assert_eq!(board(&["add", "Dark mode"]), "proj/4: added, an agent is on it (the message was sent with ctrl+s)");
     // It remembered the flag: the same, once.
     assert_eq!(board(&["add", "Sign up", "--delegate"]), "proj/5: added, an agent is on it");
     assert_eq!(on(), vec!["proj/3", "proj/4", "proj/5"]);
@@ -112,7 +112,7 @@ fn sent_with_tab_every_task_the_coordinator_adds_from_that_message_gets_an_agent
     end_turn();
     w.script(json!({ "coordinator": [{ "status": "working" }] }));
     send(&w.root, "a pricing page", true, "", &w.socket).unwrap(); drain();
-    assert_eq!(board(&["add", "Pricing page"]), "proj/9: added, an agent is on it (the message was sent with tab)");
+    assert_eq!(board(&["add", "Pricing page"]), "proj/9: added, an agent is on it (the message was sent with ctrl+s)");
     // A Coordinator that was restarted is not in that turn any more.
     state::change(&w.socket, |c| { let n = c.i("startedAt") + 1; c.put("startedAt", n); true }).unwrap();
     assert_eq!(board(&["add", "After a restart"]), "proj/10: added");

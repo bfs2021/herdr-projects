@@ -6,7 +6,7 @@ working colour. The task panel says the same under Status, as `Now`.
 
 | Key | The row says |
 |---|---|
-| `Tab`, or a first reply to a task with no agent | `Starting…` |
+| `Ctrl+S`, or a first reply to a task with no agent | `Starting…` |
 | `Ctrl+X` on a running task | `Stopping…` |
 | `Ctrl+X` then `y` on one that is not running | `Removing…` |
 | `Ctrl+L` | `Merging…` (after the `y`), `Approving…`, `Trying again…` or `Finishing as it is…`, depending on what it says yes to |
@@ -15,7 +15,7 @@ working colour. The task panel says the same under Status, as `Now`.
 | `Ctrl+P` | `Pinning…`, `Unpinning…` |
 | `y` when picking an attempt | `Keeping attempt B…` |
 | `Enter` with nothing typed | `Opening…` (until its pane opens) |
-| `Space`, `Tab`, `Ctrl+X` on an automation | `Turning on…`, `Turning off…`, `Firing…`, `Removing…` |
+| `Space`, `Ctrl+S`, `Ctrl+X` on an automation | `Turning on…`, `Turning off…`, `Firing…`, `Removing…` |
 
 ## When it ends
 

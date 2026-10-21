@@ -32,7 +32,7 @@ fn the_box_talks_to_one_long_lived_coordinator_started_once_with_nothing_held_ba
     s.typed("build a login page");
     assert!(s.text().contains("│ ❯ build a login page") && s.text().contains("enter send to the Coordinator · shift+enter new line · esc put away"), "{}", s.text());
     // tab is no second way to send: the Coordinator decides itself what to start, so the words stay where they are
-    s.press(&["tab"]);
+    s.press(&["ctrl+s"]);
     assert!(s.s.value() == "build a login page" && sw::coordinator::state::get(&socket).unwrap_or_default().arr("queue").is_empty());
     s.press(&["enter"]);
     assert_eq!(s.s.value(), "", "{}", s.s.msg);
