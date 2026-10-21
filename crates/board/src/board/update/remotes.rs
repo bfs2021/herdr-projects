@@ -22,9 +22,11 @@ pub fn machines(s: &mut State, list: Vec<Machine>, fx: &mut Vec<Effect>) {
     s.listed_at = Some(crate::clock::now());
     let alone = s.remotes.is_empty();
     if s.all() && alone {
-        s.scope.clear(); fx.push(Effect::Save);
+        s.scope.clear(); s.level = 0; fx.push(Effect::Save);
         if !s.ctx.web { s.flash(none_said(), Ink::Yellow); }
     }
+    // All is every machine as soon as there is another one.
+    if !alone && s.level == 0 && s.scope.is_empty() { s.scope = "*".into(); fx.push(Effect::Save); }
     // The scope key asked for the machines: every machine shows once there is another one.
     if std::mem::take(&mut s.seeking) {
         if alone { s.flash(none_said(), Ink::Yellow); } else { set_scope(s, "*".into(), fx); }
@@ -82,12 +84,12 @@ pub fn shown(s: &State, host: &str) -> String { sidebar::shown_as(&super::heads:
 pub fn others(s: &State) -> Vec<&Remote> { let mut v: Vec<&Remote> = s.remotes.values().collect(); v.sort_by_key(|m| place(s, &m.machine.label)); v }
 /// The machines in view: all the others with every machine shown, else the one shown.
 pub fn in_view(s: &State) -> Vec<&Remote> { if s.scope == "*" { others(s) } else { s.remotes.get(&s.scope).into_iter().collect() } }
-/// Whose board, in turn: this machine, every machine, then each other machine by itself. Every machine is in it only
-/// while there is another one.
+/// Whose board, in turn: every machine (the scope bar's All), this machine, then each other machine by itself. Every
+/// machine is in it only while there is another one.
 pub fn scope_next(s: &State) -> String {
     let others: Vec<String> = others(s).into_iter().map(|m| m.machine.label.clone()).collect();
     let every = (!others.is_empty()).then(|| "*".to_string());
-    let ring: Vec<String> = std::iter::once(String::new()).chain(every).chain(others).collect();
+    let ring: Vec<String> = every.into_iter().chain(std::iter::once(String::new())).chain(others).collect();
     let at = ring.iter().position(|x| *x == s.scope).unwrap_or(0);
     ring[(at + 1) % ring.len()].clone()
 }
@@ -101,9 +103,13 @@ pub fn next_scope(s: &mut State, fx: &mut Vec<Effect>) {
     s.flash("Looking for other machines…".to_string(), Ink::Muted);
 }
 pub fn set_scope(s: &mut State, to: String, fx: &mut Vec<Effect>) {
+    // The scope bar's step: every machine is All, a machine by itself (this one too, beside others) its own step.
+    s.level = if to == "*" || (to.is_empty() && s.remotes.is_empty()) { 0 } else { 1 };
+    s.project.clear(); s.project_on.clear(); s.pick = None;
     s.scope = to; fx.push(Effect::Save);
     if s.all() { fx.push(Effect::Poll(true)); }
-    let said = if s.scope.is_empty() { "This machine only.".to_string() } else if s.scope == "*" { "Every machine you can reach.".into() } else { format!("Only {}. What you type goes to {}.", s.scope, s.scope) };
+    let to_coord = super::scope::coord(s).map(|t| format!(" What you type goes to the {}.", t.name)).unwrap_or_default();
+    let said = if s.scope.is_empty() { format!("This machine only.{to_coord}") } else if s.scope == "*" { "Every machine you can reach.".into() } else { format!("Only {}.{to_coord}", s.scope) };
     s.flash(said, Ink::Muted);
     relist(s);
 }

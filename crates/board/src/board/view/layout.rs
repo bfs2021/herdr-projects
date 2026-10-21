@@ -51,7 +51,8 @@ fn failed(what: &str, width: usize) -> Inked { Inked::plain("  ").add(Inked::of(
 /// The header and the list, `h` lines in `w` cells; where they could not be drawn, that is said in their place.
 fn list_part(s: &mut State, t: &Theme, w: usize, h: usize, screen_w: usize, above: usize) -> Vec<Inked> {
     super::guard::part(|| {
-        let head = head_lines(s, w);
+        let head = head_lines(s, t, w);
+        for h in s.bar_hits.iter_mut() { h.0 += above; }
         s.list_at = Some((above + head.len(), w));
         let mut v = head.clone();
         v.extend(list_lines(s, t, w, h.saturating_sub(head.len()).max(1), screen_w));

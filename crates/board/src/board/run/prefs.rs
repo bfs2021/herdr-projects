@@ -1,4 +1,5 @@
-//! What the board was like when it last closed: selection, filter, draft, side panel, chat, whose board, the words put
+//! What the board was like when it last closed: selection, filter, draft, side panel, chat, whose board (the scope bar's
+//! step, the kind shown), the words put
 //! away, the folded headings, whose herdr sidebar it lists the machines in the order of. The popup has a file of its
 //! own: a board may run in a tab at the same time, and each keeps its own. The first popup starts from the tab's view,
 //! without its draft.
@@ -24,10 +25,14 @@ pub fn apply(s: &mut State, p: &Obj) {
     if p.at("away").b("text") { let a = p.at("away"); s.draft_away = Some(Away { text: a.t("text"), to: a.t("to"), cwd: if a.b("cwd") { a.t("cwd") } else { p.t("cwd") }, warned: false }); }
     s.chat_open = p.s("chat") != "closed";
     s.sidebar_from = p.at("sidebarFrom").as_str().map(String::from);
+    // The scope bar's step and the kind shown; a view from before the bar was on All, or on its one machine.
+    s.level = if p.has("level") { p.i("level").clamp(0, 2) as u8 } else if s.scope.is_empty() || s.scope == "*" { 0 } else { 1 };
+    s.project = p.t("project"); s.project_on = if s.project.is_empty() { String::new() } else { s.scope.clone() };
+    s.kind = (p.i("kind").max(0) as usize).min(crate::board::update::kinds::KINDS.len() - 1);
 }
 pub fn save(s: &State) {
     let draft = if s.mode == Mode::New && !s.reply { s.value() } else { String::new() };
     let away = if s.mode == Mode::New && s.reply && !s.value().trim().is_empty() { json!({ "text": s.value(), "to": s.reply_id }) }
         else { s.draft_away.as_ref().map(|d| json!({ "text": d.text, "to": d.to, "cwd": if d.cwd.is_empty() { s.ctx.cwd.clone() } else { d.cwd.clone() } })).unwrap_or(Value::Null) };
-    let _ = write_json(&file(s.ctx.popup), &json!({ "byRepo": s.by_repo, "side": s.side, "scope": s.scope, "sel": s.sel, "filter": s.filter, "told": s.told, "draft": draft, "chat": if s.chat_open { "open" } else { "closed" }, "cwd": s.ctx.cwd, "away": away, "folded": s.folded, "sidebarFrom": s.sidebar_from }));
+    let _ = write_json(&file(s.ctx.popup), &json!({ "byRepo": s.by_repo, "side": s.side, "scope": s.scope, "level": s.level, "project": s.project, "kind": s.kind, "sel": s.sel, "filter": s.filter, "told": s.told, "draft": draft, "chat": if s.chat_open { "open" } else { "closed" }, "cwd": s.ctx.cwd, "away": away, "folded": s.folded, "sidebarFrom": s.sidebar_from }));
 }

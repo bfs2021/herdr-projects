@@ -43,14 +43,21 @@ pub fn autos_shown(s: &State, f: &str) -> Vec<Obj> {
 /// What the list is made of, from the items: call after anything changed what shows (a load, a key, a filter).
 pub fn relist(s: &mut State) {
     super::remotes::reorder(s);
+    super::scope::settle(s);
     let mine = &s.data.items;
     s.items = if s.scope.is_empty() { mine.clone() } else if s.scope == "*" { mine.iter().cloned().chain(super::remotes::others(s).into_iter().flat_map(|m| m.items.iter().cloned())).collect() } else { s.remotes.get(&s.scope).map(|m| m.items.clone()).unwrap_or_default() };
+    // A project shows its own tasks; the kinds row keeps those of its kind.
+    if s.level >= 2 { let p = s.project.clone(); s.items.retain(|r| super::scope::repo_of(r) == p); }
+    let keep: Vec<bool> = s.items.iter().map(|r| super::kinds::keeps_task(s, r)).collect();
+    let mut keep = keep.into_iter();
+    s.items.retain(|_| keep.next().unwrap_or(true));
     super::pending::overlay(s);
     s.jobs = if s.archive_view { vec![] } else { s.data.jobs.iter().filter(|j| !super::chat::in_chat(s, j)).cloned().collect() };
     let f = filter_now(s);
-    s.autos = autos_shown(s, &f);
+    s.autos = if super::kinds::keeps_autos(s) { autos_shown(s, &f) } else { vec![] };
+    if s.level >= 2 { let p = s.project.clone(); s.autos.retain(|a| a.at("rowNow").s("repo") == p || a.s("repo") == p); }
     super::pending::overlay_autos(s);
-    let layout = serde_json::to_string(&json!([s.scope, s.by_repo, s.all_done, s.archive_view, f])).unwrap_or_default();
+    let layout = serde_json::to_string(&json!([s.scope, s.by_repo, s.all_done, s.archive_view, f, s.level, s.project, s.kind])).unwrap_or_default();
     // The task the selection is held on (or that the panel shows whole, in the same list) keeps its row whatever it has
     // become meanwhile.
     let held = |r: &Obj| r.s("id") == s.sel && (r.s("id") == s.stick || (s.full && layout == s.selection_layout));
@@ -64,7 +71,7 @@ pub fn relist(s: &mut State) {
         for r in &shown { let g = repo_name(r).to_string(); if !names.contains(&g) { names.push(g); } }
         for a in &s.autos { let g = a.t("repo"); if !names.contains(&g) { names.push(g); } }
         // A repo used lately with no task in view keeps its heading, for its project coordinator (heads.rs: empty_repo).
-        if s.scope.is_empty() || s.scope == "*" { for g in &s.data.lately { if super::heads::empty_repo(s, "", g) && !names.contains(g) { names.push(g.clone()); } } }
+        if (s.scope.is_empty() || s.scope == "*") && s.level < 2 { for g in &s.data.lately { if super::heads::empty_repo(s, "", g) && !names.contains(g) { names.push(g.clone()); } } }
         let here = s.data.repo.clone();
         names.sort_by(|a, b| if *a == here { std::cmp::Ordering::Less } else if *b == here { std::cmp::Ordering::Greater } else { a.to_lowercase().cmp(&b.to_lowercase()).then(b.cmp(a)) });
         names.into_iter().map(|g| { let list = shown.iter().filter(|r| repo_name(r) == g).cloned().collect(); (g, list) }).collect()
@@ -158,12 +165,14 @@ pub fn sync_reply(s: &mut State) {
 /// repo: after their repo's), and fold with their heading.
 pub fn fold_rows(s: &mut State) -> Vec<Row> {
     s.fold_sel = s.sel.clone();
+    // The list of coordinators is one of its own: a row for each, nothing folds (kinds.rs).
+    if super::kinds::coords(s) { let rows = super::kinds::coord_rows(s); s.steps = rows.iter().filter_map(step_id).collect(); return rows; }
     let groups = s.grouped.clone();
     let parts = parts(s, &groups);
     let lay = |keep: usize, todos: usize, s: &State| -> Vec<Row> {
         let mut rows = vec![];
         // The main Coordinator's row, on top: its coordinator's, as every heading's is (update/pilot.rs).
-        if let Some(id) = super::pilot::main_row(s) { rows.push(Row::Head { name: crate::status_words::COORDINATOR.into(), autos: false, id, machine: false, folded: 0, folded_autos: 0, empty: false }); }
+        if let Some(id) = super::pilot::main_row(s).filter(|_| super::kinds::keeps_main(s)) { rows.push(Row::Head { name: crate::status_words::COORDINATOR.into(), autos: false, id, machine: false, folded: 0, folded_autos: 0, empty: false }); }
         for p in &parts {
             let autos: Vec<Vec<Obj>> = p.groups.iter().map(|(name, _)| autos_in(s, &p.host, name)).collect();
             let n_autos: usize = autos.iter().map(|a| a.len()).sum();

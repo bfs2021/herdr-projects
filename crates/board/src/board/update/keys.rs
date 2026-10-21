@@ -44,6 +44,8 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
     if s.ask.is_some() { return answer(s, p, esc, close, fx); }
     if s.menu.is_some() { return super::menu::key(s, p, fx); }
     if s.editing.is_some() && super::edit::key(s, p, fx) { return; } // the settings page takes its own keys
+    if s.pick.is_some() && super::scope::pick_key(s, p, fx) { return; } // the scope bar's picker takes its own keys
+    if s.kinds_focus && s.value().is_empty() && super::kinds::key(s, p, fx) { return; } // and so does the kinds row
     if s.auto().is_some() && super::autos::key(s, p, fx) { return; } // and so does an automation's row
     s.stick.clear();
     let text = s.value().trim().to_string();
@@ -81,6 +83,8 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
         if enter { fx.push(Effect::Run(Job::StopDispatch { id: j.t("id") })); s.input.set_text(j.s("text")); return; }
         if tab { return; }
     } }
+    // On a coordinator in the list of coordinators, with nothing typed: into its scope.
+    if enter && text.is_empty() && super::kinds::coords(s) && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::scope::jump(s, &id, fx); }
     // On a heading, with nothing typed: fold it, or unfold it.
     if enter && text.is_empty() && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::heads::toggle(s, &id, fx); }
     if enter { return act::enter(s, &text, r.as_ref(), fx); }
@@ -122,6 +126,9 @@ pub fn run(s: &mut State, k: K, r: Option<&Obj>, fx: &mut Vec<Effect>) {
         K::Down => act::move_by(s, 1),
         K::PageUp => act::move_by(s, -10),
         K::PageDown => act::move_by(s, 10),
+        K::ScopeIn => super::scope::step_in(s, fx),
+        K::ScopeOut => super::scope::step_out(s, fx),
+        K::Kinds => { s.kinds_focus = !s.kinds_focus; s.pick = None; }
         K::Talk => act::flip_reply(s, r),
         K::Menu => s.menu = Some(crate::board::state::Menu { at: -1, ..Default::default() }),
         K::Yes => if let Some(r) = r { act::yes(s, r, fx) },

@@ -32,7 +32,7 @@ pub fn far_top(s: &State) -> Option<Target> { s.remotes.contains_key(&s.scope).t
 /// That coordinator as the board read it last: this machine's, or what its machine sent with its tasks.
 pub fn look_of(s: &State, t: &Target) -> Option<crate::coordinator::look::Look> {
     if t.host.is_empty() && t.to.is_empty() { return Some(s.data.coord.clone()); }
-    if t.host.is_empty() { return s.data.sub.as_ref().filter(|x| x.0 == t.to).map(|x| x.1.clone()); }
+    if t.host.is_empty() { return s.data.sub.as_ref().filter(|x| x.0 == t.to).map(|x| x.1.clone()).or_else(|| s.data.looks.get(&t.to).cloned()); }
     let m = s.remotes.get(&t.host)?;
     crate::coordinator::far::read(if t.to.is_empty() { &m.coord } else { m.coords.at(&t.to) })
 }
@@ -47,8 +47,22 @@ pub fn of_head(s: &State, id: &str) -> Option<Target> {
         _ => None,
     }
 }
-/// The heading's coordinator the chat talks to now, if it does.
-pub fn talking(s: &State) -> Option<Target> { if s.reply && is_head(&s.reply_id) && s.reply_id == s.sel { of_head(s, &s.sel) } else { None } }
+/// The coordinator the chat talks to now, if it is not the Coordinator: a heading's after space there, else the one of
+/// the scope the bar stands on (a machine's, a project's: update/scope.rs).
+pub fn talking(s: &State) -> Option<Target> {
+    if s.reply { return if is_head(&s.reply_id) && s.reply_id == s.sel { of_head(s, &s.sel) } else { None }; }
+    super::scope::coord(s)
+}
+/// The coordinators of this machine the board reads how they stand of, as the coordinator code names their level:
+/// the scope bar's steps, the selected row's, and with the list of coordinators every one ("*").
+pub fn looks_wanted(s: &State) -> Vec<String> {
+    let mut out: Vec<String> = vec!["machine".into()];
+    let mut add = |t: Option<Target>| if let Some(t) = t.filter(|t| t.host.is_empty() && !t.to.is_empty()) { if !out.contains(&t.to) { out.push(t.to); } };
+    add(super::scope::coord(s));
+    add(of_head(s, &s.sel));
+    if super::kinds::coords(s) || s.pick.is_some() { out.push("*".into()); }
+    out
+}
 /// This machine's coordinator the board should read, as the coordinator code names its level ("" none): the one the
 /// chat talks to, else the one whose row is selected (its panel shows it).
 pub fn wanted(s: &State) -> String { talking(s).or_else(|| of_head(s, &s.sel)).filter(|t| t.host.is_empty()).map(|t| t.to).unwrap_or_default() }

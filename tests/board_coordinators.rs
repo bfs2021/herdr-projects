@@ -11,6 +11,9 @@ use sw::board::update::{update, Effect, Event};
 use sw::coordinator::co::Co;
 use sw::json::*;
 
+/// The scope bar on top: All › machine › project, each a coordinator to talk to, and the kinds row under it.
+mod scope_bar;
+
 fn coord_world(settings: Value) -> World {
     let mut all = json!({ "coordinator.agent": "claude", "review.when": "never" });
     for (k, v) in settings.as_object().cloned().unwrap_or_default() { all[k] = v; }
