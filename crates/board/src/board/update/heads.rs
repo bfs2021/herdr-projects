@@ -19,6 +19,13 @@ pub fn machine_id(host: &str) -> String { format!("{HEAD}machine\t{host}") }
 pub fn group_id(s: &State, host: &str, name: &str) -> String { format!("{HEAD}{}\t{host}\t{name}", if s.by_repo { "repo" } else { "status" }) }
 /// The machine a task is on: "" this machine, else the name the board knows it by.
 pub fn host_of(r: &Obj) -> String { r.t("host") }
+/// A repo's name as its row reads on the machine `host` ("" this one): the home folder as `~`, there too (another
+/// machine's tasks of it say their folder is `~`).
+pub fn repo_shown(s: &State, host: &str, name: &str) -> String {
+    if host.is_empty() { return crate::shown::words::repo_label(name); }
+    let home = s.remotes.get(host).is_some_and(|m| m.items.iter().any(|r| r.s("rid").split('/').next() == Some(name) && r.at("snap").s("folder") == "~"));
+    if home { "~".into() } else { name.to_string() }
+}
 /// A machine's heading as it reads: this machine by its own name.
 pub fn label(s: &State, host: &str) -> String {
     if !host.is_empty() { return crate::shown::words::clean(host); }

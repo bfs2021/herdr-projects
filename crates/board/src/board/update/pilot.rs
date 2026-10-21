@@ -54,7 +54,7 @@ pub fn turn_on(s: &mut State, t: &Target, fx: &mut Vec<Effect>) {
 pub fn turn_off(s: &mut State, t: &Target, fx: &mut Vec<Effect>) {
     let v = view(s, t);
     if v.is_null() && !t.host.is_empty() { return s.flash(format!("{} runs an older version that has no autopilot: update herdr-projects there first.", t.host), Ink::Yellow); }
-    if !v.b("on") { return s.flash(format!("The {} is not on autopilot. {} turns it on.", t.name, crate::board::keys::key_name("delegate")), Ink::Muted); }
+    if !v.b("on") { return s.flash(format!("The {} is not on autopilot. {} turns it on.", t.name, crate::board::keys::key_name("autopilot")), Ink::Muted); }
     s.flash(format!("Turning autopilot off for the {}…", t.name), Ink::Muted);
     fx.push(job(s, t, false));
 }
@@ -63,13 +63,27 @@ fn job(s: &State, t: &Target, on: bool) -> Effect {
     let m = s.remotes.get(&t.host).map(|m| m.machine.clone()).unwrap_or_default();
     Effect::Run(Job::Far { machine: m, host: t.host.clone(), action: if on { "autopilot-on" } else { "autopilot-off" }.into(), req: json!({ "id": "", "to": t.to }), quiet: on })
 }
+/// The start key and the stop key on a coordinator's row: start it in its own conversation, or stop it, as an agent on a
+/// task; here or on its machine.
+pub fn run(s: &mut State, t: &Target, on: bool, fx: &mut Vec<Effect>) {
+    s.flash(format!("{} the {}…", if on { "Starting" } else { "Stopping" }, t.name), Ink::Muted);
+    if t.host.is_empty() { return fx.push(Effect::Run(Job::CoordRun { to: t.to.clone(), name: t.name.clone(), on })); }
+    let m = s.remotes.get(&t.host).map(|m| m.machine.clone()).unwrap_or_default();
+    fx.push(Effect::Run(Job::Far { machine: m, host: t.host.clone(), action: if on { "coordinator-start" } else { "coordinator-stop" }.into(), req: json!({ "id": "", "to": t.to }), quiet: false }));
+}
+/// The autopilot key on a coordinator's row: on, or off again (at `needs you` or `could not start` it starts again).
+pub fn toggle(s: &mut State, t: &Target, fx: &mut Vec<Effect>) {
+    let v = view(s, t);
+    if v.b("on") && !["needs you", "could not start"].contains(&v.s("state")) { turn_off(s, t, fx) } else { turn_on(s, t, fx) }
+}
 /// A ctrl or alt key's line in the ? menu on a coordinator's row, where it does something there of its own.
 pub fn menu_label(s: &State, k: crate::board::keys::K) -> Option<String> {
     use crate::board::keys::K;
     let t = selected(s)?;
     Some(match k {
-        K::Delegate => format!("put the {} on autopilot", t.name),
-        K::Stop => format!("turn the {}'s autopilot off", t.name),
+        K::Delegate => format!("start the {}", t.name),
+        K::Stop => format!("stop the {}", t.name),
+        K::Pilot => format!("{} the {}'s autopilot", if on(s, &t) { "turn off" } else { "turn on" }, t.name),
         K::Settings => if s.editing.is_some() { format!("back from the {}'s settings", t.name) } else if t.host.is_empty() { format!("the {}'s settings: see and change each one", t.name) } else { format!("the {}'s settings, as {} has them", t.name, t.host) },
         K::Side => format!("{} the side panel: this coordinator, beside the list", if s.side { "hide" } else { "show" }),
         K::Panel => if s.full { "back to the list".into() } else { "show this coordinator whole: its autopilot and its last wakes".into() },

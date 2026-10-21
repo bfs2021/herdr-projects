@@ -72,7 +72,8 @@ pub fn hints(s: &State, r: Option<&Obj>, who: Option<&Who>) -> (Vec<Hint>, Optio
         let mut v: Vec<Hint> = (!w.is_empty()).then(|| hk(K::Enter, &w)).into_iter().collect();
         if crate::board::update::archive_done::counts(s).map(|c| c.0 > 0).unwrap_or(false) { v.push(hk(K::Archive, "archive its done tasks")); }
         // A coordinator's row names both of autopilot's keys (update/pilot.rs).
-        if crate::board::update::pilot::selected(s).is_some() { v.push(hk(K::Delegate, "autopilot on")); v.push(hk(K::Stop, "off")); }
+        // A coordinator's row: started and stopped as an agent is, and its autopilot's own key.
+        if let Some(c) = crate::board::update::pilot::selected(s) { v.push(hk(K::Delegate, "start")); v.push(hk(K::Stop, "stop")); v.push(hk(K::Pilot, if crate::board::update::pilot::on(s, &c) { "autopilot off" } else { "autopilot" })); }
         v.extend(back); v.extend(key);
         match talk { Some(t) if t.stays => { v.push(t) } Some(t) => { v.insert(0, t); v.push(more) } None => v.push(more) }
         return (v, chat_key);

@@ -14,9 +14,16 @@ pub fn sent(socket: &str, now: i64) -> Value {
     for co in never_ran { all.entry(co.to()).or_insert_with(|| json!({ "on": false })); }
     Value::Object(all)
 }
-/// The start key and `Ctrl+X` on a coordinator's row of this machine, from another machine's board (remote.rs: door).
+/// The autopilot key, the start key and the stop key on a coordinator's row of this machine, from another machine's
+/// board (remote.rs: door).
 pub fn door(req: &Value) -> crate::err::Res<Value> {
     let co = crate::coordinator::co::Co::of(&crate::herdr::cli::current_socket(), req.s("to"));
-    let msg = match req.s("action") { "autopilot-on" => super::switch::on(&co, None, &[])?, "autopilot-off" => super::switch::off(&co)?, a => crate::fail!("Unknown action {a}") };
+    let msg = match req.s("action") {
+        "autopilot-on" => super::switch::on(&co, None, &[])?, "autopilot-off" => super::switch::off(&co)?,
+        // Started and stopped as an agent on a task is (the board's start key and stop key).
+        "coordinator-start" => { crate::coordinator::requests::restart(&co)?; format!("Starting the {}.", co.name()) }
+        "coordinator-stop" => { crate::coordinator::requests::stop(&co)?; format!("Stopped the {}.", co.name()) }
+        a => crate::fail!("Unknown action {a}"),
+    };
     Ok(json!({ "ok": true, "msg": msg }))
 }

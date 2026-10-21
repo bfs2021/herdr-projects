@@ -88,7 +88,7 @@ fn heading(s: &State, t: &Theme, rows: &[Row], at: usize, width: usize) -> (Inke
     let pilot = super::coord_head::shown(s, t, id);
     let project = id.starts_with(&format!("{}repo\t", crate::board::update::heads::HEAD));
     let key = if s.by_repo { crate::board::tags::heading_key(s, at) } else { String::new() };
-    let named = if *autos { Inked::of(name.clone(), Ink::Auto) } else if *machine { Inked::of(name.clone(), MACHINE_INK).bold() } else if s.by_repo || project { Inked::of(repo_label(name), REPO_HEAD_INK).bold() } else { Inked::of(name.clone(), group_ink(name)) };
+    let named = if *autos { Inked::of(name.clone(), Ink::Auto) } else if *machine { Inked::of(name.clone(), MACHINE_INK).bold() } else if s.by_repo || project { Inked::of(crate::board::update::heads::repo_shown(s, id.split('\t').nth(1).unwrap_or(""), name), REPO_HEAD_INK).bold() } else { Inked::of(name.clone(), group_ink(name)) };
     let mut named = if key.is_empty() { named } else { named.add(Inked::of(format!(" · {key}"), Ink::Muted)) };
     let caret = if id.is_empty() { Inked::plain("  ") } else { Inked::of(if r.shut() { "▸ " } else { "▾ " }, Ink::Muted) };
     // What a folded row holds: its tasks and automations; under Coordinators its projects' coordinators.
@@ -132,9 +132,14 @@ pub fn list_lines(s: &mut State, t: &Theme, width: usize, h: usize, screen: usiz
     let mut kind = false;
     for r in &s.rows { let auto = matches!(r, Row::Auto(_)); if matches!(r, Row::Head { .. }) || sections.is_empty() || (auto != kind && matches!(r, Row::Rec(_) | Row::Auto(_))) { sections.push(vec![]); kind = auto; } match r { Row::Rec(o) => sections.last_mut().unwrap().push(o.clone()), Row::Auto(a) => sections.last_mut().unwrap().push(auto_rec(a)), _ => {} } }
     let flat: Vec<Rec> = sections.iter().flatten().cloned().collect();
-    let lay = row_layout(s, t, &flat, width, &sections, screen);
+    // Each row stands as far in as it is deep (update/depth.rs): the columns are laid out for the deepest.
     let rows = s.rows.clone();
+    let ind = crate::board::update::depth::indents(&rows, width);
+    let deepest = ind.iter().copied().max().unwrap_or(0);
+    let lay = row_layout(s, t, &flat, width.saturating_sub(deepest), &sections, screen);
+    let pad = |n: usize, l: Inked| if n == 0 { l } else { Inked::spaces(n).add(l) };
     for (k, r) in rows.iter().enumerate() {
+        let (n_in, width) = (ind[k], width.saturating_sub(ind[k]));
         match r {
             Row::Head { id, .. } => {
                 if heading_height(&rows, k) > 1 { lines.push(L { head: true, ..line(Inked::new()) }); }
@@ -143,15 +148,15 @@ pub fn list_lines(s: &mut State, t: &Theme, width: usize, h: usize, screen: usiz
                 let sel = !id.is_empty() && *id == s.sel;
                 // The main Coordinator's row is a row, never a heading left hanging at the foot of what shows.
                 let hangs = !r.shut() && !crate::board::update::pilot::is_main(id);
-                lines.push(L { head: hangs && under.is_none(), sel, id: id.clone(), ..line(text) });
-                if let Some(u) = under { lines.push(L { head: hangs, sel, id: id.clone(), ..line(u) }); }
+                lines.push(L { head: hangs && under.is_none(), sel, id: id.clone(), ..line(pad(n_in, text)) });
+                if let Some(u) = under { lines.push(L { head: hangs, sel, id: id.clone(), ..line(pad(n_in, u)) }); }
             }
-            Row::Note(n) => lines.push(line(Inked::plain("   ").add(Inked::of(n.clone(), Ink::Muted)))),
+            Row::Note(n) => lines.push(line(pad(n_in, Inked::plain("   ").add(Inked::of(n.clone(), Ink::Muted))))),
             Row::Rec(_) | Row::Auto(_) => {
                 let rec: Rec = match r { Row::Auto(a) => auto_rec(a), Row::Rec(o) => o.clone(), _ => unreachable!() };
                 let all = row_lines(s, t, &rec, width, &lay);
                 let k = all.len();
-                for (n, text) in all.into_iter().enumerate() { lines.push(L { text, sel: rec.s("id") == s.sel, head: false, n, rest: k - n, id: rec.t("id"), auto: matches!(r, Row::Auto(_)) }); }
+                for (n, text) in all.into_iter().enumerate() { lines.push(L { text: pad(n_in, text), sel: rec.s("id") == s.sel, head: false, n, rest: k - n, id: rec.t("id"), auto: matches!(r, Row::Auto(_)) }); }
             }
         }
     }

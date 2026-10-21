@@ -94,6 +94,7 @@ pub mod beat;
 pub mod call;
 pub mod chat;
 pub mod coords;
+pub mod depth;
 pub mod done;
 pub mod edit;
 pub mod edit_coord;

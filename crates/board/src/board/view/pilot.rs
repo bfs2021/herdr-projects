@@ -67,8 +67,8 @@ pub fn placed(caret: Inked, named: Inked, pilot: Option<Shown>, rule: bool, widt
     let right = join(&cols);
     let first = if right.is_empty() { ruled(left) } else { let gap = width.saturating_sub(left.width() + right.width()); left.add(drawn_rule(gap)).add(right).cut(width) };
     let next = if cols.iter().any(|(k, _)| *k == "next") { Inked::new() } else { next_all };
-    // Nothing to say under it (a coordinator that never said anything): one line.
-    let under = p.under.add(next);
+    // Nothing to say under it (a machine's or a project's row): one line.
+    let under = if p.under.is_empty() { Inked::new() } else { p.under.add(next) };
     (first, (!under.is_empty()).then(|| Inked::spaces(5).add(under).cut(width)))
 }
 impl Shown {
@@ -78,6 +78,5 @@ impl Shown {
 /// Does this row take a line more for its autopilot (the list counts its room so)? While it is on, always.
 pub fn extra(s: &State, r: &Row) -> usize {
     let Row::Head { id, .. } = r else { return 0 };
-    if crate::board::update::pilot::is_main(id) { return usize::from(of_head(s, id).map(|c| view(s, &c).b("on")).unwrap_or(false)); }
-    usize::from(super::coord_head::has_under(s, id))
+    usize::from(crate::board::update::pilot::is_main(id) && of_head(s, id).map(|c| view(s, &c).b("on")).unwrap_or(false))
 }

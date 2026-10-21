@@ -1,5 +1,5 @@
-//! The filter row under the header: `vm-str ▾ │ All 48 · Needs you 3 · Working 2 · Ready 1 · To do 12 · Done 30 ·
-//! Coordinators 4`, whose board first (where there is another machine: `All machines`, or one machine),
+//! The filter row under the header: `vm-str ▾ │ All 48   Coordinators 4   Needs you 3   Working 2   Ready 1   To do 12
+//! Done 30   Automations 2`, whose board first (where there is another machine: `All machines`, or one machine),
 //! the one shown lit, the others greyed with their counts (a count of tasks that need you in red). Where it has no
 //! room, the names are said shorter (then shortest), those with nothing in them go, and where that is still too long only the one
 //! shown stands, with the key that moves on. Where each is drawn is kept for a click (update/mouse.rs).
@@ -33,7 +33,8 @@ pub fn shows_line(s: &State, _t: &Theme, w: usize) -> (Inked, Vec<(usize, usize,
         for (n, name) in names.iter().enumerate() {
             let count = s.show_n.get(n).copied().unwrap_or(0);
             if (only == 2 && n != s.show) || (only == 1 && n != s.show && n != 0 && count == 0) { continue; }
-            if !first { line = line.add(Inked::of("·", Ink::Muted)); }
+            // No dot between them: plain room, a cell of its own besides each one's own.
+            if !first { line = line.add(Inked::plain(" ")); }
             first = false;
             let lit = n == s.show;
             // The one shown is lit in its own colour (reversed: the colour is its ground); the others greyed.
