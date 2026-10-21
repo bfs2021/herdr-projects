@@ -32,6 +32,17 @@ fn show_vm_a() -> Value {
     for _ in 0..4 { call("press", json!({ "id": "scope" })); far::answered("t", 1); if call("board", json!({})).at("flags").s("scope") == "vm-a" { break; } }
     call("board", json!({}))
 }
+/// Round the scope key back to vm-a until its new answer is in (a poll already on its way may bring the one before).
+fn round_until(ok: impl Fn(&Value) -> bool) -> Value {
+    let mut c = Value::Null;
+    for _ in 0..5 {
+        for _ in 0..3 { call("press", json!({ "id": "scope" })); }
+        far::answered("t", 1);
+        c = call("board", json!({})).at("chat").clone();
+        if ok(&c) { break; }
+    }
+    c
+}
 fn looks(talk: &[(bool, &str)]) -> Look { Look { state: "idle".into(), readable: true, talk: talk.iter().map(|(you, t)| Said { you: *you, text: t.to_string(), at: 0 }).collect(), ..Default::default() } }
 
 #[test]
@@ -57,14 +68,12 @@ fn another_machines_coordinator_sends_its_words_with_its_tasks_and_the_chat_show
 
     // A machine on an older version sends nothing of its Coordinator: said, never an empty chat that looks quiet.
     far.answers("vm-a", "list", &json!({ "host": "vm-a", "version": "0.8.0", "tasks": [] }));
-    call("press", json!({ "id": "scope" })); call("press", json!({ "id": "scope" })); call("press", json!({ "id": "scope" })); far::answered("t", 1);
-    let c = call("board", json!({})).at("chat").clone();
+    let c = round_until(|c| c.arr("parts").last().is_some_and(|p| p.s("text").contains("older herdr-projects")));
     assert_eq!(c.s("coord"), "Coordinator on vm-a");
     assert_eq!(c.arr("parts").last().unwrap().s("text"), "vm-a runs an older herdr-projects, which does not send what its Coordinator says: update it there.");
     // One with no Coordinator adds what you type as a task, and the chat says so.
     far.answers("vm-a", "list", &json!({ "host": "vm-a", "version": "0.9.0", "tasks": [], "coordinator": { "off": true } }));
-    call("press", json!({ "id": "scope" })); call("press", json!({ "id": "scope" })); call("press", json!({ "id": "scope" })); far::answered("t", 1);
-    let c = call("board", json!({})).at("chat").clone();
+    let c = round_until(|c| c.s("status").starts_with("no Coordinator there"));
     assert_eq!((c.s("status"), c.arr("parts").len()), ("no Coordinator there: what you type is added as a task", 0));
 }
 
