@@ -83,17 +83,17 @@ fn the_board_finds_itself_in_the_m1s_sidebar_by_the_address_its_tailscale_name_s
     b.cols = 200;
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     for m in sw::remote::machines() { let label = m.label.clone(); let a = sw::remote::ask_list(&m, 20000); update(&mut b.s, Event::Remote { label, answer: a }); }
-    b.press(&["alt+m"]);
     assert_eq!(b.s.sidebar_from.as_deref(), Some("elias-macbook-pro-m1"));
     let here = sw::board::update::heads::label(&b.s, "");
     assert_eq!(headings(&b), vec!["Local (elias-macbook-pro-m1)".to_string(), format!("Mac mini ({here})"), "vm-str".into(), "vm-ssa".into(), "vm-not".into(), "vm-kil".into(), "vm-demo".into()]);
     let said = "Local (elias-macbook-pro-m1), vm-str, vm-ssa, vm-not, vm-kil, vm-demo";
-    assert!(b.text().contains(&format!("all machines: {said}")), "{}", b.text());
+    let bar: Vec<String> = sw::board::update::scope::candidates(&b.s).into_iter().filter(|c| !c.0.is_empty()).map(|c| c.1).collect();
+    assert_eq!(bar.join(", "), said, "the scope bar offers them in that order");
     assert_eq!(sw::webui::model::list::list_of(&b.s, &b.theme).at("head").s("machines"), said);
     // the scope key's round, which the web UI's Boards section follows too
     let mut round = vec![];
-    for _ in 0..6 { b.press(&["alt+m"]); round.push(b.s.scope.clone()); }
-    assert_eq!(round, names(&["elias-macbook-pro-m1", "vm-str", "vm-ssa", "vm-not", "vm-kil", "vm-demo"]));
+    for _ in 0..7 { b.press(&["alt+m"]); round.push(b.s.scope.clone()); }
+    assert_eq!(round, names(&["", "elias-macbook-pro-m1", "vm-str", "vm-ssa", "vm-not", "vm-kil", "vm-demo"]));
     // what this machine sends another one: the addresses its herdr's machines stand for, as it looks them up
     far.host("vm-str", &["100.89.147.73"]);
     let sent = sw::remote::remote_list();

@@ -49,7 +49,7 @@ pub fn label(s: &State, k: K, r: Option<&Obj>) -> String {
         K::AllDone => if s.all_done { "show only the latest done".into() } else { "show all done".into() },
         K::Scope => {
             let to = if super::remotes::seeks(s) { "look for other machines".to_string() } else if next_scope.is_empty() { "show this machine's tasks only".to_string() } else if next_scope == "*" { "show every machine's tasks".into() } else { format!("show only {next_scope}'s tasks") };
-            let now = if s.scope.is_empty() { "this machine".to_string() } else if s.scope == "*" { "every machine".into() } else { format!("only {}", s.scope) };
+            let now = if s.scope.is_empty() && s.level == 0 { "All, this machine only".to_string() } else if s.scope.is_empty() { "this machine".to_string() } else if s.scope == "*" { "every machine".into() } else { format!("only {}", s.scope) };
             format!("{to} (now: {now})")
         }
         _ => String::new(),

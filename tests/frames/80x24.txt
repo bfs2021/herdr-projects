@@ -1,7 +1,7 @@
 == the list
- herdr-projects  proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
- ✗ #13    Max length for task titles                                          1m
-          Conflict with main
+ ○ All › this machine
+ all · tasks · agents · coordinators · automations
+ proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 
@@ -16,7 +16,7 @@
           Starting
 ▌◐ #5     Max length for task titles                                          1m
 ▌         Found the cause; now checking every caller of the resize handler for …
- ↓ 9 more · ↑ 3 more
+ ↓ 9 more · ↑ 4 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────
@@ -24,9 +24,9 @@
 ────────────────────────────────────────────────────────────────────────────────
   enter open this task's agent · space talk to the agent · ? all keys
 == the task beside it
- herdr-projects  proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
- ✗ #14    Max length for task titles                                          1m
-          Stopped without a summary
+ ○ All › this machine
+ all · tasks · agents · coordinators · automations
+ proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
 
  ▾ ready to approve
  ◆ #11    Max length for task titles                          R#1 PR#60       1m
@@ -40,7 +40,7 @@
 ▌◐ #5     Max length for task titles                                          1m
 ▌         Found the cause; now checking every caller of the resize handler for …
 
- ↓ 9 more · ↑ 4 more
+ ↓ 9 more · ↑ 5 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────
@@ -79,6 +79,9 @@
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its
                 text)
+   → ←          into a machine or a project: type to pick, enter picks; ← back
+                up
+   shift+tab    the kinds row: all, tasks, agents, coordinators, automations
    enter        send what is typed; else open this task's agent, or fold a
                 heading
    space        flip who you talk to: the Coordinator, or this task's agent
@@ -88,10 +91,7 @@
    ?            this menu
    y  n         answer a question: y yes, n or esc no (enter never confirms)
 
- ctrl: does something
-   ctrl+l       yes: approve the merge, say yes, retry, take it as it is
-   ctrl+r       send it back: tell the agent to fix it, or to continue
- ↓ 43 more
+ ↓ 46 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────
@@ -99,9 +99,9 @@
 ────────────────────────────────────────────────────────────────────────────────
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
- herdr-projects  proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
- ✗ #13    Max length for task titles                                          1m
-          Conflict with main
+ ○ All › this machine
+ all · tasks · agents · coordinators · automations
+ proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 
@@ -116,7 +116,7 @@
           Starting
 ▌◐ #5     Max length for task titles                                          1m
 ▌         Found the cause; now checking every caller of the resize handler for …
- ↓ 9 more · ↑ 3 more
+ ↓ 9 more · ↑ 4 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────

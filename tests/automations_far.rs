@@ -89,8 +89,12 @@ fn other_machines_automations_are_in_the_list_with_their_machine_named_and_are_c
     let mut s = open(&w.root, 44); s.s.side = false;
     let _ = update(&mut s.s, Event::Machines(sw::remote::machines()));
     poll(&mut s, Some(json!([far_auto(json!({}))])));
+    // with another machine, All is every machine; this machine alone has only its own
+    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "");
     assert!(!t(&mut s, 120).contains("Theirs nightly"), "this machine only: its own");
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m", "alt+m"]); assert_eq!(s.s.scope, "*");
+    s.s.sel = "proj/1".into(); s.load();
     let text = t(&mut s, 140);
     like(&text, r"\n ⟳ on {4}Look for old dependencies {2}every 2h +next in {2}2h\n"); // its repo is the one the board shows: not said
     // in the part of the machine that has it, a group of its own after that machine's tasks; its machine is its heading, not on its row
@@ -130,7 +134,7 @@ fn other_machines_automations_are_in_the_list_with_their_machine_named_and_are_c
     like(&regex::Regex::new(r"\s+").unwrap().replace_all(&text, " "), &format!("{} changes them", regex::escape(&key_name("settings")))); assert!(!text.contains("Changed on vm-b"));
     s.press(&["down", "enter"]); assert_eq!(s.s.sel, "vm-b:far/7"); assert!(!s.s.auto_open);
     // that machine's own board: only its automations, no machine on the row (the header names it)
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "vm-b");
+    s.press(&["alt+m", "alt+m"]); assert_eq!(s.s.scope, "vm-b");
     let text = t(&mut s, 140);
     like(&text, r"\n[ ▌]⟳ on {2}Theirs nightly {2}every 5m · far +○ #7 next in {2}4m\n"); assert!(!text.contains("Look for old dependencies"));
     // off there, with why; and removing asks first, naming the machine
@@ -138,12 +142,12 @@ fn other_machines_automations_are_in_the_list_with_their_machine_named_and_are_c
     like(&t(&mut s, 140), r"\n[ ▌]⟳ off Theirs nightly {2}every 5m · far +○ #7 +fired {2}2h ago\n[ ▌] {6}it fired 30 times in an hour\n");
     s.s.sel = "vm-b:auto:0a1b2c3d".into(); s.load(); s.press(&["ctrl+x"]); assert!(t(&mut s, 120).contains("? Remove the automation \"Theirs nightly\" on vm-b? The tasks it made stay."));
     s.press(&["y"]); assert_eq!(asked(&f), json!({ "action": "auto-remove", "id": "0a1b2c3d" }));
-    poll(&mut s, Some(json!([]))); let text = t(&mut s, 140); assert!(!text.contains("automations") && !text.contains('⟳'), "{text}");
+    poll(&mut s, Some(json!([]))); let text = t(&mut s, 140); assert!(!text.contains("▾ automations") && !text.contains('⟳'), "{text}");
     // a machine whose version sends no rows for the page: ctrl+e says the command, and is on no hint
     poll(&mut s, Some(json!([far_auto(json!({ "shown": { "firings": [], "own": [] } }))]))); s.s.sel = "vm-b:auto:0a1b2c3d".into(); s.load();
     s.press(&["ctrl+e"]); assert!(t(&mut s, 120).contains("Its settings are changed on vm-b: herdr-projects set <name> <value> --automation \"Theirs nightly\"")); assert!(s.s.editing.is_none());
     assert!(!s.screen(140).last().unwrap().contains(&key_name("settings")));
     s.press(&["enter"]); assert!(regex::Regex::new(r"\s+").unwrap().replace_all(&t(&mut s, 100), " ").contains("Changed on vm-b: herdr-projects set <name> <value> --automation \"Theirs nightly\"")); s.press(&["esc"]);
     // a machine on an older version sends none: no group, and nothing breaks
-    poll(&mut s, None); assert!(!t(&mut s, 120).contains("automations"));
+    poll(&mut s, None); assert!(!t(&mut s, 120).contains("▾ automations"));
 }

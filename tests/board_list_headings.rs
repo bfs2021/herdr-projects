@@ -32,7 +32,7 @@ fn repo(host: &str, name: &str) -> String { format!("head:repo\t{host}\t{name}")
 #[test]
 fn every_machine_a_heading_its_repos_under_it_and_rows_with_the_number_alone() {
     let (_w, mut s) = two_machines();
-    s.press(&["alt+m", "alt+s"]); assert!(s.s.scope == "*" && s.s.by_repo);
+    s.press(&["alt+s"]); assert!(s.s.scope == "*" && s.s.by_repo);
     let t = s.screen(100).join("\n");
     let here = sw::shown::words::clean(&sw::remote::check::hostname());
     assert!(has(&t, &format!(r"{} ▾ proj · PRJ\n[ ▌]○ PRJ-\d+ +Mine", head(&regex::escape(&here)))), "this machine first, under its own name: {t}");
@@ -52,7 +52,7 @@ fn every_machine_a_heading_its_repos_under_it_and_rows_with_the_number_alone() {
 #[test]
 fn enter_on_a_heading_folds_it_to_one_line_with_how_many_it_holds_and_unfolds_it_at_both_levels() {
     let (_w, mut s) = two_machines();
-    s.press(&["alt+m", "alt+s"]);
+    s.press(&["alt+s"]); assert_eq!(s.s.scope, "*");
     // The arrows stop on each heading, which is selected as a row is.
     go(&mut s, &repo("otherbox", "crm"));
     assert!(s.screen(100).iter().any(|l| l.starts_with("▌▾ crm")), "{}", s.text());

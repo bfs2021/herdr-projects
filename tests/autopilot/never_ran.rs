@@ -16,7 +16,7 @@ fn far_board(w: &World, f: &crate::far::Far, list: serde_json::Value) -> Board {
     let mut b = open(&w.root, 40); b.s.side = false; b.load();
     sw::board::update::update(&mut b.s, sw::board::update::Event::Machines(sw::remote::machines()));
     for m in sw::remote::machines() { let a = sw::remote::ask_list(&m, 20000); sw::board::update::update(&mut b.s, sw::board::update::Event::Remote { label: m.label.clone(), answer: a }); }
-    b.press(&["alt+m"]); b.press(&["alt+s"]); b.load();
+    assert_eq!(b.s.scope, "*"); b.press(&["alt+s"]); b.load();
     b
 }
 fn their_task() -> serde_json::Value { json!([{ "id": "web/1", "repo": "web", "title": "Their task", "stage": "todo", "created": sw::clock::now() }]) }

@@ -38,7 +38,7 @@ fn a_moved_key_answers_to_your_chord_only_and_the_board_names_it_so() {
     assert!(!c.framed); assert_eq!(c.boxed, v(&["❯ Send message to Agent"]));
     assert!(c.hints.ends_with("ctrl+g show the latest message · space back to the Coordinator"), "{}", c.hints);
     s.press(&["ctrl+g"]); assert!(s.chat(120).framed);
-    s.press(&["?"]);
+    s.rows = 60; s.press(&["?"]); // the whole menu in view
     let t = s.text();
     assert!(regex::Regex::new(r"ctrl\+g +hide the chat's latest message").unwrap().is_match(&t), "{t}");
     assert!(!t.contains("alt+c"), "{t}");
@@ -134,7 +134,7 @@ fn mac_writes_opt_where_pc_writes_alt_and_the_keys_stay_the_same() {
     assert!(s.chat(120).hints.ends_with("opt+c hide the latest message · space back to the Coordinator"), "{}", s.chat(120).hints);
     s.press(&["alt+c"]); assert!(!s.chat(120).framed, "the Option key sends alt: it is the same key");
     s.press(&["alt+c"]);
-    s.press(&["?"]);
+    s.rows = 60; s.press(&["?"]); // the whole menu in view
     let t = s.text();
     assert!(t.contains("opt: only shows or hides") && t.contains("ctrl: does something"), "{t}");
     assert!(regex::Regex::new(r"opt\+c +hide the chat's latest message").unwrap().is_match(&t), "{t}");

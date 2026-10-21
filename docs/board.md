@@ -1,11 +1,12 @@
 # The board: the list and the chat
 
-**The board is one list of tasks and one chat.** The header on top says whose tasks show and how many need you. The list
-sorts the tasks by what they need from you. The chat at the bottom talks to the Coordinator, or to the selected task's
-agent.
+**The board is one list of tasks and one chat.** The scope bar on top says where you are and whom the chat talks to.
+The list sorts the tasks by what they need from you. The chat at the bottom talks to the scope's coordinator, or to the
+selected task's agent.
 
 ```
- herdr-projects  proj · 3 need you · 1 ready · 2 working · 12 to do · 30 done
+ ● All › ○ vm-str › herdr-projects  gtm-skills  mstars
+ all · tasks · agents · coordinators · automations            3 need you · 1 ready · 2 working · 12 to do
  needs you
  ! HSW-98  Add an undo for clear                                       R#2 PR#18 12m ago
            Review failed · 1 critical, 1 major
@@ -17,30 +18,71 @@ agent.
            Running the tests
  to do
  ○ HSW-9   Rename the hint line                                                   2h ago
- ○ Coordinator  idle
 ╭────────────────────────────────────────────────────────────────────────────────────────────╮
-│ Coordinator:                                                                               │
+│ vm-str coordinator:                                                                        │
 │ Added proj/4: Add an undo. An agent is on it.                                              │
 │                                                                                            │
-│ ❯ Send message to Coordinator                                                              │
+│ ❯ Send message to vm-str coordinator                                                       │
 ╰────────────────────────────────────────────────────────────────────────────────────────────╯
   alt+c hide the latest message · ? all keys
 ```
 
-- `↑` `↓` select a task. `Enter` goes into its agent. `Space` talks to its agent instead of the Coordinator.
-- Type and press `Enter` to send. The Coordinator decides what to start: ask it to in your words.
+- `↑` `↓` select a task. `Enter` goes into its agent. `Space` talks to its agent instead of the scope's coordinator.
+- `→` steps into a machine or a project, `←` back out ([the scope bar](#the-scope-bar)).
+- Type and press `Enter` to send. The coordinator decides what to start: ask it to in your words.
 - `Alt+P` shows the [task panel](task-panel.md) beside the list. `?` lists every key ([keys](keys.md)).
 
-## The header
+## The scope bar
 
-One line that says where you are: whose tasks show, then how many stand in each group
-(`herdr-projects proj · 3 need you · 1 ready · 2 working · 12 to do · 30 done`).
+**`All › machine › project`, like breadcrumbs.** Each step is a scope: what the list shows, and who the chat talks to.
 
-- Normally it names the repo new tasks go to. There is no folder path on it.
-- With other machines in view, that comes first instead, in the accent colour, and is never cut (names too long for the
-  line go on to the next, whole): `all machines: otherbox`, or `only otherbox` ([other machines](other-machines.md)).
-- A filter has a line of its own under it, in the accent colour, saying what it is, how many tasks match, and the key
-  that clears it: `filter "import" · 1 of 33 · esc clears`. With nothing found, the list says `Nothing matches "zzz".`
+| Step | The list shows | The chat talks to |
+|---|---|---|
+| `All` | every machine's tasks (this machine's alone while there is no other) | the [Coordinator](coordinator.md) |
+| a machine | that machine's tasks | its [machine coordinator](machine-and-project-coordinators.md) (`vm-str coordinator`) |
+| a project | that repo's tasks on that machine | its [project coordinator](machine-and-project-coordinators.md) (`herdr-projects coordinator`) |
+
+- **Each step has its coordinator's dot**: `●` amber working, `●` green idle, `●` red needs you, `✈` on
+  [autopilot](autopilot.md), `○` not started (or no coordinator can run here). The step you are on is bold.
+- **After the last step, greyed, what the next one could be**: the machines in the order of Herdr's sidebar
+  ([machine order](machine-order.md)), `(no answer)` after one that does not answer; on a machine, its projects (those
+  with tasks or automations, those used lately, those with a project coordinator), the repo the board is in first. What
+  does not fit is counted (`+3`).
+- **`→` steps in.** It opens a picker on the next step: type letters of its name, in order but not side by side
+  (`hp` finds `herdr-projects`), `↑` `↓` go through what matches, `Enter` (or `→`) goes in, `Esc` (or `←`) cancels. It
+  starts on the selected task's machine or project, so `→` `Enter` goes into the selected task's. With one machine only,
+  `→` on All goes into it at once.
+- **`←` goes up a level**: project to machine, machine to All.
+- **A click** on a step goes there; a click on one of the greyed next steps goes into it, and on `›` opens the picker.
+- **`Space` still talks to a selected task's agent** (or a heading's coordinator), and `Space` again goes back to the
+  scope's coordinator.
+- **Where no coordinator can run on this machine**, a step of this machine adds what you type as a task, as All does.
+- The scope is kept with the board's view, and is there when it opens again. `Alt+M` goes round the machines too
+  (All, this machine, each other one): [other machines](other-machines.md).
+
+## The kinds row
+
+Under the bar: `all · tasks · agents · coordinators · automations` (`coords` and `autos` on a narrow screen), with how
+many tasks stand in each group on its right, and the repo new tasks go to (on this machine's board). Where that does not
+fit beside the kinds, it has a line of its own.
+
+| Kind | The list shows |
+|---|---|
+| `all` | tasks, automations and the main Coordinator's row, as always |
+| `tasks` | the tasks only |
+| `agents` | the tasks an agent or the reviewer is on, or that wait for you |
+| `coordinators` | the scope's coordinators: on All every one of every machine (the Coordinator, each machine's, each project's that was ever talked to) |
+| `automations` | the automations only |
+
+- **`Shift+Tab` gives the row the keys**: `←` `→` choose, `Enter`, `↓`, `Esc` or `Shift+Tab` go back to the list. A
+  click on a kind picks it. (`Tab` stays what it always was: put an agent on the selected task.)
+- **The kind stays while the scope changes**: All with `coordinators` lists every coordinator on every machine, a
+  project with `coordinators` only its own.
+- **In the list of coordinators** each one has two lines: its dot, its name (another machine's with that machine beside
+  it) and where it stands, then the last thing it said. `Enter` on one goes into its scope; `Space`, `Tab`, `Ctrl+X`,
+  `Ctrl+E` and `Alt+P` do what they do on its heading ([machine and project coordinators](machine-and-project-coordinators.md)).
+- A filter has a line of its own under the row, in the accent colour, saying what it is, how many tasks match, and the
+  key that clears it: `filter "import" · 1 of 33 · esc clears`. With nothing found, the list says `Nothing matches "zzz".`
 
 ## The list: five groups
 

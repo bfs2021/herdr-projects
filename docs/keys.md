@@ -10,8 +10,17 @@ easy to guess:
 No other chord does anything, and no key of an earlier version works as a second way to press one of these.
 
 Two keys bend the rule. `Ctrl+F` (find) only changes which tasks the list shows, so by the rule it would be an `Alt` key;
-it is the key every program finds with, so it stays. `Alt+M` only shows other machines, but while one machine is shown by
-itself, what you type goes to that machine's Coordinator: the chat says so.
+it is the key every program finds with, so it stays. `Alt+M` only shows other machines, but it moves the scope bar, and
+the scope decides who the chat talks to: one machine shown by itself is that machine's machine coordinator. The chat
+says so.
+
+## The scope bar and the kinds row
+
+The plain arrows `→` and `←` move the [scope bar](board.md#the-scope-bar) on top (All › machine › project): `→` steps
+into the next level with a picker you type a name into (`Enter` picks, `Esc` cancels), `←` goes back up. They act only
+with the text box empty, where they had nothing to do: with a draft they move its cursor as ever. `Shift+Tab` gives the
+[kinds row](board.md#the-kinds-row) under the bar the keys, and there `←` `→` choose a kind. `Alt+↑` and `Alt+↓` are
+Herdr's own and the board does not take them.
 
 ## Keys and the text box
 
@@ -233,7 +242,7 @@ below always use the PC names.
 | `Alt+A` | the archive, and back to the board |
 | `Alt+S` | the list grouped by repo, each group under its repo's name (a row's tag never names a repo), or by status |
 | `Alt+D` | every done task, or only the latest |
-| `Alt+M` | other machines: this machine only, every machine, then each machine by itself |
+| `Alt+M` | other machines: every machine (the scope bar's All), this machine only, then each machine by itself |
 
 **The text box's own** (not a key of the board, and not in the `?` menu)
 

@@ -78,7 +78,7 @@ fn space_on_a_machines_heading_talks_to_that_machines_coordinator_here_or_there(
     let far = |coords: Value| Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "none" }, "coordinators": coords,
         "tasks": [{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: far(json!({ "machine": { "state": "idle", "readable": true, "said": "Otherbox is quiet.", "talk": [{ "you": true, "text": "how is it?" }, { "you": false, "text": "Otherbox is quiet." }] } })) });
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    assert_eq!(s.s.scope, "*");
     // this machine's heading: its machine coordinator, started here
     s.s.sel = machine_id(""); s.load();
     s.press(&["space"]);

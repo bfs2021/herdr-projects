@@ -99,7 +99,7 @@ pub static KEYS: &[Key] = &[
     Key { id: K::AllDone, name: "allDone", keys: &["alt+d"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Show all done"), help: None, hint: None,
         doc: Some("every done task, or only the latest") },
     Key { id: K::Scope, name: "scope", keys: &["alt+m"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Other machines"), help: None, hint: None,
-        doc: Some("other machines: this machine only, every machine, then each machine by itself") },
+        doc: Some("other machines: every machine (the scope bar's All), this machine only, then each machine by itself") },
 ];
 pub fn entry(id: K) -> &'static Key { KEYS.iter().find(|k| k.id == id).expect("every key has its entry") }
 pub fn by_name(name: &str) -> Option<&'static Key> { KEYS.iter().find(|k| k.name == name) }

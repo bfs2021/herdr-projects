@@ -1,5 +1,5 @@
-//! The task list: one header line, the five groups, a mark for each state in its group's colour, the task panel from 90
-//! columns, the side panel that alt+p shows or hides, the whole task; the done list newest first; work whose review
+//! The task list: the header (the scope bar and the kinds row), the five groups, a mark for each state in its group's
+//! colour, the task panel from 90 columns, the side panel that alt+p shows or hides, the whole task; the done list newest first; work whose review
 //! failed under needs you with "merge anyway"; what the list hides and what an action did; the wheel and the mouse.
 use crate::common;
 use common::board::open;
@@ -27,11 +27,11 @@ fn one_header_line_five_groups_a_mark_for_each_state_and_the_task_panel_from_90_
     report(&b, "half way", Some(50), None); assert_eq!(task(&b).at("watch"), &json!({ "progress": 50, "eta": 12 }));
     let mut s = open(&w.root, 34);
     let text = s.screen(120).join("\n");
-    assert!(has(&text, r"^ herdr-projects  proj · PRJ · 1 working · 1 to do +│ *\n +│"), "{text}");
+    assert!(has(&text, r"^ [○●] All › [^\n]*\n all · tasks · agents · coordinators · automations +│[^\n]*\n proj · PRJ · 1 working · 1 to do +│ *\n +│"), "{text}");
     let inks = s.inked(120);
     assert_eq!(ink_of(&inks, "◐"), Some((Ink::Yellow, false)), "a working task's mark is the working colour");
     assert_eq!(ink_of(&inks, "My own task"), Some((Ink::Plain, true)), "its title plain, and bold while it lives");
-    assert_eq!(ink_of(&inks, "○").map(|x| x.0), Some(Ink::Todo), "a task nobody started is the readable grey of to do, not green");
+    assert_eq!(ink_of(&inks[2..], "○").map(|x| x.0), Some(Ink::Todo), "a task nobody started is the readable grey of to do, not green");
     assert_eq!(ink_of(&inks, "Write the docs"), Some((Ink::Plain, false)));
     assert_eq!(heading(&inks, "working"), Some(Ink::Yellow)); assert_eq!(heading(&inks, "to do"), Some(Ink::Todo), "the headings are in their group's colour");
     assert_eq!(ink_of(&inks, "50%").map(|x| x.0), Some(Ink::Yellow)); assert_eq!(ink_of(&inks, "12m left").map(|x| x.0), Some(Ink::Yellow));
@@ -107,7 +107,7 @@ fn work_whose_review_failed_stands_under_needs_you_and_its_yes_is_merge_anyway()
     let t = s.text();
     assert!(has(&t, r"\n ▾ needs you *\n[ ▌]! PRJ-1 +Add an undo for clear +R#1 +\d+s ago *\n[ ▌] {8}Review failed · 1 critical, 1 major *\n"), "{t}");
     assert!(has(&t, r"\n ▾ ready to approve *\n[ ▌]◆ PRJ-2 +Max length for titles +R#1 +\d+s ago *\n[ ▌] {8}Pass *\n"), "{t}");
-    assert!(t.starts_with(" herdr-projects  proj · PRJ · 1 needs you · 1 ready"));
+    assert!(t.lines().take(3).any(|l| l.contains(" proj · PRJ · 1 needs you · 1 ready")), "{t}");
     s.s.sel = bad.clone(); s.load();
     assert!(s.text().contains(&format!("  {} send the review to this task's agent · {} merge this task anyway · ", key_name("sendBack"), key_name("yes"))), "{}", s.text());
     s.press(&["ctrl+l"]);
@@ -160,9 +160,9 @@ fn the_list_says_what_it_hides_the_header_where_you_are_and_an_action_what_it_di
     for n in 1..=40 { w.add(&format!("Task number {n}")); }
     let mut s = open(&w.root, 24); s.s.side = false;
     let lines = s.screen(100);
-    assert!(has(&lines[0], r"^ herdr-projects  proj · PRJ · 40 to do *$"));
+    assert!(has(&lines[0], r"^ [○●] All › ") && has(&lines[1], r"^ all · tasks · agents · coordinators · automations +proj · PRJ · 40 to do$"), "{lines:?}");
     let end = lines.iter().position(|l| l.contains("New task")).unwrap();
-    let list = &lines[1..end];
+    let list = &lines[2..end];
     let shown = list.iter().filter(|l| l.contains("Task number")).count();
     let note = list.iter().filter(|l| !l.trim().is_empty()).last().unwrap().trim_end().to_string();
     assert!(has(&note, r"^ ↓ \d+ more$"), "{note}");
@@ -172,9 +172,9 @@ fn the_list_says_what_it_hides_the_header_where_you_are_and_an_action_what_it_di
     s.press(&["pageDown", "pageDown"]);
     assert!(has(&s.screen(100).into_iter().filter(|l| l.contains("more")).collect::<Vec<_>>().join("\n"), r"↓ \d+ more · ↑ \d+ more"));
     s.press(&["pageUp", "pageUp", "pageUp"]); assert_eq!(s.s.steps.iter().position(|x| *x == s.s.sel).unwrap(), from);
-    s.press(&["ctrl+f"]); s.typed("number 3"); assert!(has(&s.screen(100)[1], r#"^ filter "number 3" · 11 of 40 · esc cancels *$"#), "{}", s.screen(100)[1]);
-    s.press(&["enter"]); assert!(has(&s.screen(100)[1], r#"^ filter "number 3" · 11 of 40 · esc clears *$"#));
-    s.press(&["esc"]); assert!(!s.screen(100)[1].contains("filter"));
+    s.press(&["ctrl+f"]); s.typed("number 3"); assert!(has(&s.screen(100)[2], r#"^ filter "number 3" · 11 of 40 · esc cancels *$"#), "{}", s.screen(100)[2]);
+    s.press(&["enter"]); assert!(has(&s.screen(100)[2], r#"^ filter "number 3" · 11 of 40 · esc clears *$"#));
+    s.press(&["esc"]); assert!(!s.screen(100)[2].contains("filter"));
     s.press(&["ctrl+f"]); s.typed("zzzq"); assert!(s.text().contains("Nothing matches \"zzzq\"."), "{}", s.text()); s.press(&["esc"]);
     let id = s.s.sel.clone();
     let tag = short(&id);

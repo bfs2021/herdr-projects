@@ -1,7 +1,7 @@
 == the list
- herdr-projects  proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
- ? #9     Max length for task titles                                                              1m
-          Should the old settings file be removed, or kept for one more version so that nobody lose…
+ ○ All › this machine
+ all · tasks · agents · coordinators · automations
+ proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
  @ #10    Max length for task titles                                                              1m
           Needs a login
  ! #12    Max length for task titles                                              R#1 PR#123456   1m
@@ -22,7 +22,7 @@
           Starting
 ▌◐ #5     Max length for task titles                                60% 11m left                  1m
 ▌         Found the cause; now checking every caller of the resize handler for the same mistake
- ↓ 9 more
+ ↓ 9 more · ↑ 1 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -30,9 +30,9 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────
   enter open this task's agent · space talk to the agent · ctrl+x stop the agent · ? all keys
 == the task beside it
- herdr-projects  proj · 5 need you · 1 ready · 9 working ·… │  #5 Max length for task titles
- @ #10    Max length for task titles                     1m │
-          Needs a login                                     │  Status ─────────────────────────────
+ ○ All › this machine                                       │  #5 Max length for task titles
+ all · tasks · agents · coordinators · automations          │
+ proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done │  Status ─────────────────────────────
  ! #12    Max length for task titles     R#1 PR#123456   1m │  State        ◐ working · for 1m
           The pull request's checks fail                    │  Progress     █████░░░ 60% · 11m left
  ✗ #13    Max length for task titles                     1m │  Now          Found the cause; now
@@ -52,7 +52,7 @@
 ▌◐ #5     Max length for task titles                     1m │
 ▌         Found the cause; now checking every caller of th… │  Settings ───────────────────────────
                                                             │  Reading its settings…
- ↓ 9 more · ↑ 1 more                                        │  alt+t shows the whole task
+ ↓ 9 more · ↑ 2 more                                        │  alt+t shows the whole task
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -96,6 +96,8 @@
  plain keys
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its text)
+   → ←          into a machine or a project: type to pick, enter picks; ← back up
+   shift+tab    the kinds row: all, tasks, agents, coordinators, automations
    enter        send what is typed; else open this task's agent, or fold a heading
    space        flip who you talk to: the Coordinator, or this task's agent
    tab          put an agent on this task
@@ -113,9 +115,7 @@
                 your own settings: what every task starts from
    ctrl+z       undo
    ctrl+f       find: show only the tasks that match
-   ctrl+c       twice: close the board
-   ctrl+t       a voice call with whoever the chat talks to
- ↓ 32 more
+ ↓ 34 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -123,9 +123,9 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
- herdr-projects  proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
- ? #9     Max length for task titles                                                              1m
-          Should the old settings file be removed, or kept for one more version so that nobody lose…
+ ○ All › this machine
+ all · tasks · agents · coordinators · automations
+ proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
  @ #10    Max length for task titles                                                              1m
           Needs a login
  ! #12    Max length for task titles                                              R#1 PR#123456   1m
@@ -146,7 +146,7 @@
           Starting
 ▌◐ #5     Max length for task titles                                60% 11m left                  1m
 ▌         Found the cause; now checking every caller of the resize handler for the same mistake
- ↓ 9 more
+ ↓ 9 more · ↑ 1 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────

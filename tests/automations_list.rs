@@ -36,28 +36,28 @@ fn the_group_has_a_colour_of_its_own_narrow_rows_a_menu_of_its_own_and_stays_wit
     l::turn(all[2].s("id"), false).unwrap(); s.load();
     let lines = s.screen(120);
     // every name starts where the task's title starts; "2h" ends where the task's "0s" does, and "never fired" at the right edge
-    for (n, name) in [(6, "Look"), (7, "Release"), (8, "Nightly")] { assert_eq!(col(&lines[n], name), col(&lines[3], "Mine"), "{}", lines[n]); }
-    assert_eq!(lines[6].chars().count(), col(&lines[3], " ago")); assert_eq!(lines[7].chars().count(), lines[3].chars().count());
+    for (n, name) in [(7, "Look"), (8, "Release"), (9, "Nightly")] { assert_eq!(col(&lines[n], name), col(&lines[4], "Mine"), "{}", lines[n]); }
+    assert_eq!(lines[7].chars().count(), col(&lines[4], " ago")); assert_eq!(lines[8].chars().count(), lines[4].chars().count());
     // a colour of its own: the heading and the mark of one that is on are the automations' ink, which no status has; off is not
     let inked = s.inked(120);
-    assert_eq!(ink_of(&inked[5], "automations"), Some(Ink::Auto)); assert_eq!(ink_of(&inked[6], "⟳"), Some(Ink::Auto));
+    assert_eq!(ink_of(&inked[6], "automations"), Some(Ink::Auto)); assert_eq!(ink_of(&inked[7], "⟳"), Some(Ink::Auto));
     let quiet = |l: &sw::shown::ink::Inked| l.0.iter().find(|p| p.t.contains('⟳')).map(|p| p.quiet).unwrap();
-    assert!(!quiet(&inked[6]) && quiet(&inked[8]), "off: the same mark, dimmed");
+    assert!(!quiet(&inked[7]) && quiet(&inked[9]), "off: the same mark, dimmed");
     s.press(&["down"]); assert_eq!(s.s.sel, "head:status\t\tautomations", "the group's heading first: it folds as the others do"); s.press(&["down"]); assert_eq!(s.s.sel, row_id(&all[0]));
     assert_eq!(s.screen(60).last().unwrap(), "  enter open this automation · ? all keys", "the hints that give way are whole ones");
     // narrower still: what a row says wraps under its name as a live task's does, and nothing is cut with …
     let tight = s.screen(34);
     let from = tight.iter().position(|l| l == " ⟳ on    Release note after a").unwrap();
     assert_eq!(tight[from..from + 4].to_vec(), [" ⟳ on    Release note after a", "         merge", "         when a task is merged, in", "         every repo    never fired"]);
-    assert!(!tight[5..from + 8].iter().any(|l| l.contains('…')), "{}", tight.join("\n"));
-    assert_eq!(s.screen(30)[6..9].to_vec(), ["▌⟳ on    Look for old", "▌        dependencies", "▌        every 2h   next in 2h"]);
+    assert!(!tight[7..from + 8].iter().any(|l| l.contains('…')), "{}", tight.join("\n"));
+    assert_eq!(s.screen(30)[8..11].to_vec(), ["▌⟳ on    Look for old", "▌        dependencies", "▌        every 2h   next in 2h"]);
     // too narrow for the tasks' numbers: they go, the names still start where the task's title does, and on or off is the first word under each
     let tiny = s.screen(22);
     let at = |re: &str| { let r = regex::Regex::new(re).unwrap(); tiny.iter().position(|l| r.is_match(l)).unwrap_or_else(|| panic!("{re}\n{}", tiny.join("\n"))) };
     assert!(at(r"^ ○ Mine") > 0);
     like(&tiny[at(r"^▌⟳ Look for old") + 2], r"^▌ {2}on · every 2h"); like(&tiny[at(r"^ ⟳ Release note") + 2], r"^ {3}on · when a task is"); like(&tiny[at(r"^ ⟳ Nightly audit") + 1], r"^ {3}off · daily 03:00");
     // off, tab would only say so: its hint goes
-    s.press(&["space"]); like(&s.screen(120)[6], r"^▌⟳ off {3}Look for old dependencies {2}every 2h +never fired");
+    s.press(&["space"]); like(&s.screen(120)[7], r"^▌⟳ off {3}Look for old dependencies {2}every 2h +never fired");
     assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation on · ctrl+x remove it · ctrl+e its settings · ? all keys");
     s.press(&["space", "tab"]);
     like(&t(&mut s, 120), r"\n▌⟳ on {4}Look for old dependencies {2}every 2h +◇ PRJ-2 next in {2}2h\n"); // the task its last firing made, by that task's own mark and number
@@ -83,7 +83,7 @@ fn the_group_has_a_colour_of_its_own_narrow_rows_a_menu_of_its_own_and_stays_wit
     // with no task at all the group is still there
     for x in sw::store::tasks::list(Default::default()) { sw::store::tasks::patch(x.s("id"), |t| t.put("archivedAt", sw::clock::now())).unwrap(); }
     s.load();
-    like(&t(&mut s, 120), r"^ herdr-projects {2}proj · PRJ\n\n ▾ automations\n[ ▌]⟳ on {2}Look for old dependencies");
+    like(&t(&mut s, 120), r"^ [○●✈] All › [^\n]*\n all · tasks · agents · coordinators · automations +proj · PRJ\n\n ▾ automations\n[ ▌]⟳ on {2}Look for old dependencies");
 }
 
 #[test]
@@ -93,12 +93,12 @@ fn more_automations_than_fit_the_list_says_how_many_it_does_not_show_and_the_sel
     for n in 1..=3 { w.add(&format!("Task {n}")); }
     for n in 1..=16 { l::add(Add { name: &format!("Automation {n:02}"), prompt: "Do it.", trigger: Some(parse_schedule(&format!("every {n}h")).unwrap()), repo: "", folder: &w.root, settings: Obj::new(), research: None }).unwrap(); }
     let mut s = open(&w.root, 20); s.s.side = false;
-    let list = |lines: &[String]| -> Vec<String> { let end = lines.iter().position(|l| l.contains("New task")).unwrap_or(lines.len()); lines[1..end].to_vec() };
+    let list = |lines: &[String]| -> Vec<String> { let end = lines.iter().position(|l| l.contains("New task")).unwrap_or(lines.len()); lines[2..end].to_vec() };
     let shown = |l: &[String]| l.iter().filter(|x| regex::Regex::new(r"⟳ on {4}Automation").unwrap().is_match(x)).count();
     let note = |l: &[String]| l.iter().find(|x| regex::Regex::new(r"^ [↓↑] ").unwrap().is_match(x)).cloned().unwrap_or_default();
     let lines = s.screen(100);
     let l1 = list(&lines);
-    like(&lines[3], r"^▌○ PRJ-\d Task \d"); assert!(l1.iter().any(|x| x == " ▾ automations"));
+    like(&lines[4], r"^▌○ PRJ-\d Task \d"); assert!(l1.iter().any(|x| x == " ▾ automations"));
     assert!(l1.iter().any(|x| regex::Regex::new(r"^ ⟳ on {4}Automation 01 {2}every 1h +next in {2}1h$").unwrap().is_match(x)), "{}", lines.join("\n"));
     assert_eq!(note(&l1), format!(" ↓ {} automations", 16 - shown(&l1))); assert!(shown(&l1) >= 2 && shown(&l1) < 16);
     // no task gives way for them: every task shows

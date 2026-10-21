@@ -4,14 +4,21 @@
 
 | Level | Talk to it | Named | Lives in Herdr |
 |---|---|---|---|
-| The [Coordinator](coordinator.md) | the chat, as always | `Coordinator` | a `Coordinator` tab in the home space (`~`) |
-| A machine coordinator | `Space` on a machine's heading | after the machine: `vm-str coordinator`, `Mac coordinator` | a tab of that name in that machine's home space |
-| A project coordinator | `Space` on a repo's heading | after the repo: `herdr-projects coordinator`, `~ coordinator` for the home folder | a tab of that name in the repo's own space |
+| The [Coordinator](coordinator.md) | the chat, with the scope bar on `All` | `Coordinator` | a `Coordinator` tab in the home space (`~`) |
+| A machine coordinator | the scope bar on that machine, or `Space` on its heading | after the machine: `vm-str coordinator`, `Mac coordinator` | a tab of that name in that machine's home space |
+| A project coordinator | the scope bar on that project, or `Space` on a repo's heading | after the repo: `herdr-projects coordinator`, `~ coordinator` for the home folder | a tab of that name in the repo's own space |
 
 The Coordinator stays as it is. The others sit beside it: talking to one never touches the others.
 
 ## Talking to one
 
+- **The scope bar** on top of the board is the main way: `All › vm-str › herdr-projects`. The step you stand on decides
+  who the chat talks to: All the Coordinator, a machine its machine coordinator, a project its project coordinator.
+  `→` steps in (type a name to pick, `Enter` goes in), `←` goes back up, a click on a step goes there. Each step has its
+  coordinator's dot: working, idle, needs you, on autopilot, or not started ([the scope bar](board.md#the-scope-bar)).
+- **Every coordinator at once**: the kinds row's `coordinators` (`Shift+Tab`, then `→`) lists the scope's coordinators,
+  on All every one of every machine, each with its dot, where it stands and its last line. `Enter` on one goes into its
+  scope ([the kinds row](board.md#the-kinds-row)).
 - **A machine's heading** shows when the board shows every machine (`Alt+M`). `Space` on it opens that machine's
   coordinator in the chat.
 - **A repo's heading** shows when the tasks are grouped by repo (`Alt+S`). `Space` on it opens that repo's coordinator.
@@ -21,7 +28,8 @@ The Coordinator stays as it is. The others sit beside it: talking to one never t
 - The chat names it (`herdr-projects coordinator  idle`), and so does the box: `Send message to herdr-projects
   coordinator`. `Enter` sends, and it decides what to start, as the Coordinator does.
 - **It follows the selection**, as a task's agent does: move to another heading and you talk to that one's
-  coordinator, move to a task and you talk to its agent. `Space` again goes back to the Coordinator.
+  coordinator, move to a task and you talk to its agent. `Space` again goes back to the scope's coordinator (the
+  Coordinator on All).
 - A status group's heading (`to do`, `done`) has none. `Space` there says so.
 
 Your first message starts it. Until then the chat says `not started: your first message starts it`.

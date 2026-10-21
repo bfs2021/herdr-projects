@@ -1,5 +1,7 @@
 == the list
- herdr-projects  proj · 5 need you · 1 …
+ ○ All › this machine
+ all · tasks · agents · coords · autos
+ proj · 5 need you · 1 ready · 9 workin…
  ◇ #4     Max length for task titles
           Starting                    1m
 ▌◐ #5     Max length for task titles
@@ -7,8 +9,6 @@
 ▌         every caller of the resize ha…
 ▌         ██████░░░░  60% 11m left    1m
 
-
- ↓ 9 more · ↑ 7 more
 
  + New task  added word for word
 ────────────────────────────────────────
@@ -16,15 +16,15 @@
 ────────────────────────────────────────
   enter open this task's agent
 == the task beside it
- herdr-projects  proj · 5 need you · 1 …
+ ○ All › this machine
+ all · tasks · agents · coords · autos
+ proj · 5 need you · 1 ready · 9 workin…
  ◇ #4     Max length for task titles
           Starting                    1m
 ▌◐ #5     Max length for task titles
 ▌         Found the cause; now checking
 ▌         every caller of the resize ha…
 ▌         ██████░░░░  60% 11m left    1m
-
- ↓ 9 more · ↑ 7 more
 
  + New task  added word for word
 ────────────────────────────────────────
@@ -58,8 +58,8 @@
                 down (in the whole
                 task: a page of its
                 text)
-   enter        send what is typed;
- ↓ 92 more
+   → ←          into a machine or a
+ ↓ 100 more
 
  + New task  added word for word
 ────────────────────────────────────────
@@ -67,7 +67,9 @@
 ────────────────────────────────────────
   ↑↓ pick a key · esc close the menu
 == a draft
- herdr-projects  proj · 5 need you · 1 …
+ ○ All › this machine
+ all · tasks · agents · coords · autos
+ proj · 5 need you · 1 ready · 9 workin…
  ◇ #4     Max length for task titles
           Starting                    1m
 ▌◐ #5     Max length for task titles
@@ -75,8 +77,6 @@
 ▌         every caller of the resize ha…
 ▌         ██████░░░░  60% 11m left    1m
 
-
- ↓ 9 more · ↑ 7 more
 
  + New task  added word for word
 ────────────────────────────────────────

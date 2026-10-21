@@ -65,5 +65,5 @@ fn on_an_automations_row_a_tasks_keys_change_no_task_removing_asks_and_find_and_
     s.press(&["esc"]);
     s.press(&["alt+a"]);
     let archive = s.screen(120).join("\n");
-    assert!(!archive.contains("automations") && !archive.contains("Nightly"), "{archive}");
+    assert!(!archive.contains("▾ automations") && !archive.contains("Nightly"), "{archive}");
 }
