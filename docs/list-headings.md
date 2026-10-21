@@ -27,7 +27,7 @@ shown by itself, that machine's), under All and under Coordinators. It folds not
 still opens on its first task: `↑` reaches the top row. The archive has none.
 
 It stands for the [Coordinator](coordinator.md), as a machine's or a project's row stands for its coordinator: `Alt+P`,
-`Alt+T`, `Ctrl+E`, and `Ctrl+S` / `Ctrl+X` for [autopilot](autopilot.md); the top row also sums up the others on
+`Alt+T`, `Ctrl+E`, `Ctrl+S` / `Ctrl+X` to start and stop it, and `Ctrl+O` for [autopilot](autopilot.md); the top row also sums up the others on
 autopilot (`Coordinator · 2 others on · 1 needs you`).
 
 ## Machine and repo headings

@@ -6,7 +6,7 @@ agent.
 
 ```
  herdr-projects  proj · PRJ
- All 48 · Needs you 3 · Working 2 · Ready 1 · To do 12 · Done 30 · Coordinators 4
+ All 48   Coordinators 4   Needs you 3   Working 2   Ready 1   To do 12   Done 30   Automations 0
  needs you
  ! HSW-98  Add an undo for clear                                       R#2 PR#18 12m ago
            Review failed · 1 critical, 1 major
@@ -46,9 +46,10 @@ board shows and how many tasks stand in each group are on the filter row under i
 
 ## The filter row
 
-**`vm-str ▾ │ All · Coordinators · Needs you · Working · Ready · To do · Done · Automations`, each with its count**, as
-in an agents command center. The one shown is lit in its own colour, the one its rows and marks have: `Needs you` red,
-`Working` amber, `Ready` green, `Coordinators` the accent, `Automations` the automations' colour, the others plain. The
+**`vm-str ▾ │ All 420   Coordinators 12   Needs you 0   Working 1   Ready 0   To do 4   Done 415   Automations 2`**,
+each filter with its count, as in an agents command center, with plain room between them. The one shown is lit in its own colour, the one its rows and marks have: `Needs you` red,
+`Working` amber, `Ready` green, `Coordinators` the accent, `Automations` the automations' colour, the others plain, with
+a cell of the highlight on each side; every filter keeps that room, so the row does not move when another is lit. The
 others are greyed, a count of tasks that need you in red.
 
 **Whose board comes first**, wherever there is another machine: `All machines ▾`, or the one machine shown (in yellow
@@ -66,10 +67,11 @@ sidebar ([other machines](other-machines.md)); a click on it does the same. Ever
 - **`Tab` shows the next filter, `Shift+Tab` the one before**, round and round. A click on one shows it. The filter
   shown is kept with the board's view. Each filter keeps the grouping (`Alt+S`) and the headings of what it shows; a
   machine or a repo with nothing that matches has none.
-- **A machine's row and a project's row are their coordinator's**, drawn as a task agent's row: its coordinator's mark
-  (working, idle, needs you, stopped, not started, `◎` on autopilot), no rule to the edge, the last thing it said under
-  it and its time on the right. `Enter` folds and unfolds it (where it has nothing to fold, it talks to its coordinator),
-  `Space` talks to its coordinator.
+- **A machine's row and a project's row are their coordinator's**, one line each: the coordinators' mark `◈` in the
+  colour of where it stands (`◎` on autopilot), no rule to the edge, its time on the right, nothing under it. The list
+  reads machine → project → task by how far in each row stands. `Enter` folds and unfolds it (where it has nothing to
+  fold, it talks to its coordinator), `Space` talks to it, `Ctrl+S` / `Ctrl+X` start and stop it, `Ctrl+O` is its
+  autopilot.
 - **Where the window is narrow** the names are shorter (`Coords`, `Needs`, `Autos`), then shortest (`Co`, `Need`,
   `Work`), then the filters with nothing in them go; narrower still, only the one shown stands, with `tab next`.
 

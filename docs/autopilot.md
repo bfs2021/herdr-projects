@@ -23,10 +23,10 @@ On the board, on a coordinator's row (below), with nothing typed:
 
 | Key | Does |
 |---|---|
-| `Ctrl+S` | autopilot on, with its saved goal and settings. On one that says `needs you` or `could not start`, it starts again |
-| `Ctrl+X` | autopilot off |
+| `Ctrl+O` | autopilot on, with its saved goal and settings; and off again. On one that says `needs you` or `could not start`, it starts again |
 
-These are the keys that put an agent on a task and stop it. `Ctrl+S` with words typed sends them, as always.
+`Ctrl+S` and `Ctrl+X` there start and stop the coordinator itself, as they put an agent on a task and stop it; autopilot
+has its own key.
 
 From a shell:
 
@@ -50,10 +50,10 @@ herdr-projects autopilot off [--machine | --project <repo> | --all]
 - **Off** drops this time's values and every reason it had to wake. A turn under way is not cut off (its chat is yours
   too), but from then on every write of that turn is refused: `autopilot was turned off`.
 - **`off --all` is this machine only.** Another machine's coordinators are turned off there, or one by one with
-  `Ctrl+X` on their rows.
+  `Ctrl+O` on their rows.
 - `herdr-projects autopilot` lists this machine's coordinators. Another machine's are on its own board.
 - **`coordinator new`, `restart` and `stop` leave autopilot as it is.** Its next wake goes to the new chat.
-  `coordinator stop` on one on autopilot says so: its next wake starts it again, and `Ctrl+X` turns autopilot off.
+  `coordinator stop` on one on autopilot says so: its next wake starts it again, and `Ctrl+O` turns autopilot off.
 
 ## Where it shows
 
@@ -145,7 +145,7 @@ another machine) reaches it as `(not a wake) Autopilot woke: …`. A coordinator
 the same conversation, as your first message would start it.
 
 - **Answered** is a wake whose turn ended within 15 minutes. After `autopilot.needsYouAfter` unanswered in a row, its row
-  says `needs you` and no more wakes are sent until `Ctrl+S` or `autopilot on`. One answered sets the count back to zero.
+  says `needs you` and no more wakes are sent until `Ctrl+O` or `autopilot on`. One answered sets the count back to zero.
 - **A start that failed** is not a wake: it counts toward no limit, waits for the gap before the next try, and the row
   says `autopilot could not start: <reason>` until a start works.
 
@@ -269,9 +269,9 @@ What each means in full is in [the list](settings.md#the-list).
 ## Other machines
 
 **Each machine runs its own coordinators' autopilot**, with its own settings and limits. This board shows their lines
-and panels as that machine sends them with its tasks, and sends `Ctrl+S` and `Ctrl+X` there. `Ctrl+E` on one shows its
+and panels as that machine sends them with its tasks, and sends `Ctrl+O` (and `Ctrl+S`, `Ctrl+X`) there. `Ctrl+E` on one shows its
 settings whole, to read, and says to change them there. Each coordinator with a row is sent, its machine's and every
-repo's that machine knows, one that never ran as off: `Ctrl+S` there starts it, as a first message would. A machine on an
+repo's that machine knows, one that never ran as off: `Ctrl+O` there starts it, as a first message would. A machine on an
 older version sends no autopilot at all, and the keys say to update it there.
 
 **The main Coordinator sees other machines only while a board is open.** The keeper does not ask other machines for

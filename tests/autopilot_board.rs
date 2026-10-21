@@ -26,11 +26,11 @@ fn the_main_coordinators_row_is_on_top_and_shows_autopilot_only_while_it_is_on()
     assert!(!b.text().contains("autopilot"), "off: nothing of autopilot shows");
     b.press(&["up", "up"]);
     assert_eq!(b.s.sel, main_id(""), "the top row is reached with ↑");
-    // Tab with no goal saved: refused, and said
-    b.press(&["ctrl+s"]);
+    // the autopilot key with no goal saved: refused, and said
+    b.press(&["ctrl+o"]);
     assert!(b.text().contains("Tell a coordinator its goal first."), "{}", b.text());
     ok(&["set", "autopilot.goal", "Keep the docs current", "--main-coordinator"]); b.s.msg.clear();
-    b.press(&["ctrl+s"]);
+    b.press(&["ctrl+o"]);
     assert!(sw::autopilot::record::is_on(&sw::coordinator::co::Co::top(&w.socket)) && b.s.msg.is_empty(), "on says nothing: its row shows it ({})", b.s.msg);
     b.load();
     let lines = b.screen(140);
@@ -42,15 +42,12 @@ fn the_main_coordinators_row_is_on_top_and_shows_autopilot_only_while_it_is_on()
     assert!(line_with(&narrow, "◎   Coordinator").map(|l| l.ends_with(" next in 10m") && !l.contains("added")).unwrap_or(false), "{narrow:#?}");
     let at = narrower.iter().position(|l| l.contains("◎   Coordinator")).unwrap();
     assert!(!narrower[at].contains("next") && narrower[at + 1].contains("On · wakes every") && narrower[at + 1].chars().count() <= 26, "{narrower:#?}");
-    // Tab again says it is on; ctrl+x turns it off; again says it is off
-    b.press(&["ctrl+s"]); assert!(b.text().contains("is on autopilot already"), "{}", b.text());
-    b.press(&["ctrl+x"]); b.load();
+    b.press(&["ctrl+o"]); b.load(); // the autopilot key again turns it off
     assert!(!sw::autopilot::record::is_on(&sw::coordinator::co::Co::top(&w.socket)));
     let lines = b.screen(140);
     assert_eq!(line_with(&lines, "Coordinator").unwrap().trim_start_matches(['▌', ' ']), "Coordinator", "off: no line, no mark");
-    b.press(&["ctrl+x"]); assert!(b.text().contains("is not on autopilot"), "{}", b.text());
     let hints = b.screen(140).last().cloned().unwrap();
-    assert!(hints.contains("ctrl+s autopilot on") && hints.contains("ctrl+x off"), "{hints}");
+    assert!(hints.contains("ctrl+s start") && hints.contains("ctrl+x stop") && hints.contains("ctrl+o autopilot"), "{hints}");
 }
 
 #[test]
@@ -69,10 +66,11 @@ fn the_main_row_sums_up_the_others_and_a_repos_heading_has_its_own_line() {
     sw::autopilot::record::change(&proj(&w), |ap, _| { ap.put("needsYou", true); true }).unwrap();
     b.load();
     assert!(line_with(&b.screen(140), "Coordinator").unwrap().contains("1 other on · 1 needs you"));
-    // Its mark and its state word in red, as a task's that needs you; nothing on the list in a colour of its own
+    // Its mark in red, as a task's that needs you; the repo's row is one line, nothing under it; nothing on the list in
+    // a colour of its own
     let inked = b.inked(140);
     let has = |what: &str, bold: bool| inked.iter().any(|l| l.0.iter().any(|p| p.t == what && p.c == Ink::Red && p.bold == bold));
-    assert!(has("◎", true) && has("Needs you", false) && b.text().contains("Needs you · its last wakes went unanswered"), "{inked:?}");
+    assert!(has("◎", true) && !b.text().contains("its last wakes went unanswered"), "{inked:?}");
     assert!(inked.iter().all(|l| l.0.iter().all(|p| p.c != Ink::Pilot)), "the theme's own inks only");
 }
 
@@ -158,8 +156,8 @@ fn the_web_board_has_the_same_row_line_and_buttons() {
     let snap = web(&w, "pick", json!({ "id": main_id(""), "open": true }));
     assert!(snap.at("panel").b("coordinator"), "{}", snap.at("panel"));
     let labels: Vec<String> = snap.arr("actions").iter().map(|a| a.t("label")).collect();
-    assert!(labels.contains(&"autopilot on".to_string()) && labels.contains(&"off".to_string()), "{labels:?}");
-    web(&w, "press", json!({ "id": "stop" }));
+    assert!(labels.contains(&"start".to_string()) && labels.contains(&"stop".to_string()) && labels.contains(&"autopilot off".to_string()), "{labels:?}");
+    web(&w, "press", json!({ "id": "autopilot" }));
     assert!(!sw::autopilot::record::is_on(&sw::coordinator::co::Co::top(&w.socket)));
 }
 
@@ -188,15 +186,16 @@ fn another_machines_coordinator_shows_its_line_and_takes_its_keys_there_and_an_o
     while b.s.scope != "*" { b.press(&["alt+m"]); }
     let lines = b.screen(160); let at = lines.iter().position(|l| l.contains("◎ ▸ vm-b")).unwrap_or_else(|| panic!("{lines:#?}"));
     assert!(!lines[at].contains("──") && lines[at].ends_with("1 of 5 added  last #3"), "no rule, its columns on the right: {lines:#?}");
-    assert!(lines[at + 1].contains("Working · woke for its timer"), "{lines:#?}");
+    assert!(!lines[at + 1].contains("Working · woke for its timer"), "one line, nothing under it: {lines:#?}");
     assert!(line_with(&lines, "Coordinator").unwrap().contains("1 other on"), "the main row sums up every machine's: {lines:#?}");
     f.answers("vm-b", "do", &json!({ "ok": true, "msg": "Autopilot off for the vm-b coordinator." }));
-    b.s.sel = sw::board::update::heads::machine_id("vm-b"); b.press(&["ctrl+x"]);
+    b.s.sel = sw::board::update::heads::machine_id("vm-b"); b.press(&["ctrl+o"]);
     let (who, what, req) = f.asked().pop().unwrap();
     assert_eq!((who.as_str(), what.as_str(), req.s("action"), req.s("to")), ("vm-b", "do", "autopilot-off", "machine"));
+    b.press(&["ctrl+x"]); let (_, _, req) = f.asked().pop().unwrap(); assert_eq!((req.s("action"), req.s("to")), ("coordinator-stop", "machine"), "ctrl+x stops it there");
     // a machine on an older version sends no autopilot: the keys say to update it
     sw::board::update::update(&mut b.s, sw::board::update::Event::Remote { label: "vm-b".into(), answer: Ok(json!({ "host": "vm-b", "version": "1.0.0", "tasks": [] })) });
-    b.press(&["ctrl+s"]); assert!(b.text().contains("runs an older version that has no autopilot: update herdr-projects there first"), "{}", b.text());
+    b.press(&["ctrl+o"]); assert!(b.text().contains("runs an older version that has no autopilot: update herdr-projects there first"), "{}", b.text());
     // the door there: Tab and Ctrl+X from another machine's board
     ok(&["set", "autopilot.goal", "Tidy", "--machine-coordinator"]);
     let a = sw::remote::door("do", &json!({ "action": "autopilot-on", "id": "", "to": "machine" })).unwrap();
