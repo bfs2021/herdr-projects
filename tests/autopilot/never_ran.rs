@@ -16,7 +16,8 @@ fn far_board(w: &World, f: &crate::far::Far, list: serde_json::Value) -> Board {
     let mut b = open(&w.root, 40); b.s.side = false; b.load();
     sw::board::update::update(&mut b.s, sw::board::update::Event::Machines(sw::remote::machines()));
     for m in sw::remote::machines() { let a = sw::remote::ask_list(&m, 20000); sw::board::update::update(&mut b.s, sw::board::update::Event::Remote { label: m.label.clone(), answer: a }); }
-    b.press(&["alt+m"]); b.press(&["alt+s"]); b.load();
+    sw::board::update::remotes::set_scope(&mut b.s, "*".into(), &mut vec![]); // every machine
+    b.press(&["alt+s"]); b.load();
     b
 }
 fn their_task() -> serde_json::Value { json!([{ "id": "web/1", "repo": "web", "title": "Their task", "stage": "todo", "created": sw::clock::now() }]) }
@@ -40,9 +41,8 @@ fn tab_on_another_machines_repo_whose_coordinator_never_ran_sends_autopilot_on_a
     let (w, f) = far_world();
     // vm-b sends its autopilot, with nothing of its web repo's coordinator (one older than this fix leaves it out)
     let mut b = far_board(&w, &f, json!({ "host": "vm-b", "version": "9.9.9", "autopilot": { "": { "on": false } }, "tasks": their_task() }));
-    let head = sw::board::update::heads::group_id(&b.s, "vm-b", "web");
-    assert!(sw::board::update::coords::exists(&b.s, &head), "{}", b.text());
-    b.s.sel = head; b.load();
+    // its repo's coordinator, by its row's id (the keys act on the selected id)
+    b.s.sel = sw::board::update::coord_rows::row_id("vm-b", "project:web");
     b.press(&["ctrl+x"]);
     assert!(b.text().contains("is not on autopilot"), "off, not an older version: {}", b.text());
     f.answers("vm-b", "do", &json!({ "ok": true, "msg": "Autopilot on for the web coordinator." }));
@@ -65,7 +65,7 @@ fn tab_on_another_machines_repo_whose_coordinator_never_ran_sends_autopilot_on_a
 fn a_machine_that_sends_no_autopilot_at_all_still_says_to_update_it() {
     let (w, f) = far_world();
     let mut b = far_board(&w, &f, json!({ "host": "vm-b", "version": "1.0.0", "tasks": their_task() }));
-    b.s.sel = sw::board::update::heads::group_id(&b.s, "vm-b", "web"); b.load();
+    b.s.sel = sw::board::update::coord_rows::row_id("vm-b", "project:web");
     b.press(&["ctrl+s"]);
     assert!(b.text().contains("vm-b runs an older version that has no autopilot: update herdr-projects there first."), "{}", b.text());
     b.press(&["ctrl+x"]);

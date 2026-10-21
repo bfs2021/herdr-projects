@@ -55,7 +55,8 @@ pub fn unread(s: &State) -> Vec<Value> {
 pub fn list_of(s: &State, t: &Theme) -> Value {
     let now = crate::clock::now();
     let mut groups: Vec<Obj> = vec![];
-    let push = |groups: &mut Vec<Obj>, row: Value| { if let Some(g) = groups.last_mut() { if let Some(a) = g.get_mut("rows").and_then(|x| x.as_array_mut()) { a.push(row); } } };
+    // A row before any heading (a coordinator's on top, on one machine's board) stands in a group with no name of its own.
+    let push = |groups: &mut Vec<Obj>, row: Value| { if groups.is_empty() { groups.push(obj(json!({ "name": "", "id": "", "folded": false, "count": 0, "color": "plain", "repo": false, "rows": [], "more": 0 }))); } if let Some(g) = groups.last_mut() { if let Some(a) = g.get_mut("rows").and_then(|x| x.as_array_mut()) { a.push(row); } } };
     // A folded heading's count: how many rows it hides, in words where automations are among them (`7 tasks, 1 automation`).
     let count = |folded: usize, autos: usize| if autos > 0 { json!(crate::board::update::heads::holds(folded, autos)) } else { json!(folded) };
     // A coordinator's heading on autopilot has autopilot's mark, its columns and its line under it (board/view/pilot.rs),

@@ -209,7 +209,7 @@ pub fn undo(s: &mut State, fx: &mut Vec<Effect>) {
             s.draft_away = Some(d.clone());
             return s.flash(if d.to.is_empty() { format!("Those words were for the Coordinator. {} goes back to it, then {} brings them back.", key_name("talk"), key_name("undo")) }
                 else if !now.is_empty() { format!("Those words were for {nm}. Move to it, then {} brings them back.", key_name("undo")) }
-                else if super::heads::is_head(&d.to) { format!("Those words were for the {}. Select its heading and press {}, then {} brings them back.", clean(&title), key_name("talk"), key_name("undo")) }
+                else if super::heads::is_head(&d.to) { format!("Those words were for the {}. Select its row and press {}, then {} brings them back.", clean(&title), key_name("talk"), key_name("undo")) }
                 else { format!("Those words were for the agent on {nm}. Select it and press {}, then {} brings them back.", key_name("talk"), key_name("undo")) }, Ink::Yellow);
         }
         s.draft_away = None;

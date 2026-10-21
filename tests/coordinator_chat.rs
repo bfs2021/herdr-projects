@@ -4,6 +4,13 @@
 use crate::common;
 use common::board::{open, Board};
 use common::*;
+/// The chat's part of the screen: the line that says who you talk to, its box, what is said under it and the hints. The
+/// list over it may show a coordinator's last line on its row.
+fn chat_part(b: &mut common::board::Board) -> String {
+    let l = b.lines();
+    let from = l.iter().rposition(|x| x.starts_with("╭─")).map(|n| n.saturating_sub(1)).or_else(|| l.iter().rposition(|x| x.starts_with('❯')).map(|n| n.saturating_sub(2))).unwrap_or(0);
+    l[from..].join("\n")
+}
 use serde_json::{json, Value};
 use sw::board::keys::key_name;
 use sw::coordinator::{look::look, requests::send, state};
@@ -79,7 +86,7 @@ fn one_chat_for_everyone_space_on_a_task_talks_to_its_agent_otherwise_to_the_coo
     // While you talk to a task's agent the chat stays that agent's: the Coordinator's reply is said once, in a line.
     w.script(json!({ "coordinator": [{ "said": "All done." }] }));
     send(&w.root, "do something", false, "", &so).unwrap(); drain(); e.load();
-    assert!(e.text().contains("The Coordinator replied. space goes back to it."), "{}", e.text()); assert!(!e.text().contains("All done.")); assert!(!look(&so).unseen.is_empty());
+    assert!(e.text().contains("The Coordinator replied. space goes back to it."), "{}", e.text()); assert!(!chat_part(&mut e).contains("All done.")); assert!(!look(&so).unseen.is_empty());
     // What you type there is for that agent, not for the Coordinator.
     e.typed("also say goodbye"); assert!(e.text().contains("enter send to PRJ-1's agent · shift+enter new line · esc put away")); e.press(&["esc"]);
     // esc is not a chat key: the agent's message stays up, you still talk to the agent, and nothing asks to close.

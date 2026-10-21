@@ -1,6 +1,6 @@
 //! A file attached in the web board's chat box for another machine's agent or coordinator reaches that machine: through
 //! the herdr web UI's own way to that PC (asked by the front door with the caller's own headers, kept beside the pane
-//! there), whose path is answered; for a heading's coordinator, and for the Coordinator of the machine whose board
+//! there), whose path is answered; for a coordinator by its row, and for the Coordinator of the machine whose board
 //! shows; and where the web UI cannot (no PC, not connected, no pane known, or it says why not), over the board's own
 //! SSH link, or the box is told plainly that it could not be sent there.
 use crate::common;
@@ -100,12 +100,12 @@ fn a_file_for_another_machines_agent_goes_through_the_web_ui_to_its_pane_there_w
 }
 
 #[test]
-fn a_file_for_another_machines_coordinator_by_its_heading_or_by_its_board_goes_beside_that_coordinator() {
+fn a_file_for_another_machines_coordinator_by_its_row_or_by_its_board_goes_beside_that_coordinator() {
     let (_w, _far) = far_world();
     every_machine("t");
     let pane = |to: Value| { let u = ui(Some(vec![pc(true)]), kept_there()); assert_eq!(attach(to, &u).unwrap().s("path"), THERE); let a = u.asked.borrow()[0].clone(); assert_eq!(a.0, "/api/machines/pc-9/pane/image"); a.1.t("pane_id") };
-    // vm-a's heading: its machine coordinator
-    assert_eq!(pane(json!({ "id": "head:machine\tvm-a", "reply": true, "scope": "*" })), "w8:p1");
+    // vm-a's machine coordinator, by its row
+    assert_eq!(pane(json!({ "id": "head:cm\tvm-a", "reply": true, "scope": "*" })), "w8:p1");
     // vm-a's board: its Coordinator, also when the box said nobody (the board's own scope then, never this machine's)
     sw::webui::web::call("t", "scope", json!({ "to": "vm-a", "role": "drive" }), "", None).unwrap();
     assert_eq!(pane(json!({ "id": "", "reply": false, "scope": "vm-a" })), "w9:p1");

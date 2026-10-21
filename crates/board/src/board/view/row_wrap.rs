@@ -45,7 +45,8 @@ pub fn wrap_parts(s: &State, r: &Obj, width: usize, cells: Option<usize>) -> Par
     // waits for a free slot its place in the queue with it (`Q#2  2m`).
     let time = Inked::of(format!("{}{}", f.elapsed, if f.ago { " ago" } else { "" }), Ink::Muted);
     let bare = f.bar.is_empty() && f.eta.is_empty() && f.review.is_empty() && f.pr.is_empty();
-    let lone = if is_auto(r) { Inked::of(f.when.clone(), Ink::Muted) } else if bare && f.percent.is_empty() { time } else if bare && queued(r) { f.percent.clone().add(Inked::plain("  ")).add(time) } else { Inked::new() };
+    let coord = super::fields::is_coord(r);
+    let lone = if is_auto(r) { Inked::of(f.when.clone(), Ink::Muted) } else if coord { time } else if bare && f.percent.is_empty() { time } else if bare && queued(r) { f.percent.clone().add(Inked::plain("  ")).add(time) } else { Inked::new() };
     let mut says = up_to(said.wrap(say_room), WRAP_LINES, say_room);
     let lw = lone.width();
     if !lone.is_empty() && is_auto(r) && says.last().map(|l| l.width()).unwrap_or(0) as i64 > say_room as i64 - lw as i64 - 2 { says.push(Inked::new()); }
@@ -58,7 +59,8 @@ pub fn wrap_parts(s: &State, r: &Obj, width: usize, cells: Option<usize>) -> Par
         let joined = line.add(Inked::spaces(gap)).add(lone.clone());
         if says.is_empty() { says.push(joined); } else { says[last] = joined; }
     }
-    Parts { indent, cells, lead: say_lead, name, says, lone: !lone.is_empty() }
+    // A coordinator has no line of columns: its time, if any, ends what it says.
+    Parts { indent, cells, lead: say_lead, name, says, lone: !lone.is_empty() || coord }
 }
 /// The lines a row takes in the list.
 pub fn row_height(s: &State, r: &Obj, width: usize, tall: bool) -> usize {

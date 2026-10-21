@@ -17,7 +17,7 @@ pub fn press_of(id: &str) -> Result<Press, String> {
     if c.is_empty() { if let Some(c) = k.raw.first().and_then(|r| r.chars().next()) { return Ok(Press::char(c)); } }
     if c.is_empty() { Err(format!("The key \"{id}\" cannot be pressed from the web board")) } else { Ok(Press::chord(&c)) }
 }
-fn on_board(s: &State, id: &str) -> bool { s.items.iter().any(|r| r.s("id") == id) || s.jobs.iter().any(|j| j.s("id") == id) || s.autos.iter().any(|a| a.s("row") == id) || (crate::board::update::coords::of_head(s, id).is_some() && s.rows.iter().any(|r| matches!(r, crate::board::state::Row::Head { id: h, .. } if h == id))) }
+fn on_board(s: &State, id: &str) -> bool { s.items.iter().any(|r| r.s("id") == id) || s.jobs.iter().any(|j| j.s("id") == id) || s.autos.iter().any(|a| a.s("row") == id) || (crate::board::update::coords::of_head(s, id).is_some() && crate::board::update::coords::exists(s, id)) || (crate::board::update::coords::of_head(s, id).is_some() && s.rows.iter().any(|r| matches!(r, crate::board::state::Row::Head { id: h, .. } if h == id))) }
 fn key(c: &mut Client, p: Press) { let fx = update(&mut c.s, Event::Key(p)); effects(c, fx, false); }
 /// A button: the key it stands for, pressed with the text box empty. Words the key puts into the text box (a draft
 /// brought back, words taken back to change) are the page's draft.

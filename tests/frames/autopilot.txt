@@ -1,11 +1,11 @@
  herdr-projects  proj · PRJ
  All 1 · Needs you 0 · Working 0 · Ready 0 · To do 1 · Done 0 · Coordinators 3
+ ◎       Main coordinator · 1 other on                           0 of 5 added         next in 1h
+         On · woke 0s ago: autopilot was turned on
 
- ◎   Coordinator · 1 other on                                               0 of 5 added  next in 1h
-     On · woke 0s ago: autopilot was turned on
-
- ◎ ▾ proj · PRJ                                                    1 of 5 added  ○ PRJ-1  next in 6h
-     On · woke 0s ago: autopilot was turned on
+ ▾ proj · PRJ
+ ◎       Project coordinator · proj                              1 of 5 added ○ PRJ-1 next in 6h
+         On · woke 0s ago: autopilot was turned on
 ▌○ PRJ-1 Fix the docs index                                                                   0s ago
 
 
@@ -17,12 +17,12 @@
 
  herdr-projects  proj · PRJ
  All 1 · To do 1 · Coords 3
+ ◎       Main coordinator · 1 other on
+         On · woke 0s ago: autopilot was tu…  next in 1h
 
- ◎   Coordinator · 1 other on   0 of 5 added  next in 1h
-     On · woke 0s ago: autopilot was turned on
-
- ◎ ▾ proj · PRJ        1 of 5 added  ○ PRJ-1  next in 6h
-     On · woke 0s ago: autopilot was turned on
+ ▾ proj · PRJ
+ ◎       Project coordinator · proj
+         On · woke 0s ago: autopilot was tu…  next in 6h
 ▌○ PRJ-1 Fix the docs index
 
 

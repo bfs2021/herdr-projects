@@ -23,6 +23,8 @@ fn two_machines() -> (World, Board) {
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "0.2.0", "tasks": [task("proj/151", "Theirs in proj"), task("crm/4", "Theirs in crm")] })) });
     (w, s)
 }
+/// Alt+M round to every machine: it comes first in the round, this machine where herdr's sidebar has it.
+fn every(s: &mut Board) { for _ in 0..4 { if s.s.scope == "*" { return; } s.press(&["alt+m"]); } panic!("alt+m never showed every machine"); }
 fn head(name: &str) -> String { format!(r"\n ▾ {name} ─+\n") }
 /// Arrow down until the selection is on this heading (or on this task).
 fn go(s: &mut Board, id: &str) { for _ in 0..40 { if s.s.sel == id { return; } s.press(&["down"]); } for _ in 0..40 { if s.s.sel == id { return; } s.press(&["up"]); } panic!("{id} is not reached with the arrows"); }
@@ -32,7 +34,7 @@ fn repo(host: &str, name: &str) -> String { format!("head:repo\t{host}\t{name}")
 #[test]
 fn every_machine_a_heading_its_repos_under_it_and_rows_with_the_number_alone() {
     let (_w, mut s) = two_machines();
-    s.press(&["alt+m", "alt+s"]); assert!(s.s.scope == "*" && s.s.by_repo);
+    every(&mut s); s.press(&["alt+s"]); assert!(s.s.scope == "*" && s.s.by_repo);
     let t = s.screen(100).join("\n");
     let here = sw::shown::words::clean(&sw::remote::check::hostname());
     assert!(has(&t, &format!(r"{} ▾ proj · PRJ\n[ ▌]○ PRJ-\d+ +Mine", head(&regex::escape(&here)))), "this machine first, under its own name: {t}");
@@ -52,7 +54,7 @@ fn every_machine_a_heading_its_repos_under_it_and_rows_with_the_number_alone() {
 #[test]
 fn enter_on_a_heading_folds_it_to_one_line_with_how_many_it_holds_and_unfolds_it_at_both_levels() {
     let (_w, mut s) = two_machines();
-    s.press(&["alt+m", "alt+s"]);
+    every(&mut s); s.press(&["alt+s"]);
     // The arrows stop on each heading, which is selected as a row is.
     go(&mut s, &repo("otherbox", "crm"));
     assert!(s.screen(100).iter().any(|l| l.starts_with("▌▾ crm")), "{}", s.text());

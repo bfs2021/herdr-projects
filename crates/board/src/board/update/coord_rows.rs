@@ -40,7 +40,9 @@ fn of_machine_as(s: &State, host: &str, every: bool) -> (Vec<String>, Vec<(Strin
     if has_main(s, host) { top.push(row_id(host, "")); }
     if every || known.iter().any(|k| k == "machine") { top.push(row_id(host, "machine")); }
     let mut repos: Vec<String> = known.iter().filter_map(|k| k.strip_prefix("project:").map(String::from)).collect();
+    // Every one: also a project's that never ran, for the repos used lately here, and there for those its tasks are of.
     if every && host.is_empty() { repos.extend(s.data.lately.iter().cloned()); }
+    if every && !host.is_empty() { if let Some(m) = s.remotes.get(host) { repos.extend(m.items.iter().filter(|r| !r.b("archivedAt")).map(|r| super::list::repo_name(r).to_string())); } }
     repos.sort_by_key(|r| r.to_lowercase()); repos.dedup();
     (top, repos.into_iter().map(|r| { let id = row_id(host, &format!("project:{r}")); (r, id) }).collect())
 }
@@ -73,5 +75,6 @@ pub fn rec(s: &State, id: &str) -> Option<Rec> {
     let state = match kind { "working" => "working", "blocked" | "error" => "blocked", _ => "idle" };
     Some(Rec::new(obj(json!({ "id": id, "title": row_name(&t), "state": state, "msg": line, "host": t.host,
         "coord": { "kind": kind, "word": word, "pilot": pilot, "said": line, "at": at, "main": t.to.is_empty(),
-            "added": if p.b("on") { p.t("added") } else { String::new() }, "last": if p.b("on") && p.b("last") { format!("last {}", p.s("last")) } else { String::new() }, "next": if p.b("on") { p.t("next") } else { String::new() } } }))))
+            "added": if p.b("on") { p.t("added") } else { String::new() }, "lastId": if p.b("on") { p.t("lastId") } else { String::new() },
+            "sum": if t.to.is_empty() && (t.host.is_empty() || t.host == s.scope) { super::pilot::others(s, &t) } else { String::new() }, "last": if p.b("on") && p.b("last") { format!("last {}", p.s("last")) } else { String::new() }, "next": if p.b("on") { p.t("next") } else { String::new() } } }))))
 }

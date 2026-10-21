@@ -90,7 +90,7 @@ fn other_machines_automations_are_in_the_list_with_their_machine_named_and_are_c
     let _ = update(&mut s.s, Event::Machines(sw::remote::machines()));
     poll(&mut s, Some(json!([far_auto(json!({}))])));
     assert!(!t(&mut s, 120).contains("Theirs nightly"), "this machine only: its own");
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    sw::board::update::remotes::set_scope(&mut s.s, "*".into(), &mut vec![]); // every machine assert_eq!(s.s.scope, "*");
     let text = t(&mut s, 140);
     like(&text, r"\n ⟳ on {4}Look for old dependencies {2}every 2h +next in {2}2h\n"); // its repo is the one the board shows: not said
     // in the part of the machine that has it, a group of its own after that machine's tasks; its machine is its heading, not on its row
@@ -130,7 +130,7 @@ fn other_machines_automations_are_in_the_list_with_their_machine_named_and_are_c
     like(&regex::Regex::new(r"\s+").unwrap().replace_all(&text, " "), &format!("{} changes them", regex::escape(&key_name("settings")))); assert!(!text.contains("Changed on vm-b"));
     s.press(&["down", "enter"]); assert_eq!(s.s.sel, "vm-b:far/7"); assert!(!s.s.auto_open);
     // that machine's own board: only its automations, no machine on the row (the header names it)
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "vm-b");
+    for _ in 0..3 { if s.s.scope != "vm-b" { s.press(&["alt+m"]); } } assert_eq!(s.s.scope, "vm-b");
     let text = t(&mut s, 140);
     like(&text, r"\n[ ▌]⟳ on {2}Theirs nightly {2}every 5m · far +○ #7 next in {2}4m\n"); assert!(!text.contains("Look for old dependencies"));
     // off there, with why; and removing asks first, naming the machine

@@ -234,7 +234,7 @@ below always use the PC names.
 | `Alt+A` | the archive, and back to the board |
 | `Alt+S` | how the list is grouped, in turn: by status, by repo (each group under its repo's name; a row's tag never names a repo), by machine (each machine under its own heading, its tasks under it by how much they need you) |
 | `Alt+D` | every done task, or only the latest |
-| `Alt+M` | other machines: this machine only, every machine, then each machine by itself |
+| `Alt+M` | whose board shows, the filter row's first item: every machine, then each machine by itself (this one too) in the order of herdr's sidebar |
 
 **The text box's own** (not a key of the board, and not in the `?` menu)
 

@@ -4,6 +4,13 @@
 use crate::common;
 use common::board::open;
 use common::*;
+/// The chat's part of the screen: the line that says who you talk to, its box, what is said under it and the hints. The
+/// list over it may show a coordinator's last line on its row.
+fn chat_part(b: &mut common::board::Board) -> String {
+    let l = b.lines();
+    let from = l.iter().rposition(|x| x.starts_with("╭─")).map(|n| n.saturating_sub(1)).or_else(|| l.iter().rposition(|x| x.starts_with('❯')).map(|n| n.saturating_sub(2))).unwrap_or(0);
+    l[from..].join("\n")
+}
 use serde_json::json;
 use sw::board::keys::key_name;
 use sw::json::*;
@@ -63,7 +70,7 @@ fn the_box_talks_to_one_long_lived_coordinator_started_once_with_nothing_held_ba
     }
     assert_eq!(sw::coordinator::look::look(&socket).unseen, "", "a reply you can see counts as seen");
     s.press(&["alt+c"]); assert!(!s.s.chat_open);
-    assert!(!s.text().contains("Added proj/1."));
+    assert!(!chat_part(&mut s).contains("Added proj/1."));
     assert_eq!(sw::store::files::read_obj(&sw::store::files::data_dir().join("view.json")).unwrap().s("chat"), "closed");
     s.press(&["esc"]); assert!(!s.s.chat_open && s.s.ask.is_none() && !s.closed);
     s.press(&["alt+c"]); assert!(s.s.chat_open && s.text().contains("Added proj/1."));
@@ -79,6 +86,6 @@ fn the_box_talks_to_one_long_lived_coordinator_started_once_with_nothing_held_ba
     assert!(has(&sw::coordinator::requests::where_text(&socket), r#"2 messages[^\n]*\n- "build a login page"[^\n]*It was sent with enter[^\n]*\n- "and start it"[^\n]*It was sent with enter[^\n]*$"#));
     // Hidden, a new reply is said on the chat's one line; shown again, it is there.
     s.load(); assert!(!s.s.chat_open);
-    assert!(!s.text().contains("Delegated proj/1.") && has(&s.text(), r"\n[ ▌]○ Coordinator  new reply *\n"), "{}", s.text());
+    assert!(!chat_part(&mut s).contains("Delegated proj/1.") && has(&s.text(), r"\n[ ▌]○ Coordinator  new reply *\n"), "{}", s.text());
     s.press(&["alt+c"]); assert!(s.text().contains("Delegated proj/1."));
 }

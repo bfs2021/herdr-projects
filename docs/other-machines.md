@@ -1,11 +1,11 @@
 # Other machines
 
-**Every machine keeps its own tasks, and `Alt+M` shows the others' tasks on your board.** Press it to go round: this
-machine, every machine, then each other machine by itself. Actions on another machine's task run on that machine, over
+**Every machine keeps its own tasks, and `Alt+M` shows the others' tasks on your board.** Press it to go round: every
+machine, then each machine by itself (this one too) in the order of Herdr's sidebar. Actions on another machine's task run on that machine, over
 SSH. Work never moves between machines.
 
-Which machines you see is the first thing in the board's header, in the accent colour, and is never cut:
-`all machines: otherbox`, or `only otherbox`.
+Which machines you see is the first item of the filter row, in the accent colour: `All machines ▾`, or `otherbox ▾`
+(in yellow while it does not answer). A click on it goes round too ([the board](board.md#the-filter-row)).
 
 ## Set up another machine
 

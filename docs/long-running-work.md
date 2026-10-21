@@ -13,7 +13,7 @@ that keeps the thread.
 
 ## A project coordinator per repo
 
-Group by repo (`Alt+S`) and press `Space` on the repo's heading: you talk to that repo's own coordinator. It is a
+Press `Enter` on the repo's `Project coordinator` row (`Shift+Tab` shows every coordinator): you talk to that repo's own coordinator. It is a
 long-lived chat about that one repo, kept across restarts, beside the Coordinator and never mixed with it
 ([machine and project coordinators](machine-and-project-coordinators.md)).
 

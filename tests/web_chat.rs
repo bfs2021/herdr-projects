@@ -27,8 +27,11 @@ fn far_world() -> (World, Far) {
     std::fs::write(sw::store::files::data_dir().join("view.json"), json!({ "cwd": w.root_str() }).to_string()).unwrap();
     (w, far)
 }
-/// The page shows vm-a's board by itself: this machine, every machine, then vm-a.
-fn show_vm_a() -> Value { call("press", json!({ "id": "scope" })); far::answered("t", 1); call("press", json!({ "id": "scope" })); far::answered("t", 1); call("board", json!({})) }
+/// The page shows vm-a's board by itself: round from this machine, every machine first, then each machine (vm-a among them).
+fn show_vm_a() -> Value {
+    for _ in 0..4 { call("press", json!({ "id": "scope" })); far::answered("t", 1); if call("board", json!({})).at("flags").s("scope") == "vm-a" { break; } }
+    call("board", json!({}))
+}
 fn looks(talk: &[(bool, &str)]) -> Look { Look { state: "idle".into(), readable: true, talk: talk.iter().map(|(you, t)| Said { you: *you, text: t.to_string(), at: 0 }).collect(), ..Default::default() } }
 
 #[test]

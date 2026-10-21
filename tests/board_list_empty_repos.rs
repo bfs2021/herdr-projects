@@ -1,11 +1,12 @@
 //! Grouped by repo, a known repo with no task in view keeps its heading when it was used lately (a task that changed in
-//! the last 14 days, archived ones too) or has a project coordinator: folded, `0 tasks`, and space there talks to its
-//! project coordinator. An old repo, one whose folder is gone, and any while a filter or the archive narrows the list
+//! the last 14 days, archived ones too): folded, `0 tasks`; one with a project coordinator has its heading open over
+//! that coordinator's row, which enter or space talks to. An old repo, one whose folder is gone, and any while a filter or the archive narrows the list
 //! have none. The web board has the same heading.
 use crate::common;
 use common::board::{open, Board};
 use common::*;
 use serde_json::json;
+use sw::board::update::coord_rows::row_id;
 use sw::board::update::heads::group_id;
 use sw::coordinator::co::Co;
 use sw::json::*;
@@ -30,7 +31,7 @@ fn screen(s: &mut Board) -> String { s.screen(100).join("\n") }
 fn coordinated(w: &World, repo: &str) { sw::coordinator::state::change(Co::project(&w.socket, repo), |_| true).unwrap(); }
 
 #[test]
-fn a_known_repo_with_a_project_coordinator_and_no_tasks_has_its_heading_and_space_talks_to_it() {
+fn a_known_repo_with_a_project_coordinator_and_no_tasks_has_its_heading_and_its_coordinators_row_talks_to_it() {
     let w = world_with(Opts { repo: true, settings: json!({ "coordinator.agent": "claude" }), ..Default::default() });
     side_repo(&w);
     let mut s = by_repo(&w);
@@ -39,21 +40,21 @@ fn a_known_repo_with_a_project_coordinator_and_no_tasks_has_its_heading_and_spac
     coordinated(&w, "side");
     s.load();
     let t = screen(&mut s);
-    assert!(has(&t, r"\n ▸ side\b.*  0 tasks") && t.contains("Mine"), "{t}");
-    // Enter has nothing to unfold; space talks to its project coordinator.
-    let head = group_id(&s.s, "", "side");
-    s.s.sel = head.clone(); s.load();
+    assert!(has(&t, r"\n ▾ side\b[^\n]*\n[^\n]*Project coordinator · side") && t.contains("Mine"), "{t}");
+    // Enter on its row talks to its project coordinator.
+    let row = row_id("", "project:side");
+    s.s.sel = row.clone(); s.load();
     s.press(&["enter"]);
-    assert!(s.s.msg.contains("No tasks in side yet") && s.s.msg.contains("project coordinator") && s.s.sel == head, "{}", s.s.msg);
-    s.press(&["space"]);
-    assert!(s.s.reply && s.s.reply_id == head);
+    assert!(s.s.reply && s.s.reply_id == row);
     assert!(has(&s.text(), r"side coordinator  not started"), "{}", s.text());
-    // The web board shows it too, folded.
+    // The web board shows it too: its heading with the coordinator's row in it.
     let g = sw::webui::model::list::list_of(&s.s, &s.theme);
-    let side = g.arr("groups").iter().find(|g| g.s("id") == head).cloned().unwrap_or_else(|| panic!("{g}"));
-    assert!(side.b("folded") && side.s("count") == "0 tasks" && side.arr("rows").is_empty(), "{side}");
-    // Not by status: no repo headings at all.
-    s.press(&["alt+s"]); assert!(!screen(&mut s).contains("side"));
+    let side = g.arr("groups").iter().find(|g| g.s("id") == group_id(&s.s, "", "side")).cloned().unwrap_or_else(|| panic!("{g}"));
+    assert!(!side.b("folded") && side.arr("rows").iter().any(|r| r.s("id") == row), "{side}");
+    // Not by repo: no repo headings at all, the coordinator's row with the others on top.
+    s.press(&["alt+s", "alt+s"]); assert!(!s.s.by_repo && !s.s.by_machine);
+    let t = screen(&mut s);
+    assert!(!has(&t, r"▾ side|▸ side") && t.contains("Project coordinator · side"), "{t}");
 }
 
 #[test]
@@ -78,7 +79,7 @@ fn a_repo_whose_last_task_is_archived_keeps_its_heading_until_it_was_not_used_fo
     assert!(!screen(&mut s).contains("side"), "{}", screen(&mut s));
     coordinated(&w, "side");
     s.load();
-    assert!(has(&screen(&mut s), r"▸ side\b"), "{}", screen(&mut s));
+    assert!(has(&screen(&mut s), r"▾ side\b") && screen(&mut s).contains("Project coordinator · side"), "{}", screen(&mut s));
 }
 
 #[test]
@@ -87,7 +88,7 @@ fn a_known_repo_whose_folder_is_gone_has_no_heading() {
     let side = side_repo(&w);
     coordinated(&w, "side");
     let mut s = by_repo(&w);
-    assert!(has(&screen(&mut s), r"▸ side\b"), "{}", screen(&mut s));
+    assert!(has(&screen(&mut s), r"▾ side\b"), "{}", screen(&mut s));
     std::fs::remove_dir_all(&side).unwrap();
     s.load();
     assert!(!screen(&mut s).contains("side"), "{}", screen(&mut s));

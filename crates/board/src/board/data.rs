@@ -93,7 +93,8 @@ pub fn load(wants: &Wants) -> Data {
     let sub = (!wants.coord.is_empty()).then(|| { let co = crate::coordinator::co::Co::of(&socket, &wants.coord); let v = look(&co); let sc = if !v.readable && v.status.is_some() { screen_text(&screen(&v, &co)) } else { String::new() }; (wants.coord.clone(), v, sc) });
     let here = repo_here(&wants.cwd);
     let looks = looks(&socket, &wants.looks);
-    let coords = crate::coordinator::state::all(&socket).into_iter().filter(|c| !c.is_top()).map(|c| c.to()).collect();
+    // A project's whose repo folder is gone has no row: as a repo's heading, it would lead nowhere.
+    let coords = crate::coordinator::state::all(&socket).into_iter().filter(|c| !c.is_top() && c.repo().is_none_or(|r| roots.get(r).is_some_and(|f| std::path::Path::new(f).is_dir()))).map(|c| c.to()).collect();
     Data {
         items, autos, jobs, coord, coord_screen, sub, looks, coords, can_dispatch: crate::coordinator::who::ready(&socket), keys: repo_keys(), repos: roots.keys().cloned().collect(), roots, lately,
         session: session_name(&socket), notify: setting("board.notify", None).as_str().unwrap_or("").to_string(),

@@ -1,12 +1,13 @@
-//! Your own settings on the board: the settings key on this machine's heading opens the settings page for yours (what
-//! every task starts from), on a repo's heading for your entry for that repo (each under the heading's coordinator's
-//! own rows, as a heading stands for its coordinator), and on a task still for that task; the ? menu has them too. A change there is the one `herdr-projects set` makes, put back the one `unset` makes; another
+//! Your own settings on the board: the settings key on this machine's coordinator's row opens the settings page for
+//! yours (what every task starts from), on a repo's coordinator's row for your entry for that repo (each under that
+//! coordinator's own rows), and on a task still for that task; the ? menu has them too. A change there is the one `herdr-projects set` makes, put back the one `unset` makes; another
 //! machine's are changed on that machine.
 use crate::common;
 use common::board::{open, Board};
 use common::*;
 use serde_json::{json, Value};
 use sw::board::state::Whose;
+use sw::board::update::coord_rows::row_id;
 use sw::board::update::{update, Event};
 use sw::json::*;
 use sw::store::settings::lookup::Scope;
@@ -28,19 +29,22 @@ fn every_machine() -> (World, Board, String) {
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     let now = sw::clock::now();
     update(&mut b.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "0.2.0", "tasks": [{ "id": "proj/151", "title": "Theirs", "state": "idle", "stage": "todo", "at": now, "created": now }] })) });
-    b.press(&["alt+m"]); assert_eq!(b.s.scope, "*");
+    for _ in 0..3 { if b.s.scope != "*" { b.press(&["alt+m"]); } }
+    assert_eq!(b.s.scope, "*");
     (w, b, id)
 }
 
 #[test]
-fn the_settings_key_on_this_machines_heading_changes_your_own_settings_and_a_task_follows() {
+fn the_settings_key_on_this_machines_coordinators_row_changes_your_own_settings_and_a_task_follows() {
     let (_w, mut b, id) = every_machine();
-    b.s.sel = "head:machine\t".into();
+    // its row (never talked to: under the filter Coordinators)
+    b.press(&["shift+tab"]);
+    b.s.sel = row_id("", "machine"); b.load(); assert_eq!(b.s.sel, row_id("", "machine"));
     b.press(&["ctrl+e"]);
     assert_eq!(whose(&b), Some(Whose::Coord("machine".into(), "you".into())));
     b.rows = 160; // the page is whole on the screen: its coordinator's rows come first
     let t = b.screen(120).join("\n");
-    assert!(t.contains("This coordinator") && t.contains("Every coordinator and task (you)") && t.contains("autopilot.every"), "the heading's coordinator's rows, then yours: {t}");
+    assert!(t.contains("This coordinator") && t.contains("Every coordinator and task (you)") && t.contains("autopilot.every"), "the coordinator's own rows, then yours: {t}");
     assert!(t.contains("Merge method") && t.contains("merge.method") && t.contains("built in") && t.contains("The board key opens"), "work and board settings, each saying where it comes from: {t}");
     assert!(t.contains("set by you") && t.contains("esc back to the list"), "{t}");
     // enter takes a choice to its next value: the one `set` would save, and `show` says it is yours.
@@ -68,10 +72,12 @@ fn the_settings_key_on_this_machines_heading_changes_your_own_settings_and_a_tas
 }
 
 #[test]
-fn on_a_repos_heading_it_is_your_entry_for_that_repo_on_a_task_the_tasks_own_and_another_machines_says_where() {
+fn on_a_repos_coordinator_it_is_your_entry_for_that_repo_on_a_task_the_tasks_own_and_another_machines_says_where() {
     let (_w, mut b, id) = every_machine();
     b.press(&["alt+s"]); assert!(b.s.by_repo);
-    b.s.sel = "head:repo\t\tproj".into();
+    // its row (never talked to: under the filter Coordinators)
+    b.press(&["shift+tab"]);
+    b.s.sel = row_id("", "project:proj"); b.load(); assert_eq!(b.s.sel, row_id("", "project:proj"));
     b.press(&["ctrl+e"]);
     let t = b.screen(120).join("\n");
     assert_eq!(whose(&b), Some(Whose::Coord("project:proj".into(), "repo:proj".into())));
@@ -86,6 +92,7 @@ fn on_a_repos_heading_it_is_your_entry_for_that_repo_on_a_task_the_tasks_own_and
     assert_eq!(shown(&Scope::repo("proj"), "merge.method").2, false);
     b.press(&["esc"]);
     // On a task it is still that task's page.
+    b.press(&["tab"]);
     b.s.sel = id.clone(); b.load();
     b.press(&["ctrl+e"]);
     assert_eq!(whose(&b), Some(Whose::Task));
@@ -95,8 +102,8 @@ fn on_a_repos_heading_it_is_your_entry_for_that_repo_on_a_task_the_tasks_own_and
     let task = sw::store::tasks::get(&id).unwrap();
     assert_eq!(shown(&Scope::task(&task), "merge.method"), ("merge".into(), "this task".into(), true));
     b.press(&["esc", "esc"]);
-    // Another machine's heading: its settings are changed there, and the board says so.
-    b.s.sel = "head:machine\totherbox".into();
+    // Another machine's coordinator: its settings are changed there, and the board says so.
+    b.s.sel = row_id("otherbox", "machine");
     b.press(&["ctrl+e"]);
     assert!(b.s.editing.is_none());
     let said = b.text().replace("\n  ", " ");

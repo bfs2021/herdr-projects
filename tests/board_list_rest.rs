@@ -88,8 +88,10 @@ fn every_machines_tasks_say_whose_they_are_and_a_far_merge_says_where_it_lands()
     let now = sw::clock::now();
     let far = |items: serde_json::Value| Ok(json!({ "host": "otherbox", "version": "0.2.0", "tasks": items }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: far(json!([{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }])) });
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
-    for width in [100, 40, 24] { assert!(s.screen(width)[0].contains("all machines: otherbox"), "at {width}: {}", s.screen(width)[0]); }
+    // Alt+M: every machine comes first in its round (this machine where herdr's sidebar has it).
+    while s.s.scope != "*" { s.press(&["alt+m"]); }
+    // whose board shows is the filter row's first item, never cut
+    for width in [100, 40, 24] { assert!(s.screen(width)[1].starts_with(" All machines ▾"), "at {width}: {}", s.screen(width)[1]); }
     s.s.sel = "otherbox:proj/1".into(); s.load();
     let t = s.screen(100).join("\n");
     // Each machine under a heading of its own, its status groups under that: the row's tag is the number alone.
@@ -112,18 +114,24 @@ fn every_machines_tasks_say_whose_they_are_and_a_far_merge_says_where_it_lands()
 }
 
 #[test]
-fn machine_names_too_long_for_the_header_go_on_whole_never_cut() {
+fn machine_names_too_long_for_a_line_are_shown_whole_never_cut() {
     let long = ["a-very-long-machine-name-on-the-tailnet", "another-extremely-long-machine-name-there"];
     let w = world_with(Opts { repo: true, settings: json!({ "board.machines": long.join(", ") }), ..Default::default() });
     w.add("Mine");
     let mut s = open(&w.root, 24); s.s.side = false;
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     for m in long { update(&mut s.s, Event::Remote { label: m.into(), answer: Ok(json!({ "host": m, "version": "0.2.0", "tasks": [] })) }); }
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    while s.s.scope != "*" { s.press(&["alt+m"]); }
+    // every machine: each under a heading of its own, its name whole
     for width in [80, 50] {
-        let head = regex::Regex::new(r"\s+").unwrap().replace_all(&s.screen(width)[..4].join(" "), " ").into_owned();
-        for name in long { assert!(head.contains(name), "{name} whole at {width}: {head}"); }
-        assert!(!has(&s.screen(width)[..4].join("\n"), "machine[^\n]*…"));
+        let t = s.screen(width).join("\n");
+        for name in long { assert!(t.lines().any(|l| l.contains(&format!("▾ {name}")) || l.contains(&format!("▸ {name}"))), "{name} whole at {width}: {t}"); }
+    }
+    // one machine by itself: its name is the filter row's first item, whole
+    for name in long {
+        while s.s.scope != name { s.press(&["alt+m"]); }
+        let l = s.screen(50)[1].clone();
+        assert!(l.starts_with(&format!(" {name} ▾")), "{l}");
     }
 }
 

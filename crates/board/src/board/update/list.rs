@@ -19,7 +19,7 @@ fn is_todo(r: &Obj) -> bool { group_of(r) == "to do" && !r.b("pinned") && !r.b("
 fn rank(r: &Obj) -> i64 { if r.b("archivedAt") { -2 } else if r.b("pinned") { -1 } else { GROUPS.iter().position(|g| *g == group_of(r)).map(|n| n as i64).unwrap_or(9) } }
 fn repo_of(id: &str) -> &str { id.split('/').next().unwrap_or("") }
 /// A task's repo as its heading names it: another machine's by its own id there, so its machine is not in it.
-fn repo_name(r: &Obj) -> &str { repo_of(if r.b("rid") { r.s("rid") } else { r.s("id") }) }
+pub fn repo_name(r: &Obj) -> &str { repo_of(if r.b("rid") { r.s("rid") } else { r.s("id") }) }
 
 /// The filter as typed (find) or kept.
 pub fn filter_now(s: &State) -> String { (if s.mode == Mode::Find { s.value() } else { s.filter.clone() }).trim().to_lowercase() }

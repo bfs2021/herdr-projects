@@ -20,17 +20,13 @@ machine**, its repos (or status groups) under it, and their tasks under those.
  ▸ vm-ssa  1 task ─────────────────────────────────────────────────
 ```
 
-## The Coordinator's row on top
+## The coordinators' rows
 
-**Above every heading is the main Coordinator's row**, wherever a Coordinator can run (and on another machine's board
-shown by itself, that machine's). It folds nothing: `Enter` there says so. The list still opens on its first task, and
-lands where it did after an archive or a fold: `↑` reaches the top row. The archive has none.
-
-It stands for the [Coordinator](coordinator.md), as a machine's or a repo's heading stands for its coordinator: `Alt+P`,
-`Alt+T`, `Ctrl+E`, and `Ctrl+S` / `Ctrl+X` for [autopilot](autopilot.md). While a coordinator is on autopilot, its row reads as
-a task's: autopilot's mark `◎` in the marks' column (left of the caret, which moves one step in), its timing in the columns on the right and what it does on the line
-under it; the top row also sums up the others
-(`Coordinator · 2 others on · 1 needs you`).
+**The coordinators are rows, not headings** ([machine and project coordinators](machine-and-project-coordinators.md)):
+the main Coordinator's and a machine coordinator's stand at the top of their machine's part, under its heading when every
+machine is shown; a project coordinator's beside them, or grouped by repo at the top of its repo's group. Each reads as a
+task agent's row: its mark (`◎` on [autopilot](autopilot.md)), what it is, its last line under it, its time on the right.
+The list still opens on its first task: `↑` reaches the rows on top. The archive has none.
 
 ## Machine and repo headings
 
@@ -38,8 +34,7 @@ under it; the top row also sums up the others
   shows its own name (its hostname).
 - Machines come in the order of Herdr's machines sidebar ([machine order](machine-order.md)).
 - **Every machine that answered has a heading, also one with no task yet.** It shows folded, `▸ vm-ssa  0 tasks`, and
-  does what any machine's heading does: `Space` talks to its machine coordinator, which adds tasks there
-  ([machine and project coordinators](machine-and-project-coordinators.md)), and its automations show under it. `Enter`
+  does what any machine's heading does; its coordinators' rows and its automations show under it. `Enter`
   has nothing to unfold and says so; its first task opens it. While a filter is on, or in the archive, a machine with
   nothing that matches has no heading.
 - One whose tasks cannot be read has no heading: it says so above the list, as always.

@@ -2,30 +2,38 @@
 
 **Three levels you can talk to, each its own conversation.**
 
-| Level | Talk to it | Named | Lives in Herdr |
-|---|---|---|---|
-| The [Coordinator](coordinator.md) | the chat, as always | `Coordinator` | a `Coordinator` tab in the home space (`~`) |
-| A machine coordinator | `Space` on a machine's heading | after the machine: `vm-str coordinator`, `Mac coordinator` | a tab of that name in that machine's home space |
-| A project coordinator | `Space` on a repo's heading | after the repo: `herdr-projects coordinator`, `~ coordinator` for the home folder | a tab of that name in the repo's own space |
+| Level | Talk to it | Its row says | Named in the chat | Lives in Herdr |
+|---|---|---|---|---|
+| The [Coordinator](coordinator.md) | the chat, as always, or `Enter` on its row | `Main coordinator` | `Coordinator` | a `Coordinator` tab in the home space (`~`) |
+| A machine coordinator | `Enter` or `Space` on its row | `Machine coordinator` | after the machine: `vm-str coordinator`, `Mac coordinator` | a tab of that name in that machine's home space |
+| A project coordinator | `Enter` or `Space` on its row | `Project coordinator · herdr-projects` | after the repo: `herdr-projects coordinator`, `~ coordinator` for the home folder | a tab of that name in the repo's own space |
 
 The Coordinator stays as it is. The others sit beside it: talking to one never touches the others.
 
+## Their rows
+
+**Each coordinator is a row of the list, drawn as a task agent's**: a mark in the marks' column for where it stands, the
+same marks the chat's line has for a coordinator or an agent (working, idle, needs you, stopped, not started, `◎` on
+[autopilot](autopilot.md)), its name, the last thing it said on the line under it, and on the right how long ago it said
+it (on autopilot its timing: `2 of 5 added  last HSW-92  next in 40m`). No review tag, pull request or progress: a
+coordinator has none.
+
+- **Where it stands is where the grouping puts it** (`Alt+S`): the main one and the machine's at the top of their
+  machine's part (under the machine's heading with every machine shown), a project's beside them, or grouped by repo at
+  the top of its repo's group. Another machine's main Coordinator stands in that machine's part too.
+- **Under All** only those that were ever talked to show, and the main one. **The filter Coordinators** (`Shift+Tab`
+  from All, [the filter row](board.md#the-filter-row)) shows the board with only the coordinators' rows left, every one
+  of the machine shown: also a machine's that never ran and a project's used lately, so that your first message starts
+  it.
+- **Headings are only headings**: a machine's or a repo's folds and unfolds, and has no coordinator of its own.
+
 ## Talking to one
 
-- **Every coordinator at once**: the filter row's **Coordinators** (`Tab` round to it, or `Shift+Tab` from All) lists
-  them all, the main one, each machine's and each project's, on every machine that answers, each with its dot, where
-  it stands and its last line. `Enter` or `Space` on one talks to it ([the filter row](board.md#the-filter-row)).
-- **A machine's heading** shows when the board shows every machine (`Alt+M`). `Space` on it opens that machine's
-  coordinator in the chat.
-- **A repo's heading** shows when the tasks are grouped by repo (`Alt+S`). `Space` on it opens that repo's coordinator.
-  The home folder's tasks have one too.
-- **A repo with no tasks in view keeps its heading**, folded (`0 tasks`), when it was used in the last 14 days (a task,
-  archived ones too) or has a project coordinator, so `Space` still reaches it. Older repos, and repos whose folder is gone, have none.
-- The chat names it (`herdr-projects coordinator  idle`), and so does the box: `Send message to herdr-projects
-  coordinator`. `Enter` sends, and it decides what to start, as the Coordinator does.
-- **It follows the selection**, as a task's agent does: move to another heading and you talk to that one's
-  coordinator, move to a task and you talk to its agent. `Space` again goes back to the Coordinator.
-- A status group's heading (`to do`, `done`) has none. `Space` there says so.
+- **`Enter` or `Space` on its row** opens it in the chat. The chat names it (`herdr-projects coordinator  idle`), and so
+  does the box: `Send message to herdr-projects coordinator`. `Enter` sends, and it decides what to start, as the
+  Coordinator does.
+- **It follows the selection**, as a task's agent does: move to another coordinator's row and you talk to that one,
+  move to a task and you talk to its agent. `Space` again goes back to the Coordinator.
 
 Your first message starts it. Until then the chat says `not started: your first message starts it`.
 
@@ -49,17 +57,15 @@ Your first message starts it. Until then the chat says `not started: your first 
   type goes there. A machine on an older version has none: the chat says to update it there.
 - **Herdr's sidebar** names each as the board does, with where it stands and its last message.
 
-## A heading is its coordinator
+## A row is its coordinator
 
-A machine's heading and a repo's heading stand for their coordinator, as a row stands for its task:
+A coordinator's row stands for it, as a task's row stands for the task:
 
 - `Alt+P` shows it beside the list, `Alt+T` whole, in the [task panel](task-panel.md)'s form.
-- `Ctrl+E` opens its settings page: its own rows first, under `This coordinator`, then what that heading's page always
-  showed (on this machine's heading your own settings, on a repo's your entry for that repo).
+- `Ctrl+E` opens its settings page: its own rows first, under `This coordinator`, then for the machine's your own
+  settings, for a project's your entry for that repo.
 - `Ctrl+S`, with nothing typed, puts it on [autopilot](autopilot.md) with its saved goal and settings; `Ctrl+X` takes it
-  off. While on, the heading reads as a task's row: autopilot's mark, its timing on the right, what it
-  does under its name ([autopilot](autopilot.md)).
-- Grouped by status, or on one machine, these coordinators have no heading: change the grouping to reach them.
+  off. While on, its mark is autopilot's `◎`, its timing is on the right and what it does is under its name.
 
 **Each has its own settings**, `coordinator.*` and `autopilot.*`, looked up **this coordinator → you → built in**
 ([settings](settings.md)). What you set for yourself counts for every coordinator; one set for this coordinator alone
