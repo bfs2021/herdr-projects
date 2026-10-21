@@ -62,7 +62,7 @@ fn next(s: &State, th: &Theme, l: &mut Line, w: usize) {
     if from > 0 { l.put(Inked::of(format!("  ‹{from}"), Ink::Muted), "more"); }
     for (n, ((id, _), label)) in list.iter().zip(named).enumerate().skip(from) {
         let gap = if n == 0 && open.is_none() { " " } else { "  " };
-        if l.text.width() + gap.len() + crate::text::width(&label) + 4 > w && (n > from || open.is_none()) { l.put(Inked::of(format!("  +{}", list.len() - n), Ink::Muted), "more"); break; }
+        if l.text.width() + gap.len() + crate::text::width(&label) + 4 > w && (n > from || open.is_none()) { l.put(Inked::of(format!("{gap}+{}", list.len() - n), Ink::Muted), "more"); break; }
         l.put(Inked::plain(gap), "");
         let lit = open.is_some() && at == n;
         let named = if lit { let x = Inked::of(label, Ink::Accent).bold(); if th.paints_selection() { x.on(Ink::Selection) } else { x.inv() } } else { Inked::of(label, Ink::Muted) };

@@ -166,3 +166,15 @@ fn a_step_that_has_no_room_on_a_narrow_bar_is_counted_never_cut() {
     s.s.data.lately = vec!["proj".into()];
     for width in [24, 20] { let l = &s.screen(width)[0]; assert!(l.starts_with(" ○ All ›") && (l.contains("runnervm8k3b6-a-long-host-name") || l.ends_with("+1")) && !l.contains('…'), "at {width}: {l}"); }
 }
+
+#[test]
+fn with_a_long_host_name_and_another_machine_a_narrow_bar_counts_both_and_cuts_neither() {
+    let w = world_with(Opts { repo: true, settings: json!({ "board.machines": "otherbox" }), ..Default::default() });
+    let mut s = open(&w.root, 24); s.s.side = false;
+    update(&mut s.s, Event::Machines(sw::remote::machines()));
+    update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "tasks": [] })) });
+    s.s.data.host = "runnervmxehtw-with-a-long-name".into();
+    assert_eq!(s.screen(24)[0], " ○ All › +2");
+    let l = &s.screen(40)[0]; assert!(l.ends_with("› +2") && !l.contains('…'), "{l}");
+    let l = &s.screen(100)[0]; assert!(l.contains("runnervmxehtw-with-a-long-name  otherbox"), "{l}");
+}

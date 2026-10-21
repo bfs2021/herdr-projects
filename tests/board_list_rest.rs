@@ -91,7 +91,7 @@ fn every_machines_tasks_say_whose_they_are_and_a_far_merge_says_where_it_lands()
     assert_eq!(s.s.scope, "*");
     // the scope bar: All, then the machines to step into, greyed; one that has no room is counted, never cut
     assert!(s.screen(100)[0].starts_with(" ○ All › ") && s.screen(100)[0].ends_with("  otherbox"), "{}", s.screen(100)[0]);
-    for width in [40, 24] { let l = &s.screen(width)[0]; assert!(l.contains("otherbox") || l.ends_with("+1"), "at {width}: {l}"); assert!(!l.contains('…'), "at {width}: {l}"); }
+    for width in [40, 24] { let l = &s.screen(width)[0]; assert!(l.contains("otherbox") || has(l, r" › .*\+[12]$"), "at {width}: {l}"); assert!(!l.contains('…'), "at {width}: {l}"); }
     s.s.sel = "otherbox:proj/1".into(); s.load();
     let t = s.screen(100).join("\n");
     // Each machine under a heading of its own, its status groups under that: the row's tag is the number alone.
