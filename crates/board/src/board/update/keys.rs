@@ -152,6 +152,8 @@ pub fn run_as(s: &mut State, k: K, p: &Press, r: Option<&Obj>, fx: &mut Vec<Effe
         K::AllDone => { s.all_done = !s.all_done; relist(s); }
         K::Scope => super::remotes::next_scope(s, fx),
         // Decided by the state, above: nothing of their own here.
-        K::Enter | K::Newline | K::Delegate | K::Back | K::SayYes | K::SayNo | K::PutBack => { let _ = entry(k); }
+        // Its line in the ? menu: as the key itself does with nothing typed (the key goes through the state, above).
+        K::Delegate => match r { Some(r) => act::tab(s, "", Some(r), fx), None => if let Some(t) = super::pilot::selected(s) { super::pilot::turn_on(s, &t, fx) } },
+        K::Enter | K::Newline | K::Back | K::SayYes | K::SayNo | K::PutBack => { let _ = entry(k); }
     }
 }

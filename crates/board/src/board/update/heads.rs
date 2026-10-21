@@ -53,11 +53,11 @@ pub fn autos_in(s: &State, host: &str, name: &str) -> Vec<Obj> {
     if !s.by_repo && name != AUTOMATIONS { return vec![]; }
     s.autos.iter().filter(|a| (s.scope != "*" || a.s("host") == host) && (!s.by_repo || a.s("repo") == name)).cloned().collect()
 }
-/// What a folded heading says it holds: `7 tasks`, `7 tasks, 1 automation`, `1 automation`.
-pub fn holds(folded: usize, autos: usize) -> String {
+/// What a folded heading says it holds: `7 tasks`, `7 tasks, 1 automation`, `1 automation`, `1 coordinator`.
+pub fn holds(folded: usize, autos: usize, coords: usize) -> String {
     let tasks = folded.saturating_sub(autos);
     let say = |n: usize, what: &str| format!("{n} {what}{}", if n == 1 { "" } else { "s" });
-    [(tasks > 0 || autos == 0).then(|| say(tasks, "task")), (autos > 0).then(|| say(autos, "automation"))].into_iter().flatten().collect::<Vec<_>>().join(", ")
+    [(tasks > 0 || (autos == 0 && coords == 0)).then(|| say(tasks, "task")), (autos > 0).then(|| say(autos, "automation")), (coords > 0).then(|| say(coords, "coordinator"))].into_iter().flatten().collect::<Vec<_>>().join(", ")
 }
 /// The selected heading, when the selection is on one.
 pub fn selected(s: &State) -> Option<&Row> { if !is_head(&s.sel) { return None; } s.rows.iter().find(|r| matches!(r, Row::Head { id, .. } if *id == s.sel)) }
@@ -68,7 +68,7 @@ pub fn says(s: &State) -> Option<String> {
     // An empty machine's has nothing to unfold.
     if *empty { return Some(String::new()); }
     let what = if *machine { "this machine" } else if s.by_repo { "this repo" } else { "this group" };
-    Some(format!("{} {what}", if *folded > 0 { "unfold" } else { "fold" }))
+    Some(format!("{} {what}", if *folded > 0 || selected(s).is_some_and(|r| r.shut()) { "unfold" } else { "fold" }))
 }
 /// Fold the heading `id`, or unfold it. The selection stays on it.
 pub fn toggle(s: &mut State, id: &str, fx: &mut Vec<Effect>) {

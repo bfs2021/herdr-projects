@@ -82,14 +82,14 @@ pub fn unread_lines(s: &State, width: usize) -> Vec<Inked> {
 /// Coordinator's row, on top, is its name and what it sums up of the others.
 fn heading(s: &State, t: &Theme, rows: &[Row], at: usize, width: usize) -> (Inked, Option<Inked>) {
     let r = &rows[at];
-    let Row::Head { name, autos, machine, folded, folded_autos, id, .. } = r else { return (Inked::new(), None) };
+    let Row::Head { name, autos, machine, folded, folded_autos, folded_coords, id, .. } = r else { return (Inked::new(), None) };
     let pilot = super::pilot::shown(s, t, id);
     if crate::board::update::pilot::is_main(id) { return super::pilot::placed(Inked::plain("  "), super::pilot::main_head(s, id), pilot, false, width); }
     let key = if s.by_repo { crate::board::tags::heading_key(s, at) } else { String::new() };
     let named = if *autos { Inked::of(name.clone(), Ink::Auto) } else if *machine { Inked::of(name.clone(), MACHINE_INK).bold() } else if s.by_repo { Inked::of(repo_label(name), REPO_HEAD_INK).bold() } else { Inked::of(name.clone(), group_ink(name)) };
     let mut named = if key.is_empty() { named } else { named.add(Inked::of(format!(" · {key}"), Ink::Muted)) };
     let caret = if id.is_empty() { Inked::plain("  ") } else { Inked::of(if r.shut() { "▸ " } else { "▾ " }, Ink::Muted) };
-    if r.shut() { named = named.add(Inked::of(format!("  {}", crate::board::update::heads::holds(*folded, *folded_autos)), Ink::Muted)); }
+    if r.shut() { named = named.add(Inked::of(format!("  {}", crate::board::update::heads::holds(*folded, *folded_autos, *folded_coords)), Ink::Muted)); }
     super::pilot::placed(caret, named, pilot, *machine, width)
 }
 struct L { text: Inked, sel: bool, head: bool, n: usize, rest: usize, id: String, auto: bool }

@@ -131,3 +131,22 @@ fn alt_s_groups_by_status_by_repo_by_machine_and_round_again() {
     assert_eq!(tasks_shown(&s).len(), 2);
     s.press(&["alt+s"]); assert!(!s.s.by_machine && !s.s.by_repo); assert_eq!(heads(&s), vec!["to do"]);
 }
+
+#[test]
+fn the_menus_start_line_puts_an_agent_on_the_task_and_a_folded_group_of_coordinators_says_so() {
+    let w = coord_world("none");
+    let id = w.add("Start me from the menu");
+    w.script(json!({ "worker": [{ "status": "working", "screen": "● Working\n" }] }));
+    let mut s = open(&w.root, 60); s.s.side = false;
+    s.s.sel = id.clone(); s.load();
+    s.press(&["?"]);
+    let at = sw::board::update::menu::items(&s.s).iter().position(|i| i.id == sw::board::keys::K::Delegate).expect("a start line");
+    for _ in 0..=at { s.press(&["down"]); }
+    s.press(&["enter"]); settle(&id); s.load();
+    assert_ne!(task(&id).s("stage"), "todo", "{:?}", task(&id));
+    // Coordinators by repo: a repo with only its coordinator folds to one line that says so
+    s.press(&["shift+tab", "alt+s"]);
+    s.s.sel = sw::board::update::heads::group_id(&s.s, "", "proj"); s.load();
+    s.press(&["enter"]);
+    assert!(s.text().contains("▸ proj · PRJ  1 coordinator") && s.text().contains("enter unfold this repo"), "{}", s.text());
+}

@@ -187,8 +187,8 @@ pub fn fold_rows(s: &mut State) -> Vec<Row> {
             if p.heading && (n > 0 || n_coords > 0 || has_bare || super::heads::empty_shown(s)) {
                 let id = machine_id(&p.host);
                 // Only empty repos' headings under it: nothing to fold.
-                let shut = super::heads::folded(s, &id) && n > 0;
-                rows.push(Row::Head { name: super::remotes::shown(s, &p.host), autos: false, id, machine: true, folded: if shut { n } else { 0 }, folded_autos: if shut { n_autos } else { 0 }, empty: n == 0 && n_coords == 0 && !has_bare });
+                let shut = super::heads::folded(s, &id) && (n > 0 || n_coords > 0);
+                rows.push(Row::Head { name: super::remotes::shown(s, &p.host), autos: false, id, machine: true, folded: if shut { n } else { 0 }, folded_autos: if shut { n_autos } else { 0 }, folded_coords: if shut { n_coords } else { 0 }, empty: n == 0 && n_coords == 0 && !has_bare });
                 if shut { continue; }
             }
             if n == 0 && n_coords == 0 && !has_bare { continue; }
@@ -203,7 +203,7 @@ pub fn fold_rows(s: &mut State) -> Vec<Row> {
                 let shut = super::heads::folded(s, &id) && !empty;
                 let own = !s.by_repo && name == AUTOMATIONS;
                 // By machine, the machine's heading is the tasks' own: no group heading under it but its automations'.
-                if !(s.by_machine && name != AUTOMATIONS) { rows.push(Row::Head { name: name.clone(), autos: own, id, machine: false, folded: if shut { recs.len() + autos.len() } else { 0 }, folded_autos: if shut { autos.len() } else { 0 }, empty }); }
+                if !(s.by_machine && name != AUTOMATIONS) { rows.push(Row::Head { name: name.clone(), autos: own, id, machine: false, folded: if shut { recs.len() + autos.len() } else { 0 }, folded_autos: if shut { autos.len() } else { 0 }, folded_coords: if shut { mine.len() } else { 0 }, empty }); }
                 if shut || empty { continue; }
                 rows.extend(mine.into_iter().filter_map(crec));
                 let mut list = recs.clone();
