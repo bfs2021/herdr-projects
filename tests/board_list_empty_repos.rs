@@ -40,12 +40,10 @@ fn a_known_repo_with_a_project_coordinator_and_no_tasks_has_its_heading_and_spac
     s.load();
     let t = screen(&mut s);
     assert!(has(&t, r"\n \S ▸ side\b.*  0 tasks") && t.contains("Mine"), "{t}");
-    // Enter has nothing to unfold; space talks to its project coordinator.
+    // Enter has nothing to unfold: it talks to its project coordinator, as space does.
     let head = group_id(&s.s, "", "side");
     s.s.sel = head.clone(); s.load();
     s.press(&["enter"]);
-    assert!(s.s.msg.contains("No tasks in side yet") && s.s.msg.contains("project coordinator") && s.s.sel == head, "{}", s.s.msg);
-    s.press(&["space"]);
     assert!(s.s.reply && s.s.reply_id == head);
     assert!(has(&s.text(), r"side coordinator  not started"), "{}", s.text());
     // The web board shows it too, folded.

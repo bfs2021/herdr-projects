@@ -108,16 +108,29 @@ fn space_on_a_machines_row_or_a_projects_row_talks_to_its_coordinator_and_coordi
     s.press(&["space"]);
     // Coordinators: the Coordinator's row, each machine's row and its projects' rows; no task
     s.press(&["tab"]); assert_eq!(s.s.show, 1);
-    let mut want = vec!["Coordinator".to_string(), host.clone(), "proj".into(), "otherbox".into(), "far".into()];
-    if sw::board::update::remotes::place(&s.s, "otherbox") < sw::board::update::remotes::place(&s.s, "") { want = vec!["Coordinator".into(), "otherbox".into(), "far".into(), host.clone(), "proj".into()]; }
+    let mut want = vec!["Coordinator".to_string(), host.clone(), "proj".into(), "otherbox".into(), "Coordinator".into(), "far".into()];
+    if sw::board::update::remotes::place(&s.s, "otherbox") < sw::board::update::remotes::place(&s.s, "") { want = vec!["Coordinator".into(), "otherbox".into(), "Coordinator".into(), "far".into(), host.clone(), "proj".into()]; }
     assert_eq!(heads(&s), want);
     assert!(tasks_shown(&s).is_empty());
-    assert!(regex::Regex::new(r"Coordinators 5 +·").unwrap().is_match(&s.screen(160)[1]), "{:?}", s.screen(160));
-    // space there talks to it; enter has nothing to fold on a project's row there and says so
+    assert!(regex::Regex::new(r"Coordinators 6 +·").unwrap().is_match(&s.screen(160)[1]), "{:?}", s.screen(160));
+    // another machine's own Coordinator stands under its row
+    assert!(s.text().contains("Coordinator on otherbox"), "{}", s.text());
+    // a project's row folds nothing there: enter talks to it, as space does
     s.s.sel = format!("head:repo\totherbox\tfar"); s.load();
-    s.press(&["enter"]); assert!(s.s.msg.contains("Nothing to fold here"), "{}", s.s.msg);
-    s.press(&["space"]); assert!(s.text().contains("Send message to far coordinator"), "{}", s.text());
+    assert!(s.text().contains("enter talk to it"), "{}", s.text());
+    s.press(&["enter"]); assert!(s.s.reply && s.text().contains("Send message to far coordinator"), "{}", s.text());
     s.press(&["space"]);
+    // so does the Coordinator's row, another machine's too
+    s.s.sel = sw::board::update::pilot::main_id("otherbox"); s.load();
+    s.press(&["enter"]); assert!(s.text().contains("Send message to Coordinator on otherbox"), "{}", s.text());
+    s.press(&["space"]);
+    s.s.sel = sw::board::update::pilot::main_id(""); s.load();
+    s.press(&["enter"]); assert!(s.s.reply && s.text().contains("Send message to Coordinator"), "{}", s.text());
+    s.press(&["space"]);
+    // a machine's row with its projects' rows under it folds them
+    s.s.sel = machine_id("otherbox"); s.load();
+    s.press(&["enter"]); assert!(s.s.folded.contains(&machine_id("otherbox")) && !s.s.reply, "{}", s.text());
+    s.press(&["enter"]);
     // one machine shown: its own only, and the count is its
     while s.s.scope != "otherbox" { s.press(&["alt+m"]); }
     assert_eq!(heads(&s), vec!["Coordinator".to_string(), "otherbox".into(), "far".into()], "that machine's own Coordinator, its row, its project's");

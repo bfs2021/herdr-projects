@@ -58,7 +58,7 @@ sidebar ([other machines](other-machines.md)); a click on it does the same. Ever
 | Filter | The list shows |
 |---|---|
 | `All` | every task in its group, the automations and the Coordinator's row, as always |
-| `Coordinators` | only the Coordinator's row, each machine's row and its projects' rows (those with a project coordinator): the rows that are coordinators ([machine and project coordinators](machine-and-project-coordinators.md)) |
+| `Coordinators` | only the Coordinator's row, each machine's row (with every machine shown, another machine's own Coordinator under it) and its projects' rows (those with a project coordinator): the rows that are coordinators ([machine and project coordinators](machine-and-project-coordinators.md)) |
 | `Needs you`, `Working`, `Ready`, `To do` | only the tasks of that group (`Ready` is ready to approve) |
 | `Done` | every done task, not only the latest five |
 | `Automations` | only the automations' rows, in their places |
@@ -68,7 +68,8 @@ sidebar ([other machines](other-machines.md)); a click on it does the same. Ever
   machine or a repo with nothing that matches has none.
 - **A machine's row and a project's row are their coordinator's**, drawn as a task agent's row: its coordinator's mark
   (working, idle, needs you, stopped, not started, `◎` on autopilot), no rule to the edge, the last thing it said under
-  it and its time on the right. `Enter` folds and unfolds it, `Space` talks to its coordinator.
+  it and its time on the right. `Enter` folds and unfolds it (where it has nothing to fold, it talks to its coordinator),
+  `Space` talks to its coordinator.
 - **Where the window is narrow** the names are shorter (`Coords`, `Needs`, `Autos`), then shortest (`Co`, `Need`,
   `Work`), then the filters with nothing in them go; narrower still, only the one shown stands, with `tab next`.
 

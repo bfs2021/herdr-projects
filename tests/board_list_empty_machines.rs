@@ -33,10 +33,10 @@ fn a_machine_with_no_task_has_its_heading_folded_and_space_there_talks_to_its_ma
     s.s.sel = machine_id("otherbox"); s.load();
     let t = s.text();
     assert!(t.contains("space talk to the otherbox coordinator") && !t.contains("unfold this machine"), "{t}");
+    // nothing to unfold: enter talks to its machine coordinator, as space does
     s.press(&["enter"]);
-    assert!(s.s.msg.contains("No tasks on otherbox yet") && s.s.sel == machine_id("otherbox"), "{}", s.s.msg);
+    assert!(s.s.reply && s.s.reply_id == machine_id("otherbox") && s.s.sel == machine_id("otherbox"), "{}", s.s.msg);
     assert!(has(&s.screen(100).join("\n"), r"\n▌\S ▸ otherbox  0 tasks *\n"), "still folded");
-    s.press(&["space"]);
     s.typed("set up the crm repo");
     let fx = s.hold("enter");
     assert!(fx.iter().any(|e| matches!(e, Effect::Run(Job::Dispatch { machine, text, to, .. }) if machine.label == "otherbox" && text == "set up the crm repo" && to == "machine")), "{fx:?}");

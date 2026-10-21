@@ -241,7 +241,7 @@ pub fn fold_rows(s: &mut State) -> Vec<Row> {
 pub fn heading_height(rows: &[Row], n: usize) -> usize {
     // Under Coordinators a project's row follows the open rows above it with nothing between (shows.rs: coord_rows).
     let project = |r: &Row| matches!(r, Row::Head { id, .. } if id.starts_with(&format!("{}repo\t", super::heads::HEAD)));
-    if n > 0 && (matches!(rows[n - 1], Row::Head { machine: true, folded: 0, empty: false, .. }) || (project(&rows[n]) && matches!(&rows[n - 1], Row::Head { folded: 0, empty: false, id, .. } if !super::pilot::is_main(id)))) { 1 } else { 2 }
+    if n > 0 && (matches!(rows[n - 1], Row::Head { machine: true, folded: 0, empty: false, .. }) || (project(&rows[n]) && n > 1 && matches!(&rows[n - 1], Row::Head { folded: 0, empty: false, .. }))) { 1 } else { 2 }
 }
 /// A row the arrow keys stop on: a task, an automation or a heading.
 fn step_id(r: &Row) -> Option<String> { match r { Row::Rec(o) => Some(o.t("id")), Row::Auto(a) => Some(a.t("row")), Row::Head { id, .. } if !id.is_empty() => Some(id.clone()), _ => None } }

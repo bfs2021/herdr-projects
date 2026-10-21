@@ -21,11 +21,13 @@ heading, grouped by repo) stand for their coordinator, and are drawn as a task a
 - on the right how long ago its coordinator last said something (on [autopilot](autopilot.md) its timing:
   `2 of 5 added  last HSW-92  next in 40m`), and **under its name the last thing it said**. One that never said
   anything has no second line. No review tag, pull request or progress: a coordinator has none.
-- `Enter` folds it and unfolds it, as any heading; `Space` talks to its coordinator.
+- `Enter` folds it and unfolds it, as any heading; where it has nothing to fold (a repo or a machine with nothing in
+  view, a project's row under Coordinators, the Coordinator's row) `Enter` talks to its coordinator, as `Space` does.
 
 **The filter Coordinators** (`Tab` from All, [the filter row](board.md#the-filter-row)) leaves only the Coordinator's
-row, each machine's row and the rows of its projects that have a project coordinator, for the machine shown; its count
-is how many there are. `Enter` on a machine's row there folds its projects' rows away.
+row, each machine's row (with every machine shown, another machine's own Coordinator under it) and the rows of its
+projects that have a project coordinator, for the machine shown; its count is how many there are. `Enter` on a
+machine's row there folds its projects' rows away; on any other row there it talks to it.
 
 ## Talking to one
 
