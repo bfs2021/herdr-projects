@@ -14,7 +14,7 @@ pub fn dot(s: &State, t: Option<&Target>) -> (&'static str, Ink, &'static str) {
     let main = Target::default();
     let t = t.unwrap_or(&main);
     if t.host.is_empty() && !s.data.can_dispatch { return ("○", Ink::Muted, "off here"); }
-    if pilot::on(s, t) { return ("✈", Ink::Accent, "on autopilot"); }
+    if pilot::on(s, t) { return (super::pilot::PILOT_MARK, Ink::Accent, "on autopilot"); }
     let v = look_of(s, t);
     let (state, err) = v.as_ref().map(|v| (v.state.as_str(), !v.error.is_empty())).unwrap_or(("none", false));
     if err || state == "blocked" { return ("●", Ink::Red, "needs you"); }

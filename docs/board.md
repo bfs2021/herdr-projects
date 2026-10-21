@@ -42,7 +42,7 @@ selected task's agent.
 | a machine | that machine's tasks | its [machine coordinator](machine-and-project-coordinators.md) (`vm-str coordinator`) |
 | a project | that repo's tasks on that machine | its [project coordinator](machine-and-project-coordinators.md) (`herdr-projects coordinator`) |
 
-- **Each step has its coordinator's dot**: `●` amber working, `●` green idle, `●` red needs you, `✈` on
+- **Each step has its coordinator's dot**: `●` amber working, `●` green idle, `●` red needs you, `◎` on
   [autopilot](autopilot.md), `○` not started (or no coordinator can run here). The step you are on is bold.
 - **After the last step, greyed, what the next one could be**: the machines in the order of Herdr's sidebar
   ([machine order](machine-order.md)), `(no answer)` after one that does not answer; on a machine, its projects (those
