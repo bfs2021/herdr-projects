@@ -7,10 +7,11 @@ use crate::shown::ink::{Ink, Inked};
 /// Its two lines, `width` cells wide.
 pub fn coord_lines(s: &State, id: &str, width: usize) -> Vec<Inked> {
     let Some(t) = of_head(s, id) else { return vec![] };
-    let main = crate::board::update::pilot::is_main(id);
+    // This machine's Coordinator is read here; another machine's main one is what it sent (update/coords.rs: look_of).
+    let main = id == crate::board::update::pilot::main_id("");
     let (mark, ink, word) = super::scope_bar::dot(s, (!main).then_some(&t));
     let mut name = Inked::plain(" ").add(Inked::of(mark, ink)).add(Inked::plain(" ")).add(Inked::of(t.name.clone(), Ink::Text));
-    if !t.host.is_empty() { name = name.add(Inked::of(format!(" · {}", crate::board::update::remotes::shown(s, &t.host)), Ink::Muted)); }
+    if !t.host.is_empty() && !t.name.contains(&t.host) { name = name.add(Inked::of(format!(" · {}", crate::board::update::remotes::shown(s, &t.host)), Ink::Muted)); }
     let room = width.saturating_sub(crate::text::width(word) + 2);
     let first = name.cut(room).fit(room).add(Inked::of(format!(" {word}"), ink));
     let v = if main { Some(s.data.coord.clone()) } else { look_of(s, &t) };

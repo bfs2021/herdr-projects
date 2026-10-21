@@ -52,13 +52,17 @@ fn next(s: &State, th: &Theme, l: &mut Line, w: usize) {
     l.put(Inked::of(" ›", Ink::Muted), "more");
     if let Some(p) = open { l.put(Inked::plain(" ").add(Inked::of(format!("{}▏", p.typed), Ink::Accent)), ""); }
     if list.is_empty() { if open.is_some() { l.put(Inked::of("  nothing matches", Ink::Muted), ""); } return; }
-    for (n, (id, label)) in list.iter().enumerate() {
-        let far = s.level == 0 && s.remotes.get(id).is_some_and(|m| !m.ok);
-        let label = if far { format!("{label} (no answer)") } else { label.clone() };
+    let named: Vec<String> = list.iter().map(|(id, label)| if s.level == 0 && s.remotes.get(id).is_some_and(|m| !m.ok) { format!("{label} (no answer)") } else { label.clone() }).collect();
+    // The picked one is always in view: those before it that leave it no room are counted (`‹3`), as those after are.
+    let at = open.map(|p| p.at.min(list.len() - 1)).unwrap_or(0);
+    let room = w.saturating_sub(l.text.width() + 10);
+    let from = (0..=at).find(|f| (*f..=at).map(|n| 2 + crate::text::width(&named[n])).sum::<usize>() <= room).unwrap_or(at);
+    if from > 0 { l.put(Inked::of(format!("  ‹{from}"), Ink::Muted), "more"); }
+    for (n, ((id, _), label)) in list.iter().zip(named).enumerate().skip(from) {
         let gap = if n == 0 && open.is_none() { " " } else { "  " };
-        if l.text.width() + gap.len() + crate::text::width(&label) + 4 > w && n > 0 { l.put(Inked::of(format!("  +{}", list.len() - n), Ink::Muted), "more"); break; }
+        if l.text.width() + gap.len() + crate::text::width(&label) + 4 > w && n > from { l.put(Inked::of(format!("  +{}", list.len() - n), Ink::Muted), "more"); break; }
         l.put(Inked::plain(gap), "");
-        let lit = open.is_some_and(|p| p.at.min(list.len() - 1) == n);
+        let lit = open.is_some() && at == n;
         let named = if lit { let x = Inked::of(label, Ink::Accent).bold(); if th.paints_selection() { x.on(Ink::Selection) } else { x.inv() } } else { Inked::of(label, Ink::Muted) };
         l.put(named, &format!("{what}\t{id}"));
     }

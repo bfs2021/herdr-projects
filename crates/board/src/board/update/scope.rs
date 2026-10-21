@@ -131,7 +131,9 @@ pub fn go(s: &mut State, level: u8, host: &str, project: &str, fx: &mut Vec<Effe
 pub fn jump(s: &mut State, id: &str, fx: &mut Vec<Effect>) {
     let rest = id.strip_prefix(HEAD).unwrap_or("");
     match rest.split('\t').collect::<Vec<_>>().as_slice() {
-        ["main", _] => go(s, 0, "", "", fx),
+        ["main", ""] => go(s, 0, "", "", fx),
+        // Another machine's main Coordinator: into its machine (space on its row talks to it).
+        ["main", host] => go(s, 1, host, "", fx),
         ["machine", host] => go(s, 1, host, "", fx),
         ["repo", host, repo] => go(s, 2, host, repo, fx),
         _ => {}

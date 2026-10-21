@@ -114,3 +114,38 @@ fn the_kinds_row_narrows_the_list_and_coordinators_lists_each_one_enter_goes_int
     click_on(&mut s, "kind\t0"); assert_eq!(s.s.kind, 0);
     assert!(s.text().contains("Fix the login"), "{}", s.text());
 }
+
+#[test]
+fn all_with_coordinators_lists_another_machines_own_coordinators_too() {
+    let w = world_with(Opts { repo: true, settings: json!({ "coordinator.agent": "claude", "review.when": "never", "board.machines": "otherbox" }), ..Default::default() });
+    let mut s = open(&w.root, 34);
+    update(&mut s.s, Event::Machines(sw::remote::machines()));
+    let now = sw::clock::now();
+    let answer = json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "working", "readable": true, "said": "Far main is busy." },
+        "coordinators": { "machine": { "state": "idle", "said": "Far machine is quiet." }, "project:far": { "state": "idle", "said": "Far project." } },
+        "tasks": [{ "id": "far/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] });
+    update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(answer) });
+    assert_eq!(s.s.scope, "*");
+    s.press(&["shift+tab", "right", "right", "right", "enter"]); assert_eq!(s.s.kind, 3);
+    let ids: Vec<String> = s.s.rows.iter().filter_map(|r| match r { sw::board::state::Row::Head { id, .. } => Some(id.clone()), _ => None }).collect();
+    assert!(ids.contains(&sw::board::update::pilot::main_id("otherbox")), "{ids:?}");
+    let t = s.text();
+    assert!(t.contains("Coordinator on otherbox") && t.contains("Far main is busy.") && t.contains("otherbox coordinator") && t.contains("far coordinator · otherbox"), "{t}");
+    // enter on it: into its machine
+    s.s.sel = sw::board::update::pilot::main_id("otherbox"); s.load();
+    s.press(&["enter"]); assert_eq!((s.s.level, s.s.scope.as_str()), (1, "otherbox"));
+}
+
+#[test]
+fn a_picker_longer_than_the_bar_keeps_the_picked_one_in_view() {
+    let w = coord_world();
+    w.add("Fix the login");
+    let mut s = open(&w.root, 34);
+    s.press(&["right"]);
+    for n in 0..20 { s.s.data.lately.push(format!("project-{n:02}")); }
+    s.press(&["right"]);
+    for _ in 0..19 { s.press(&["down"]); }
+    let l = s.screen(80);
+    assert!(l[0].contains("project-18") && l[0].contains("‹") && !l[0].contains("project-00"), "{l:?}");
+    s.press(&["enter"]); assert_eq!(s.s.project, "project-18");
+}

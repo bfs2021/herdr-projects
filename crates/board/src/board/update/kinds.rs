@@ -47,8 +47,8 @@ fn projects(s: &State, host: &str) -> Vec<String> {
     out.sort_by_key(|r| r.to_lowercase());
     out
 }
-/// The coordinators of the scope, as rows: on All the Coordinator, then each machine's (that answered) with its
-/// projects'; on a machine its own and its projects'; on a project only its own.
+/// The coordinators of the scope, as rows: on All the Coordinator, then for each machine (that answered) its own main
+/// Coordinator (another machine's), its machine coordinator and its projects'; on a machine its own and its projects'; on a project only its own.
 pub fn coord_rows(s: &State) -> Vec<Row> {
     let head = |name: String, id: String| Row::Head { name, autos: false, id, machine: false, folded: 0, folded_autos: 0, empty: false };
     let named = |id: String| of_head(s, &id).map(|t| head(t.name, id));
@@ -61,6 +61,8 @@ pub fn coord_rows(s: &State) -> Vec<Row> {
         h
     } else { vec![s.scope.clone()] };
     for h in hosts {
+        // Another machine's own main Coordinator, on All, where it sent one.
+        if s.level == 0 && !h.is_empty() && s.remotes.get(&h).and_then(|m| crate::coordinator::far::read(&m.coord)).is_some() { out.extend(named(super::pilot::main_id(&h))); }
         out.extend(named(machine_id(&h)));
         for r in projects(s, &h) { out.extend(named(super::scope::repo_id(&h, &r))); }
     }
