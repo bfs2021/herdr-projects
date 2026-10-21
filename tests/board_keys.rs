@@ -8,6 +8,9 @@ use serde_json::json;
 use sw::board::keys::key_name;
 use sw::json::*;
 
+/// The filter row on top and the three groupings of alt+s.
+mod filters;
+
 fn has(text: &str, re: &str) -> bool { regex::Regex::new(re).unwrap().is_match(text) }
 
 #[test]

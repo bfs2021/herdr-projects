@@ -88,10 +88,8 @@ fn every_machines_tasks_say_whose_they_are_and_a_far_merge_says_where_it_lands()
     let now = sw::clock::now();
     let far = |items: serde_json::Value| Ok(json!({ "host": "otherbox", "version": "0.2.0", "tasks": items }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: far(json!([{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }])) });
-    assert_eq!(s.s.scope, "*");
-    // the scope bar: All, then the machines to step into, greyed; one that has no room is counted, never cut
-    assert!(s.screen(100)[0].starts_with(" ○ All › ") && s.screen(100)[0].ends_with("  otherbox"), "{}", s.screen(100)[0]);
-    for width in [40, 24] { let l = &s.screen(width)[0]; assert!(l.contains("otherbox") || has(l, r" › .*\+[12]$"), "at {width}: {l}"); assert!(!l.contains('…'), "at {width}: {l}"); }
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    for width in [100, 40, 24] { assert!(s.screen(width)[0].contains("all machines: otherbox"), "at {width}: {}", s.screen(width)[0]); }
     s.s.sel = "otherbox:proj/1".into(); s.load();
     let t = s.screen(100).join("\n");
     // Each machine under a heading of its own, its status groups under that: the row's tag is the number alone.
@@ -114,22 +112,19 @@ fn every_machines_tasks_say_whose_they_are_and_a_far_merge_says_where_it_lands()
 }
 
 #[test]
-fn machine_names_too_long_for_the_scope_bar_are_counted_never_cut() {
+fn machine_names_too_long_for_the_header_go_on_whole_never_cut() {
     let long = ["a-very-long-machine-name-on-the-tailnet", "another-extremely-long-machine-name-there"];
     let w = world_with(Opts { repo: true, settings: json!({ "board.machines": long.join(", ") }), ..Default::default() });
     w.add("Mine");
     let mut s = open(&w.root, 24); s.s.side = false;
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     for m in long { update(&mut s.s, Event::Remote { label: m.into(), answer: Ok(json!({ "host": m, "version": "0.2.0", "tasks": [] })) }); }
-    assert_eq!(s.s.scope, "*");
-    // the bar names each machine whole or not at all: those with no room left are counted at its end (`+1`)
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
     for width in [80, 50] {
-        let bar = s.screen(width)[0].clone();
-        let named = long.iter().filter(|n| bar.contains(*n)).count();
-        assert!(named == long.len() || bar.ends_with(&format!("+{}", long.len() - named)), "at {width}: {bar}");
-        assert!(!bar.contains('…'), "at {width}: {bar}");
+        let head = regex::Regex::new(r"\s+").unwrap().replace_all(&s.screen(width)[..4].join(" "), " ").into_owned();
+        for name in long { assert!(head.contains(name), "{name} whole at {width}: {head}"); }
+        assert!(!has(&s.screen(width)[..4].join("\n"), "machine[^\n]*…"));
     }
-    assert_eq!(sw::board::update::scope::candidates(&s.s).iter().filter(|c| !c.0.is_empty()).map(|c| c.1.clone()).collect::<Vec<_>>(), long, "the picker has them all");
 }
 
 #[test]
@@ -138,7 +133,5 @@ fn a_click_that_is_on_no_row_is_not_the_boards() {
     for n in 1..=5 { w.add(&format!("Task number {n}")); }
     let mut s = open(&w.root, 20); s.s.side = false; s.screen(120);
     let (sel, top) = (s.s.sel.clone(), s.s.top);
-    // line 0 is the scope bar and line 1 the kinds row (a click there is theirs: board_coordinators/scope_bar.rs); the
-    // empty line under them is no row
-    s.click(2); assert_eq!((s.s.sel.clone(), s.s.top, s.s.msg.clone()), (sel, top, String::new()), "the header is no row");
+    s.click(0); assert_eq!((s.s.sel.clone(), s.s.top, s.s.msg.clone()), (sel, top, String::new()), "the header is no row");
 }

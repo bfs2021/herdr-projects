@@ -54,7 +54,7 @@ fn real_programs_the_board_starts_takes_keys_resizes_and_leaves_nothing_behind()
     for t in ["Write the notes", "Fix the footer", "Look at 日本語 🚀"] { w.add(t); }
     let t0 = Instant::now();
     let mut t = start(&w.root, 100, 30);
-    assert!(t.until("All ›", 5000), "the board drew nothing: {:?}", plain(&t.out));
+    assert!(t.until("herdr-projects", 5000), "the board drew nothing: {:?}", plain(&t.out));
     let first = t0.elapsed();
     eprintln!("first frame after {first:?}");
     assert!(first < Duration::from_secs(3), "the first frame took {first:?}");

@@ -32,7 +32,7 @@ pub struct Data {
     /// "project:<repo>"), how it stands, and its screen (update/coords.rs).
     pub sub: Option<(String, Look, String)>,
     /// How this machine's other coordinators stand, by level, as far as the board wants them (update/coords.rs:
-    /// looks_wanted): the scope bar's dots, the list of coordinators.
+    /// looks_wanted): the filter row's list of coordinators, the selected one's panel.
     pub looks: BTreeMap<String, Look>,
     /// This machine's coordinators' autopilot as each shows it, by level ("" the main one, "machine", "project:<repo>").
     pub pilots: Value,
@@ -103,7 +103,7 @@ pub fn load(wants: &Wants) -> Data {
 /// How this machine's coordinators of these levels stand ("*": every one that was ever talked to, and the machine's).
 fn looks(socket: &str, wanted: &[String]) -> BTreeMap<String, Look> {
     let mut levels: Vec<String> = wanted.iter().filter(|w| *w != "*").cloned().collect();
-    if wanted.iter().any(|w| w == "*") { levels.extend(crate::coordinator::state::all(socket).into_iter().filter(|c| !c.is_top()).map(|c| c.to())); }
+    if wanted.iter().any(|w| w == "*") { levels.push("machine".into()); levels.extend(crate::coordinator::state::all(socket).into_iter().filter(|c| !c.is_top()).map(|c| c.to())); }
     levels.into_iter().filter(|l| !l.is_empty()).map(|l| { let v = look(crate::coordinator::co::Co::of(socket, &l)); (l, v) }).collect()
 }
 /// How long a repo with no task in view keeps its heading by repo after its last use.

@@ -19,8 +19,7 @@ fn pinned(s: &mut Board, rows: usize, what: &str) -> (usize, usize) {
     if rows >= 16 { assert_eq!(lines[head - 1].trim(), "", "{note}: an empty line sets the chat off from the list"); }
     for l in &lines[head..=last] { assert_ne!(l.trim(), "", "{note}: an empty line inside the chat block"); }
     let tasks = lines[..head].iter().filter(|l| l.contains("Task number")).count();
-    // (the header is two lines: the scope bar and the kinds row)
-    if rows >= 16 { assert!(tasks + 6 >= head, "{note}: {tasks} tasks in {head} lines"); }
+    if rows >= 16 { assert!(tasks + 6 >= head, "{note}: {tasks} tasks in {head} lines"); } // the header and the filter row
     (head, tasks)
 }
 

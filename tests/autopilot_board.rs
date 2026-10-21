@@ -13,7 +13,7 @@ use sw::json::*;
 use sw::shown::ink::Ink;
 
 fn board(w: &World) -> Board { let mut b = open(&w.root, 40); b.s.side = false; b.load(); b }
-fn line_with<'a>(lines: &'a [String], needle: &str) -> Option<&'a String> { lines.iter().find(|l| l.contains(needle)) }
+fn line_with<'a>(lines: &'a [String], needle: &str) -> Option<&'a String> { lines.iter().skip(2).find(|l| l.contains(needle)) } // under the header and its filter row
 
 #[test]
 fn the_main_coordinators_row_is_on_top_and_shows_autopilot_only_while_it_is_on() {
@@ -22,7 +22,7 @@ fn the_main_coordinators_row_is_on_top_and_shows_autopilot_only_while_it_is_on()
     let mut b = board(&w);
     assert_eq!(b.s.sel, id, "the list still opens on its first task");
     let lines = b.screen(140);
-    assert_eq!(lines[3].trim(), "Coordinator", "the scope bar and the kinds row above it: {lines:#?}");
+    assert_eq!(lines[3].trim(), "Coordinator", "{lines:#?}");
     assert!(!b.text().contains("autopilot"), "off: nothing of autopilot shows");
     b.press(&["up", "up"]);
     assert_eq!(b.s.sel, main_id(""), "the top row is reached with ↑");
@@ -185,7 +185,7 @@ fn another_machines_coordinator_shows_its_line_and_takes_its_keys_there_and_an_o
     let mut b = board(&w);
     sw::board::update::update(&mut b.s, sw::board::update::Event::Machines(sw::remote::machines()));
     for m in sw::remote::machines() { let a = sw::remote::ask_list(&m, 20000); sw::board::update::update(&mut b.s, sw::board::update::Event::Remote { label: m.label.clone(), answer: a }); }
-    assert_eq!(b.s.scope, "*");
+    b.press(&["alt+m"]); assert_eq!(b.s.scope, "*");
     let lines = b.screen(160); let at = lines.iter().position(|l| l.contains("◎ ▸ vm-b")).unwrap_or_else(|| panic!("{lines:#?}"));
     assert!(lines[at].contains("──") && lines[at].ends_with("1 of 5 added  last #3"), "its rule, then its columns: {lines:#?}");
     assert!(lines[at + 1].contains("Working · woke for its timer"), "{lines:#?}");

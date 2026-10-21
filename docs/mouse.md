@@ -26,11 +26,10 @@ wheel must not send your answer to another agent. The next key brings the view b
 
 - **A click on a task's row selects it**, like `↑` and `↓`. On the selected row it does nothing more.
 - **A click on a heading folds it**, or unfolds it, like `Enter` on it ([list headings](list-headings.md)).
-- **A click on the scope bar** goes to the step clicked: `All`, the machine, the project, or one of the greyed next
-  steps; on `›` it opens the picker. A click on a kind in the row under it shows that kind
-  ([the scope bar](board.md#the-scope-bar)). In the list of coordinators a click selects one (`Enter` goes into it).
 - With words in the box, a click selects nothing and the board says why: `Send or put away what you typed first`.
-- A click anywhere else (the chat, the task panel) does nothing.
+- **A click on the filter row** shows that filter ([the board](board.md#the-filter-row)). In Coordinators a click on
+  one selects it; `Enter` talks to it.
+- A click anywhere else (the header, the chat, the task panel) does nothing.
 
 ## Selecting and copying
 

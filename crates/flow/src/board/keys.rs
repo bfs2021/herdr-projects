@@ -19,7 +19,7 @@ use std::cell::Cell;
 /// The groups, in the order the ? menu and docs/keys.md show them.
 pub const GROUPS: [(&str, &str); 3] = [("plain", "plain keys"), ("ctrl", "ctrl: does something"), ("alt", "alt: only shows or hides")];
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum K { Up, Down, PageUp, PageDown, ScopeIn, ScopeOut, Focus, Enter, Newline, Talk, Delegate, Back, Menu, SayYes, SayNo, Yes, SendBack, NextAttempt, Stop, Archive, Pin, Settings, PutBack, Undo, Find, Free, Close, Call, ChatMessage, ChatScrollUp, ChatScrollDown, Side, Panel, ArchiveView, ByRepo, AllDone, Scope }
+pub enum K { Up, Down, PageUp, PageDown, Filter, Enter, Newline, Talk, Delegate, Back, Menu, SayYes, SayNo, Yes, SendBack, NextAttempt, Stop, Archive, Pin, Settings, PutBack, Undo, Find, Free, Close, Call, ChatMessage, ChatScrollUp, ChatScrollDown, Side, Panel, ArchiveView, ByRepo, AllDone, Scope }
 pub struct Key {
     pub id: K, pub name: &'static str, pub keys: &'static [&'static str], pub raw: &'static [&'static str], pub show: Option<&'static str>, pub gap: Option<&'static str>,
     pub group: Option<&'static str>, pub with: Option<&'static str>, pub fixed: bool, pub draft: bool, pub web: Option<&'static str>, pub help: Option<&'static str>,
@@ -34,12 +34,8 @@ pub static KEYS: &[Key] = &[
         doc: Some("a page up or down: ten tasks in the list, a page of text in the whole task") },
     Key { id: K::PageDown, name: "pageDown", keys: &["pageDown"], raw: &[], show: Some("pgdn"), gap: None, group: None, with: Some("pageUp"), fixed: false, draft: false, web: None, help: None, hint: None,
         doc: None },
-    Key { id: K::ScopeIn, name: "scopeIn", keys: &["right"], raw: &[], show: Some("→"), gap: None, group: Some("plain"), with: None, fixed: false, draft: false, web: None, help: Some("into a machine or a project: type to pick, {enter} picks; {scopeOut} back up"), hint: Some("into a machine or project"),
-        doc: Some("the scope bar on top (All › machine › project): {scopeIn} steps into the next level, a machine or one of its projects. Typing then picks one by its name (letters in order, not side by side), {up} {down} go through those that match, {enter} or {scopeIn} picks, {back} or {scopeOut} cancels. {scopeOut} goes back up a level. The scope decides who the chat talks to: All the Coordinator, a machine its machine coordinator, a project its project coordinator ([board.md](board.md#the-scope-bar))") },
-    Key { id: K::ScopeOut, name: "scopeOut", keys: &["left"], raw: &[], show: Some("←"), gap: None, group: None, with: Some("scopeIn"), fixed: false, draft: false, web: None, help: None, hint: Some("up a level"),
-        doc: None },
-    Key { id: K::Focus, name: "focus", keys: &["tab", "shift+tab"], raw: &[], show: Some("tab"), gap: None, group: Some("plain"), with: None, fixed: false, draft: false, web: None, help: Some("move between the list, the scope bar and the kinds row"), hint: Some("scope bar and kinds"),
-        doc: Some("move the keys between the list, the scope bar and the kinds row under it (all · tasks · agents · coordinators · automations): {focus} goes list, scope bar, kinds row, list; shift+tab the other way. On the scope bar {scopeOut} {scopeIn} go up a level and into the next, the step you are on lit; on the kinds row they choose a kind (a click on a kind picks it too). {enter}, {down} or {back} go back to the list. The kind stays while the scope changes: on All, coordinators lists every coordinator of every machine, and {enter} on one goes into its scope") },
+    Key { id: K::Filter, name: "filter", keys: &["tab", "shift+tab"], raw: &[], show: Some("tab"), gap: None, group: Some("plain"), with: None, fixed: false, draft: false, web: None, help: Some("the next filter on top: all, needs you, working, ready, to do, done, coordinators"), hint: Some("next filter"),
+        doc: Some("the filter row on top (All · Needs you · Working · Ready · To do · Done · Coordinators, each with its count): {filter} moves to the next, shift+tab to the one before, a click picks one. The list then shows only the tasks of that status; Coordinators lists every coordinator (the main one, each machine's, each project's, on every machine) with where it stands and its last line, and {enter} or {talk} on one talks to it ([board.md](board.md#the-filter-row))") },
     Key { id: K::Enter, name: "enter", keys: &["enter", "return"], raw: &[], show: None, gap: None, group: Some("plain"), with: None, fixed: false, draft: false, web: Some("Open agent"), help: Some("send what is typed; else open this task's agent, or fold a heading"), hint: Some("open this task's agent"),
         doc: Some("send what you typed; with nothing typed, open the task's agent: its real herdr pane. The board keeps running in its own tab and is there as you left it; your key goes back to it (as a popup it closes, and your key opens it again where it was). On an automation's row: open the automation, whole ([automations.md](automations.md)). On a heading (a machine, a repo, a status group): fold it to its one line, which says how many tasks it holds, and unfold it; its caret says which it is, `▾` open, `▸` folded ([list-headings.md](list-headings.md))") },
     Key { id: K::Newline, name: "newline", keys: &["shift+enter"], raw: &[], show: None, gap: None, group: None, with: None, fixed: true, draft: false, web: None, help: None, hint: Some("new line"),
@@ -95,11 +91,11 @@ pub static KEYS: &[Key] = &[
     Key { id: K::ArchiveView, name: "archiveView", keys: &["alt+a"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Show the archive"), help: None, hint: None,
         doc: Some("the archive, and back to the board") },
     Key { id: K::ByRepo, name: "byRepo", keys: &["alt+s"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Group by repo"), help: None, hint: None,
-        doc: Some("the list grouped by repo, each group under its repo's name (a row's tag never names a repo), or by status") },
+        doc: Some("how the list is grouped, in turn: by status, by repo (each group under its repo's name; a row's tag never names a repo), by machine (each machine under its own heading, its tasks under it by how much they need you)") },
     Key { id: K::AllDone, name: "allDone", keys: &["alt+d"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Show all done"), help: None, hint: None,
         doc: Some("every done task, or only the latest") },
     Key { id: K::Scope, name: "scope", keys: &["alt+m"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Other machines"), help: None, hint: None,
-        doc: Some("other machines: every machine (the scope bar's All), this machine only, then each machine by itself") },
+        doc: Some("other machines: this machine only, every machine, then each machine by itself") },
 ];
 pub fn entry(id: K) -> &'static Key { KEYS.iter().find(|k| k.id == id).expect("every key has its entry") }
 pub fn by_name(name: &str) -> Option<&'static Key> { KEYS.iter().find(|k| k.name == name) }

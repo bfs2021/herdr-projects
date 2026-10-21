@@ -1,5 +1,5 @@
-//! The task list: the header (the scope bar and the kinds row), the five groups, a mark for each state in its group's
-//! colour, the task panel from 90 columns, the side panel that alt+p shows or hides, the whole task; the done list newest first; work whose review
+//! The task list: one header line, the five groups, a mark for each state in its group's colour, the task panel from 90
+//! columns, the side panel that alt+p shows or hides, the whole task; the done list newest first; work whose review
 //! failed under needs you with "merge anyway"; what the list hides and what an action did; the wheel and the mouse.
 use crate::common;
 use common::board::open;
@@ -27,11 +27,11 @@ fn one_header_line_five_groups_a_mark_for_each_state_and_the_task_panel_from_90_
     report(&b, "half way", Some(50), None); assert_eq!(task(&b).at("watch"), &json!({ "progress": 50, "eta": 12 }));
     let mut s = open(&w.root, 34);
     let text = s.screen(120).join("\n");
-    assert!(has(&text, r"^ [○●] All › [^\n]*\n all · tasks · agents · coordinators · automations +│[^\n]*\n proj · PRJ · 1 working · 1 to do +│ *\n +│"), "{text}");
+    assert!(has(&text, r"^ herdr-projects  proj · PRJ +│ *\n All 2 · Needs 0 · Working 1 · Ready 0 · To do 1 · Done 0 · Coords \d+ +│[^\n]*\n +│"), "{text}");
     let inks = s.inked(120);
     assert_eq!(ink_of(&inks, "◐"), Some((Ink::Yellow, false)), "a working task's mark is the working colour");
     assert_eq!(ink_of(&inks, "My own task"), Some((Ink::Plain, true)), "its title plain, and bold while it lives");
-    assert_eq!(ink_of(&inks[2..], "○").map(|x| x.0), Some(Ink::Todo), "a task nobody started is the readable grey of to do, not green");
+    assert_eq!(ink_of(&inks, "○").map(|x| x.0), Some(Ink::Todo), "a task nobody started is the readable grey of to do, not green");
     assert_eq!(ink_of(&inks, "Write the docs"), Some((Ink::Plain, false)));
     assert_eq!(heading(&inks, "working"), Some(Ink::Yellow)); assert_eq!(heading(&inks, "to do"), Some(Ink::Todo), "the headings are in their group's colour");
     assert_eq!(ink_of(&inks, "50%").map(|x| x.0), Some(Ink::Yellow)); assert_eq!(ink_of(&inks, "12m left").map(|x| x.0), Some(Ink::Yellow));
@@ -107,7 +107,7 @@ fn work_whose_review_failed_stands_under_needs_you_and_its_yes_is_merge_anyway()
     let t = s.text();
     assert!(has(&t, r"\n ▾ needs you *\n[ ▌]! PRJ-1 +Add an undo for clear +R#1 +\d+s ago *\n[ ▌] {8}Review failed · 1 critical, 1 major *\n"), "{t}");
     assert!(has(&t, r"\n ▾ ready to approve *\n[ ▌]◆ PRJ-2 +Max length for titles +R#1 +\d+s ago *\n[ ▌] {8}Pass *\n"), "{t}");
-    assert!(t.lines().take(3).any(|l| l.contains(" proj · PRJ · 1 needs you · 1 ready")), "{t}");
+    assert!(t.starts_with(" herdr-projects  proj · PRJ") && has(&t, r"\n All 2 · Needs you 1 · Working 0 · Ready 1 · "), "{t}");
     s.s.sel = bad.clone(); s.load();
     assert!(s.text().contains(&format!("  {} send the review to this task's agent · {} merge this task anyway · ", key_name("sendBack"), key_name("yes"))), "{}", s.text());
     s.press(&["ctrl+l"]);
@@ -160,7 +160,7 @@ fn the_list_says_what_it_hides_the_header_where_you_are_and_an_action_what_it_di
     for n in 1..=40 { w.add(&format!("Task number {n}")); }
     let mut s = open(&w.root, 24); s.s.side = false;
     let lines = s.screen(100);
-    assert!(has(&lines[0], r"^ [○●] All › ") && has(&lines[1], r"^ all · tasks · agents · coordinators · automations +proj · PRJ · 40 to do$"), "{lines:?}");
+    assert!(has(&lines[0], r"^ herdr-projects  proj · PRJ *$")); assert!(has(&lines[1], r"^ All 40 · Needs you 0 · Working 0 · Ready 0 · To do 40 · Done 0 · Coordinators \d+ *$"), "{}", lines[1]);
     let end = lines.iter().position(|l| l.contains("New task")).unwrap();
     let list = &lines[2..end];
     let shown = list.iter().filter(|l| l.contains("Task number")).count();

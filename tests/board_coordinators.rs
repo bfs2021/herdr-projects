@@ -11,9 +11,6 @@ use sw::board::update::{update, Effect, Event};
 use sw::coordinator::co::Co;
 use sw::json::*;
 
-/// The scope bar on top: All › machine › project, each a coordinator to talk to, and the kinds row under it.
-mod scope_bar;
-
 fn coord_world(settings: Value) -> World {
     let mut all = json!({ "coordinator.agent": "claude", "review.when": "never" });
     for (k, v) in settings.as_object().cloned().unwrap_or_default() { all[k] = v; }
@@ -60,7 +57,7 @@ fn space_on_a_repos_heading_talks_to_its_project_coordinator_and_space_again_goe
     s.press(&["space"]); assert!(!s.s.reply);
     assert!(has(&s.text(), r"\n[ ▌]· Coordinator  not started"), "{}", s.text());
     // a status group's heading has no coordinator: space says where they are
-    s.press(&["alt+s"]); assert!(!s.s.by_repo);
+    s.press(&["alt+s", "alt+s"]); assert!(!s.s.by_repo && !s.s.by_machine); // by machine, then by status
     s.s.sel = group_id(&s.s, "", "to do"); s.load();
     s.press(&["space"]);
     assert!(!s.s.reply && s.s.msg.contains("Space on a machine's heading or a repo's heading talks to its coordinator"), "{}", s.s.msg);
@@ -78,7 +75,7 @@ fn space_on_a_machines_heading_talks_to_that_machines_coordinator_here_or_there(
     let far = |coords: Value| Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "none" }, "coordinators": coords,
         "tasks": [{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: far(json!({ "machine": { "state": "idle", "readable": true, "said": "Otherbox is quiet.", "talk": [{ "you": true, "text": "how is it?" }, { "you": false, "text": "Otherbox is quiet." }] } })) });
-    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
     // this machine's heading: its machine coordinator, started here
     s.s.sel = machine_id(""); s.load();
     s.press(&["space"]);

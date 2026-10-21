@@ -74,7 +74,7 @@ fn a_repos_coordinator_is_drawn_in_the_brighter_grey_and_a_machines_in_its_headi
             all(&mut s, "╰", REPO_INK, false);
         }
         // this machine's coordinator: its heading's accent
-        s.press(&["space"]); s.press(&["alt+s"]);
+        s.press(&["space"]); s.press(&["alt+s", "alt+s"]); // by machine, then by status
         update(&mut s.s, Event::Machines(sw::remote::machines()));
         if s.s.scope != "*" { s.press(&["alt+m"]); }
         s.s.sel = machine_id(""); s.load();

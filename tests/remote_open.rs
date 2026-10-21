@@ -20,7 +20,7 @@ fn board_on_theirs(w: &World) -> Board {
     let mut b = open(&w.root, 34);
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     update(&mut b.s, Event::Remote { label: "vm-a".into(), answer: Ok(json!({ "host": "vm-a", "version": "0.2.0", "tasks": [theirs()] })) });
-    assert_eq!(b.s.scope, "*");
+    b.press(&["alt+m"]);
     b.s.sel = "vm-a:far/1".into(); b.load();
     b
 }

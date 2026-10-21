@@ -112,8 +112,6 @@ fn the_machines_a_sidebar_does_not_show_come_after_the_rest_this_machine_first_t
 fn herdr_list(w: &World, list: Value) { std::fs::create_dir_all(&w.fake.dir).unwrap(); std::fs::write(w.fake.dir.join("machines.json"), list.to_string()).unwrap(); }
 fn saved(label: &str, selected: bool) -> Value { json!({ "id": "", "label": label, "target": format!("me@{label}"), "session": "default", "enabled": true, "selected": selected }) }
 fn answer(b: &mut common::board::Board, label: &str, n: i64, sidebar: Value) { update(&mut b.s, Event::Remote { label: label.into(), answer: Ok(json!({ "host": label, "version": "0.2.0", "tasks": [theirs(n)], "sidebar": sidebar })) }); }
-/// The other machines as the scope bar offers them to step into, in its order (update/scope.rs: candidates).
-fn bar_lists(b: &common::board::Board) -> String { sw::board::update::scope::candidates(&b.s).into_iter().filter(|c| !c.0.is_empty()).map(|c| c.1).collect::<Vec<_>>().join(", ") }
 fn headings(b: &mut common::board::Board) -> Vec<String> {
     b.s.rows.iter().filter_map(|r| match r { sw::board::state::Row::Head { name, machine: true, .. } => Some(name.clone()), _ => None }).collect()
 }
@@ -127,19 +125,19 @@ fn every_list_of_machines_on_the_board_is_in_the_sidebars_order_and_follows_it_w
     let mut b = open(&w.root, 40);
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     for (n, l) in ["vm-a", "vm-b", "vm-c"].iter().enumerate() { answer(&mut b, l, n as i64 + 1, json!([])); }
-    assert_eq!(b.s.scope, "*", "with other machines, All is every machine");
+    b.press(&["alt+m"]);
+    assert_eq!(b.s.scope, "*");
     let here = sw::board::update::heads::label(&b.s, "");
     // this machine's own herdr list: its Local first, then the others as herdr lists them, not by name
     assert_eq!(headings(&mut b), vec![here.clone(), "vm-c".into(), "vm-a".into(), "vm-b".into()]);
-    assert_eq!(bar_lists(&b), "vm-c, vm-a, vm-b");
-    assert!(b.screen(120)[0].contains(" vm-c  vm-a  vm-b"), "{:?}", b.screen(120));
+    assert!(b.text().contains("all machines: vm-c, vm-a, vm-b"), "{}", b.text());
     let model = sw::webui::model::list::list_of(&b.s, &b.theme);
     assert_eq!(model.at("head").s("machines"), "vm-c, vm-a, vm-b");
     // the scope key goes round in that order too
     let mut round = vec![];
-    for _ in 0..4 { b.press(&["alt+m"]); round.push(b.s.scope.clone()); }
-    assert_eq!(round, names(&["", "vm-c", "vm-a", "vm-b"]));
-    b.press(&["alt+m"]);
+    for _ in 0..3 { b.press(&["alt+m"]); round.push(b.s.scope.clone()); }
+    assert_eq!(round, names(&["vm-c", "vm-a", "vm-b"]));
+    for _ in 0..2 { b.press(&["alt+m"]); }
     assert_eq!(b.s.scope, "*");
     // vm-b's herdr window shows this machine: its sidebar is followed, vm-b itself (its Local) first
     let mine = json!({ "label": "this one", "target": format!("me@{}", sw::remote::check::hostname()), "session": "default", "enabled": true, "selected": true });
@@ -147,7 +145,7 @@ fn every_list_of_machines_on_the_board_is_in_the_sidebars_order_and_follows_it_w
     assert_eq!(b.s.sidebar_from.as_deref(), Some("vm-b"));
     // each named as that sidebar names it: vm-b its Local, this machine "this one"
     assert_eq!(headings(&mut b), vec!["Local (vm-b)".to_string(), "vm-a".into(), format!("this one ({here})"), "vm-c".into()]);
-    assert_eq!(bar_lists(&b), "Local (vm-b), vm-a, vm-c");
+    assert!(b.text().contains("all machines: Local (vm-b), vm-a, vm-c"), "{}", b.text());
     // reordered there: followed at its next answer, and still when that window shows another machine meanwhile
     let mut later = mine.clone(); later["selected"] = json!(false);
     answer(&mut b, "vm-b", 2, json!([later, saved("vm-c", true), saved("vm-a", false)]));
@@ -165,8 +163,9 @@ fn machines_named_by_hand_keep_the_old_order_and_this_machine_sends_its_own_herd
     let mut b = open(&w.root, 40);
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     for (n, l) in ["vm-a", "vm-b", "vm-c"].iter().enumerate() { answer(&mut b, l, n as i64 + 1, Value::Null); }
+    b.press(&["alt+m"]);
     assert_eq!(b.s.sidebar_from, None);
-    assert_eq!(bar_lists(&b), "vm-a, vm-b, vm-c");
+    assert!(b.text().contains("all machines: vm-a, vm-b, vm-c"), "{}", b.text());
     assert_eq!(headings(&mut b)[1..].to_vec(), names(&["vm-a", "vm-b", "vm-c"]));
     // what this machine sends another one: herdr's list here, in its order, with the machine its window shows
     herdr_list(&w, json!([saved("vm-c", false), { "id": "x", "label": "vm-a", "target": "me@vm-a", "session": "default", "enabled": false, "selected": true }]));
@@ -220,13 +219,14 @@ fn a_machine_on_an_older_program_still_has_its_sidebar_followed_through_its_herd
     b.cols = 200;
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     ask_all(&mut b);
+    b.press(&["alt+m"]);
     assert_eq!(b.s.sidebar_from.as_deref(), Some("elias-macbook-pro-m1"));
     let here = sw::board::update::heads::label(&b.s, "");
     // what the user saw was the Mac mini's own list: elias-macbook-pro-m1, vm-str, vm-not, vm-kil, vm-demo, vm-ssa;
     // each is named as the M1's sidebar names it, the board's name beside it where that is another
     let local = "Local (elias-macbook-pro-m1)".to_string();
     assert_eq!(headings(&mut b), vec![local.clone(), format!("Mac mini ({here})"), "vm-str".into(), "vm-ssa".into(), "vm-not".into(), "vm-kil".into(), "vm-demo".into()]);
-    assert_eq!(bar_lists(&b), "Local (elias-macbook-pro-m1), vm-str, vm-ssa, vm-not, vm-kil, vm-demo");
+    assert!(b.text().contains("all machines: Local (elias-macbook-pro-m1), vm-str, vm-ssa, vm-not, vm-kil, vm-demo"), "{}", b.text());
     assert_eq!(sw::webui::model::list::list_of(&b.s, &b.theme).at("head").s("machines"), "Local (elias-macbook-pro-m1), vm-str, vm-ssa, vm-not, vm-kil, vm-demo");
     // the user moves vm-demo up in the MacBook's herdr: followed at the M1's next answer
     m1_answers(&far, &["vm-demo", "vm-str", "vm-ssa", "vm-not", "vm-kil"]);

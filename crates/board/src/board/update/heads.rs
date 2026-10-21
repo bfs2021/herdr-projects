@@ -37,7 +37,7 @@ pub struct Part { pub host: String, pub heading: bool, pub groups: Vec<(String, 
 /// The groups, machine by machine in the order of herdr's sidebar (remotes.rs: place), this machine where it stands
 /// there. On one machine's board, one part with no heading.
 pub fn parts(s: &State, groups: &[(String, Vec<Rec>)]) -> Vec<Part> {
-    if s.scope != "*" { return vec![Part { host: s.scope.clone(), heading: false, groups: groups.to_vec() }]; }
+    if s.scope != "*" { return vec![Part { host: s.scope.clone(), heading: s.by_machine, groups: groups.to_vec() }]; }
     let mut hosts: Vec<String> = vec![String::new()];
     for r in &s.items { let h = host_of(r); if !hosts.contains(&h) { hosts.push(h); } }
     for a in &s.autos { let h = a.t("host"); if !hosts.contains(&h) { hosts.push(h); } }

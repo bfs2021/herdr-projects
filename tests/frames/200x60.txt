@@ -1,6 +1,6 @@
 == the list
- ○ All › this machine
- all · tasks · agents · coordinators · automations                                                                                           proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
 
  ▾ needs you
  ? #9     Max length for task titles                                                                                                                                                              1m ago
@@ -60,8 +60,8 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
   enter open this task's agent · space talk to the agent · ctrl+x stop the agent · ? all keys
 == the task beside it
- ○ All › this machine                                                                                                           │
- all · tasks · agents · coordinators · automations                  proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done  │  #5 Max length for task titles
+ herdr-projects  proj                                                                                                           │
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1                                                 │  #5 Max length for task titles
                                                                                                                                 │
  ▾ needs you                                                                                                                    │  Status ─────────────────────────────────────────────────────────────
  ? #9     Max length for task titles                                                                                     1m ago │  State        ◐ working · for 1m
@@ -186,8 +186,7 @@
  plain keys
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its text)
-   → ←          into a machine or a project: type to pick, enter picks; ← back up
-   tab          move between the list, the scope bar and the kinds row
+   tab          the next filter on top: all, needs you, working, ready, to do, done, coordinators
    enter        send what is typed; else open this task's agent, or fold a heading
    space        flip who you talk to: the Coordinator, or this task's agent
    esc          back, one step at a time (as a popup, the board closes on the last one)
@@ -217,7 +216,7 @@
    alt+a        show the archive
    alt+s        group by repo: see which repo each task is in
    alt+d        show all done
-   alt+m        look for other machines (now: All, this machine only)
+   alt+m        look for other machines (now: this machine)
 
  on a row
    ◐            an agent works
@@ -235,7 +234,8 @@
    65% 2m left  how far it is, and the time left; the time after it is how long it has worked, or how long ago it stopped
    R#2          the review it is on or last had, coloured by where it stands: passed, failed, the reviewer working
    PR#16        its pull request: green when its checks pass, red when they fail
- ↓ 2 more
+   [auto]       made by an automation; [research]: research only, nothing is merged
+   [chat]       a conversation: it changes nothing and ends when you say
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -243,8 +243,8 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
- ○ All › this machine
- all · tasks · agents · coordinators · automations                                                                                           proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
 
  ▾ needs you
  ? #9     Max length for task titles                                                                                                                                                              1m ago

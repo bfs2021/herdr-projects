@@ -18,7 +18,7 @@ fn empty_otherbox() -> (World, Board) {
     let mut s = open(&w.root, 40); s.s.side = false;
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "none" }, "coordinators": { "machine": { "state": "idle" } }, "tasks": [] })) });
-    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
     (w, s)
 }
 
@@ -54,7 +54,7 @@ fn this_machine_with_no_task_has_its_heading_too_and_a_filter_hides_the_empty_on
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     let now = sw::clock::now();
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "tasks": [{ "id": "proj/1", "title": "Theirs", "state": "idle", "stage": "todo", "at": now, "created": now }] })) });
-    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]);
     let here = regex::escape(&sw::shown::words::clean(&sw::remote::check::hostname()));
     let t = s.screen(100).join("\n");
     assert!(has(&t, &format!(r"\n[ ▌]▸ {here}  0 tasks ─+\n")) && has(&t, r"\n[ ▌]▾ otherbox ─+\n"), "{t}");

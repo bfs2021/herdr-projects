@@ -1,12 +1,11 @@
 # Other machines
 
-**Every machine keeps its own tasks, and the scope bar's All shows the others' tasks on your board.** `→` steps into
-one machine ([the scope bar](board.md#the-scope-bar)); `Alt+M` goes round: every machine, this machine, then each other
-machine by itself. Actions on another machine's task run on that machine, over
+**Every machine keeps its own tasks, and `Alt+M` shows the others' tasks on your board.** Press it to go round: this
+machine, every machine, then each other machine by itself. Actions on another machine's task run on that machine, over
 SSH. Work never moves between machines.
 
-Which machines you see is the scope bar on top: `All`, with the machines you can step into greyed after it (`(no
-answer)` after one that does not answer), or `All › otherbox` for one machine by itself.
+Which machines you see is the first thing in the board's header, in the accent colour, and is never cut:
+`all machines: otherbox`, or `only otherbox`.
 
 ## Set up another machine
 
@@ -109,11 +108,11 @@ vm-a: its tasks cannot be read: herdr-projects is not found there.
 - **The chat.** For each task someone is on, its machine sends the last few things said in the conversation: its
   agent's, or its reviewer's during a review, read there from the program's saved conversation. The chat and task panel
   show them like this machine's own, under the same lines that name who said them ([the board](board.md)).
-- **Its coordinators.** While the scope bar stands on one other machine, what you type goes to that machine's machine
-  coordinator (`vm-a coordinator`), and on one of its projects to that project's coordinator; the chat shows its
-  conversation. The machine sends where each of its coordinators stands (`idle`, `working`, how many of your messages
-  wait) and the last dozen things said. The box shows them under the same lines (`vm-a coordinator:`, `You:`) and
-  scrolls back through them. A machine where no coordinator can run says so.
+- **Its Coordinator.** While the board shows one other machine by itself, what you type goes to that machine's
+  Coordinator, and the chat shows that Coordinator's conversation. The machine sends where its Coordinator stands
+  (`idle`, `working`, how many of your messages wait) and the last dozen things said. The box shows them under the same
+  lines (`Coordinator:`, `You:`) and scrolls back through them. A machine with no Coordinator says so (what you type
+  there is added as a task).
 - **A machine on an older plugin** is recognised by its missing version: its new fields stay blank and the board says
   "update herdr-projects on <machine>". It sends no chat: its agent's last message still shows, and for a reviewer or
   its Coordinator the box says the machine needs the update.

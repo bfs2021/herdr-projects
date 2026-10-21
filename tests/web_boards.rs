@@ -44,7 +44,7 @@ fn each_machine_has_its_board_in_the_section_named_as_the_web_ui_names_it_with_h
         e("", "Mac", "yellow", "1 working · 1 to do"),
         e("vm-a", "vm-box", "red", "1 needs you · 1 working · 1 to do"),
     ]);
-    assert_eq!(b.s("scope"), "*", "the board is on All: every machine, once herdr said there is another");
+    assert_eq!(b.s("scope"), "", "the board shows this machine");
 }
 
 #[test]
@@ -115,8 +115,6 @@ fn picking_an_entry_shows_that_machines_board_as_other_machines_does_and_the_two
     assert_eq!(boards(None).s("scope"), "vm-a", "the section highlights what the board shows");
     // the other way round: the board's own Other machines moves the section's highlight with it
     call("press", json!({ "id": "scope" }), None).unwrap();
-    assert_eq!(boards(None).s("scope"), "*", "round from the last machine to All");
-    call("press", json!({ "id": "scope" }), None).unwrap();
     assert_eq!(boards(None).s("scope"), "");
     call("scope", json!({ "to": "*" }), None).unwrap();
     assert_eq!(boards(None).s("scope"), "*");
@@ -177,5 +175,5 @@ fn only_a_board_picked_on_the_web_is_kept_another_change_leaves_the_web_followin
     assert!(s.at("list").arr("groups").iter().any(|g| g.arr("rows").iter().any(|r| r.s("title") == "Theirs 1")), "{}", s.at("list"));
     // the scope key pressed on the web is a pick, as the sidebar's entry is
     call("press", json!({ "id": "scope" }), None).unwrap();
-    assert_eq!(kept().at("ownScope"), &json!(""), "from All, this machine by itself");
+    assert_eq!(kept().at("ownScope"), &json!("vm-a"));
 }

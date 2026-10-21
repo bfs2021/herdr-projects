@@ -47,33 +47,18 @@ pub fn of_head(s: &State, id: &str) -> Option<Target> {
         _ => None,
     }
 }
-/// The coordinator the chat talks to now, if it is not the Coordinator: a heading's after space there, else the one of
-/// the scope the bar stands on (a machine's, a project's: update/scope.rs).
-pub fn talking(s: &State) -> Option<Target> {
-    if s.reply { return if is_head(&s.reply_id) && s.reply_id == s.sel { of_head(s, &s.sel) } else { None }; }
-    super::scope::coord(s)
-}
-/// Whom words typed now are for, as words put away keep it: the task or heading you reply to, else the scope bar's
-/// coordinator (by its heading's id), "" the Coordinator.
-pub fn draft_for(s: &State) -> String {
-    if s.reply { return if s.current().is_some() || talking(s).is_some() { s.sel.clone() } else { String::new() }; }
-    super::scope::coord_id(s).unwrap_or_default()
-}
-/// A coordinator a draft was for is still there to get it: its heading is on the board, or its machine is.
-pub fn reachable(s: &State, id: &str) -> bool { of_head(s, id).is_some_and(|t| exists(s, id) || t.host.is_empty() || s.remotes.contains_key(&t.host)) }
-/// The coordinators of this machine the board reads how they stand of, as the coordinator code names their level:
-/// the scope bar's steps, the selected row's, and with the list of coordinators every one ("*").
-pub fn looks_wanted(s: &State) -> Vec<String> {
-    let mut out: Vec<String> = vec!["machine".into()];
-    let mut add = |t: Option<Target>| if let Some(t) = t.filter(|t| t.host.is_empty() && !t.to.is_empty()) { if !out.contains(&t.to) { out.push(t.to); } };
-    add(super::scope::coord(s));
-    add(of_head(s, &s.sel));
-    if super::kinds::coords(s) || s.pick.is_some() { out.push("*".into()); }
-    out
-}
+/// The heading's coordinator the chat talks to now, if it does.
+pub fn talking(s: &State) -> Option<Target> { if s.reply && is_head(&s.reply_id) && s.reply_id == s.sel { of_head(s, &s.sel) } else { None } }
 /// This machine's coordinator the board should read, as the coordinator code names its level ("" none): the one the
 /// chat talks to, else the one whose row is selected (its panel shows it).
 pub fn wanted(s: &State) -> String { talking(s).or_else(|| of_head(s, &s.sel)).filter(|t| t.host.is_empty()).map(|t| t.to).unwrap_or_default() }
+/// The coordinators of this machine the board reads how they stand of, as the coordinator code names their level: the
+/// selected row's, and with the list of coordinators every one ("*").
+pub fn looks_wanted(s: &State) -> Vec<String> {
+    let mut out: Vec<String> = of_head(s, &s.sel).filter(|t| t.host.is_empty() && !t.to.is_empty()).map(|t| vec![t.to]).unwrap_or_default();
+    if super::shows::coords(s) { out.push("*".into()); }
+    out
+}
 /// Is this row still on the board: a task, or a heading.
 pub fn exists(s: &State, id: &str) -> bool { s.items.iter().any(|r| r.s("id") == id) || s.rows.iter().any(|r| matches!(r, Row::Head { id: h, .. } if h == id)) }
 /// Space on a heading: talk to its coordinator. A status group's heading has none: it says where they are.

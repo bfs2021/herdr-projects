@@ -1,5 +1,5 @@
-//! What a key does. The board's state decides it where a question, a draft, find, esc, enter or the start key (put an agent on) is involved; every
-//! other key is the entry of board/keys.rs that it presses, and `run` below says what each one does: a key with no arm
+//! What a key does. The board's state decides it where a question, a draft, find, esc, enter or the start key is involved;
+//! every other key is the entry of board/keys.rs that it presses, and `run` below says what each one does: a key with no arm
 //! there does not compile. While the text box holds words it owns the keyboard: only enter, the start key, esc and ctrl+c act on
 //! the board, so no shortcut fires in the middle of a draft.
 use super::actions as act;
@@ -44,8 +44,6 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
     if s.ask.is_some() { return answer(s, p, esc, close, fx); }
     if s.menu.is_some() { return super::menu::key(s, p, fx); }
     if s.editing.is_some() && super::edit::key(s, p, fx) { return; } // the settings page takes its own keys
-    if s.pick.is_some() && super::scope::pick_key(s, p, fx) { return; } // the scope bar's picker takes its own keys
-    if (s.bar_focus || s.kinds_focus) && s.value().is_empty() && super::kinds::key(s, p, fx) { return; } // and so do the bar and the kinds row
     if s.auto().is_some() && super::autos::key(s, p, fx) { return; } // and so does an automation's row
     s.stick.clear();
     let text = s.value().trim().to_string();
@@ -56,7 +54,7 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
         // step only shows how the board closes (the popup closes on it).
         if s.mode != Mode::New { s.mode = Mode::New; s.input.set_text(""); }
         else if !s.value().is_empty() {
-            if !text.is_empty() { s.draft_away = Some(Away { text: s.value(), to: super::coords::draft_for(s), cwd: s.ctx.cwd.clone(), warned: false }); s.flash(format!("Put away. {} brings it back.", key_name("undo")), Ink::Muted); }
+            if !text.is_empty() { s.draft_away = Some(Away { text: s.value(), to: if s.reply { r.as_ref().map(|r| r.t("id")).or_else(|| super::coords::talking(s).map(|_| s.sel.clone())).unwrap_or_default() } else { String::new() }, cwd: s.ctx.cwd.clone(), warned: false }); s.flash(format!("Put away. {} brings it back.", key_name("undo")), Ink::Muted); }
             s.input.set_text("");
         }
         else if s.full { return act::fold_panel(s); }
@@ -83,8 +81,8 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
         if enter { fx.push(Effect::Run(Job::StopDispatch { id: j.t("id") })); s.input.set_text(j.s("text")); return; }
         if start { return; }
     } }
-    // On a coordinator in the list of coordinators, with nothing typed: into its scope.
-    if enter && text.is_empty() && super::kinds::coords(s) && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::scope::jump(s, &id, fx); }
+    // On a coordinator in the list of coordinators, with nothing typed: talk to it.
+    if enter && text.is_empty() && super::shows::coords(s) && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::shows::talk(s, &id); }
     // On a heading, with nothing typed: fold it, or unfold it.
     if enter && text.is_empty() && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::heads::toggle(s, &id, fx); }
     if enter { return act::enter(s, &text, r.as_ref(), fx); }
@@ -121,16 +119,14 @@ pub fn on(s: &State, k: K, r: Option<&Obj>) -> bool {
 }
 /// What each key of the list does with the text box empty, and from its line in the ? menu.
 pub fn run(s: &mut State, k: K, r: Option<&Obj>, fx: &mut Vec<Effect>) { run_as(s, k, &Press::chord(&crate::board::keys::chord(k)), r, fx) }
-/// The same, with the press itself where the key reads it (tab and shift+tab move the keys round either way).
+/// The same, with the press itself where the key reads it (tab and shift+tab go round the filters either way).
 pub fn run_as(s: &mut State, k: K, p: &Press, r: Option<&Obj>, fx: &mut Vec<Effect>) {
     match k {
         K::Up => act::move_by(s, -1),
         K::Down => act::move_by(s, 1),
         K::PageUp => act::move_by(s, -10),
         K::PageDown => act::move_by(s, 10),
-        K::ScopeIn => super::scope::step_in(s, fx),
-        K::ScopeOut => super::scope::step_out(s, fx),
-        K::Focus => super::kinds::focus(s, p),
+        K::Filter => super::shows::step(s, p, fx),
         K::Talk => act::flip_reply(s, r),
         K::Menu => s.menu = Some(crate::board::state::Menu { at: -1, ..Default::default() }),
         K::Yes => if let Some(r) = r { act::yes(s, r, fx) },
@@ -151,7 +147,8 @@ pub fn run_as(s: &mut State, k: K, p: &Press, r: Option<&Obj>, fx: &mut Vec<Effe
         K::Side => if !s.full { act::toggle_side(s, fx) },
         K::Panel => if s.full { act::fold_panel(s) } else { act::open_panel(s) },
         K::ArchiveView => act::toggle_archive(s),
-        K::ByRepo => { s.by_repo = !s.by_repo; fx.push(Effect::Save); relist(s); }
+        // By status, by repo, by machine, and round again.
+        K::ByRepo => { (s.by_repo, s.by_machine) = (!s.by_repo && !s.by_machine, s.by_repo); fx.push(Effect::Save); relist(s); }
         K::AllDone => { s.all_done = !s.all_done; relist(s); }
         K::Scope => super::remotes::next_scope(s, fx),
         // Decided by the state, above: nothing of their own here.

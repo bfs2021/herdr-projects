@@ -60,7 +60,7 @@ fn the_web_board_goes_with_the_web_ui_on_another_pc_it_is_that_machines_board_an
     let s = board("", Some(pcs.clone())); assert_eq!(scope(&s), ""); assert!(s.at("msg").is_null());
     // the web UI goes to vm-a: that machine's board by itself, as the terminal board's own key shows it
     let s = board("pc-a", Some(pcs.clone()));
-    assert_eq!((scope(&s), s.at("list").at("head").s("only"), s.at("msg").s("text")), ("vm-a".into(), "vm-a", "Only vm-a. What you type goes to the vm-a coordinator."));
+    assert_eq!((scope(&s), s.at("list").at("head").s("only"), s.at("msg").s("text")), ("vm-a".into(), "vm-a", "Only vm-a. What you type goes to vm-a."));
     // what a page opened later starts with is what this one showed before it went there, not where the web UI was
     assert_eq!(sw::store::files::read_obj(&sw::store::files::data_dir().join("web-view.json")).unwrap().at("ownScope"), &json!(null), "the terminal board's, followed");
     // while it stays there, a choice of your own stands
@@ -68,9 +68,7 @@ fn the_web_board_goes_with_the_web_ui_on_another_pc_it_is_that_machines_board_an
     assert_eq!(scope(&board("pc-a", Some(pcs.clone()))), chosen);
     // back on this machine: what the board showed before it went
     assert_eq!(scope(&board("", Some(pcs.clone()))), "");
-    // (the scope key from this machine goes on to vm-a now, All first in its round: All is picked by hand)
-    assert_eq!(scope(&call("c", "press", json!({ "id": "scope" }), "", Some(pcs.clone()))), "vm-a");
-    assert_eq!(scope(&call("c", "scope", json!({ "to": "*" }), "", Some(pcs.clone()))), "*");
+    assert_eq!(scope(&call("c", "press", json!({ "id": "scope" }), "", Some(pcs.clone()))), "*");
     assert_eq!(scope(&board("pc-a", Some(pcs.clone()))), "vm-a");
     assert_eq!(scope(&board("local", Some(pcs.clone()))), "*");
     // a PC the board has no machine for: said, and the board stays as it is
@@ -85,7 +83,7 @@ fn the_web_board_goes_with_the_web_ui_on_another_pc_it_is_that_machines_board_an
     assert_eq!(scope(&board("pc-x", Some(pcs.clone()))), "*", "not asked again at once");
     { let c = client("c"); c.lock().unwrap().s.web.stranger_tried -= 11000; }
     let s = board("pc-x", Some(pcs.clone()));
-    assert_eq!((scope(&s), s.at("msg").s("text")), ("nowhere".into(), "Only nowhere. What you type goes to the nowhere coordinator."));
+    assert_eq!((scope(&s), s.at("msg").s("text")), ("nowhere".into(), "Only nowhere. What you type goes to nowhere."));
     sw::store::settings::change::set_value("board.machines", &json!("vm-a vm-b"), &sw::store::settings::lookup::Scope::you()).unwrap();
     assert_eq!(scope(&board("", Some(pcs.clone()))), "*");
     // also straight from another PC's board: it does not go on showing that one under the new PC's name

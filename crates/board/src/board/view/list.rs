@@ -21,24 +21,35 @@ pub fn hl(t: &Theme, line: &Inked, width: usize) -> Inked {
     let barred = if cut.text().starts_with(' ') { Inked::of("▌", Ink::Accent).add(cut.skip(1)) } else { cut };
     if t.paints_selection() { barred.on(Ink::Selection) } else { barred.inv() }
 }
-/// The header says where you are: the scope bar and the kinds row under it (scope_bar.rs), with the repo new tasks go
-/// to (none beside other machines or in a project) and how many tasks stand in each group. A filter has a line of its
-/// own under it. Where a click on the bar goes is kept (`bar_hits`, by line from the top of the header).
-pub fn head_lines(s: &mut State, t: &Theme, w: usize) -> Vec<Inked> {
+/// The header says where you are: whose tasks show (other machines in the accent colour), else the repo new tasks go
+/// to. Under it the filter row, with how many tasks each holds (shows_row.rs), where the list part has `h` lines enough
+/// for it; a find has a line of its own under that.
+pub fn head_lines(s: &mut State, t: &Theme, w: usize, h: usize) -> Vec<Inked> {
+    let others: Vec<String> = crate::board::update::remotes::others(s).into_iter().map(|m| { let n = crate::board::update::remotes::shown(s, &m.machine.label); if m.ok { n } else { format!("{n} (no answer)") } }).collect();
+    let scope = if s.scope == "*" { format!("all machines: {}", if others.is_empty() { if s.listed_at.is_some() { "no others found" } else { "asking…" }.into() } else { others.join(", ") }) } else if s.all() { format!("only {}{}", s.scope, if s.remotes.get(&s.scope).map(|m| m.ok).unwrap_or(false) { "" } else { " (no answer)" }) } else { String::new() };
     let n = counts(s);
     let c = |k: &str| n.get(k).copied().unwrap_or(0);
+    // The counts of each status are on the filter row; the archive has none, so its count stays here.
     // The repo with its key beside it (`gtm-agent · AGT`), in the header's quiet ink as the rest of it.
     let where_ = if s.archive_view { "archive".to_string() } else { crate::board::tags::repo_with_key(&repo_label(&s.data.repo), s.data.keys.get(&s.data.repo).map(|k| k.as_str()).unwrap_or("")) };
-    let tally: Vec<String> = if s.archive_view { vec![format!("{} archived", c("archived"))] } else {
-        [(c("needs you") > 0).then(|| format!("{} {} you", c("needs you"), if c("needs you") == 1 { "needs" } else { "need" })), (c("ready to approve") > 0).then(|| format!("{} ready", c("ready to approve"))),
-         (c("working") > 0).then(|| format!("{} working", c("working"))), (c("to do") > 0).then(|| format!("{} to do", c("to do"))), (c("done") > 0).then(|| format!("{} done", c("done")))].into_iter().flatten().collect()
-    };
+    let tally: Vec<String> = if s.archive_view { vec![format!("{} archived", c("archived"))] } else { vec![] };
     let mut rest: Vec<String> = vec![];
-    if (!s.all() && s.level < 2) || s.archive_view { rest.push(where_); }
+    if scope.is_empty() { rest.push(where_); }
     rest.extend(tally);
     if !s.data.session.is_empty() && s.data.session != "default" { rest.push(format!("session {}", s.data.session)); }
-    let (mut head, hits) = super::scope_bar::bar_lines(s, t, w, &rest.join(" · "));
-    s.bar_hits = hits;
+    let rest = rest.join(" · ");
+    // The board's name gives way before whose tasks these are; names too long for the line go on to the next, whole.
+    let name = Inked::plain(" ").add(Inked::plain("herdr-projects").bold()).add(Inked::plain("  "));
+    let lead = if !scope.is_empty() && name.width() + crate::text::width(&scope) > w { Inked::plain(" ") } else { name };
+    let named: Vec<Inked> = if scope.is_empty() { vec![Inked::new()] } else { Inked::of(scope.clone(), Ink::Accent).wrap(w.saturating_sub(lead.width()).max(4)) };
+    let first = lead.add(named[0].clone());
+    let left = w as i64 - first.width() as i64 - if scope.is_empty() { 0 } else { 3 };
+    let more: Vec<Inked> = named[1..].iter().map(|l| Inked::plain(" ").add(l.clone())).collect();
+    let tail = if !rest.is_empty() && more.is_empty() && left >= 4 { Inked::of(format!("{}{}", if scope.is_empty() { "" } else { " · " }, crate::text::cut(&rest, left as usize)), Ink::Muted) } else { Inked::new() };
+    let mut head = vec![first.add(tail)];
+    head.extend(more);
+    // In a window too short for it, the filter row gives way before the list's rows do.
+    if !s.archive_view && h >= 6 { let (row, hits) = super::shows_row::shows_line(s, t, w); let y = head.len(); s.show_hits = hits.into_iter().map(|(a, b, n)| (y, a, b, n)).collect(); head.push(row); } else { s.show_hits.clear(); }
     let f = (if s.mode == Mode::Find { s.value() } else { s.filter.clone() }).trim().to_string();
     if f.is_empty() { return head; }
     let found: usize = s.grouped.iter().map(|(_, r)| r.len()).sum();
@@ -123,7 +134,7 @@ pub fn list_lines(s: &mut State, t: &Theme, width: usize, h: usize, screen: usiz
     for (k, r) in rows.iter().enumerate() {
         match r {
             // The list of coordinators: a row of two lines for each (coord_list.rs).
-            Row::Head { id, .. } if crate::board::update::kinds::coords(s) => {
+            Row::Head { id, .. } if crate::board::update::shows::coords(s) => {
                 let all = super::coord_list::coord_lines(s, id, width);
                 let k = all.len();
                 for (n, text) in all.into_iter().enumerate() { lines.push(L { text, sel: *id == s.sel, head: false, n, rest: k - n, id: id.clone(), auto: false }); }

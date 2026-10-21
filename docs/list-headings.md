@@ -2,6 +2,8 @@
 
 **The task list sits under headings, and `Enter` on a heading folds it.** The headings are a repo's name when the list
 is grouped by repo (`Alt+S`), or a status (`needs you`, `working`, `to do`, `done` …) when it is grouped by status.
+Grouped by machine (`Alt+S` again), each machine has its heading and its tasks stand right under it, with no status
+headings.
 
 With every machine shown (`Alt+M`, [other machines](other-machines.md)) there is one more level: **a heading per
 machine**, its repos (or status groups) under it, and their tasks under those.

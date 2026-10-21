@@ -49,8 +49,8 @@ fn the_group_has_a_colour_of_its_own_narrow_rows_a_menu_of_its_own_and_stays_wit
     let tight = s.screen(34);
     let from = tight.iter().position(|l| l == " ⟳ on    Release note after a").unwrap();
     assert_eq!(tight[from..from + 4].to_vec(), [" ⟳ on    Release note after a", "         merge", "         when a task is merged, in", "         every repo    never fired"]);
-    assert!(!tight[7..from + 8].iter().any(|l| l.contains('…')), "{}", tight.join("\n"));
-    assert_eq!(s.screen(30)[8..11].to_vec(), ["▌⟳ on    Look for old", "▌        dependencies", "▌        every 2h   next in 2h"]);
+    assert!(!tight[6..from + 8].iter().any(|l| l.contains('…')), "{}", tight.join("\n"));
+    assert_eq!(s.screen(30)[7..10].to_vec(), ["▌⟳ on    Look for old", "▌        dependencies", "▌        every 2h   next in 2h"]);
     // too narrow for the tasks' numbers: they go, the names still start where the task's title does, and on or off is the first word under each
     let tiny = s.screen(22);
     let at = |re: &str| { let r = regex::Regex::new(re).unwrap(); tiny.iter().position(|l| r.is_match(l)).unwrap_or_else(|| panic!("{re}\n{}", tiny.join("\n"))) };
@@ -83,7 +83,7 @@ fn the_group_has_a_colour_of_its_own_narrow_rows_a_menu_of_its_own_and_stays_wit
     // with no task at all the group is still there
     for x in sw::store::tasks::list(Default::default()) { sw::store::tasks::patch(x.s("id"), |t| t.put("archivedAt", sw::clock::now())).unwrap(); }
     s.load();
-    like(&t(&mut s, 120), r"^ [○●✈] All › [^\n]*\n all · tasks · agents · coordinators · automations +proj · PRJ\n\n ▾ automations\n[ ▌]⟳ on {2}Look for old dependencies");
+    like(&t(&mut s, 120), r"^ herdr-projects {2}proj · PRJ\n All 0 · [^\n]*\n\n ▾ automations\n[ ▌]⟳ on {2}Look for old dependencies");
 }
 
 #[test]

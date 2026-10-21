@@ -32,9 +32,6 @@ pub struct Menu { pub at: i64, pub top: usize, pub over: i64, pub follow: bool, 
 /// Words put away, and whom they were for ("" the Coordinator) and where they were typed.
 #[derive(Clone, Debug, Default)]
 pub struct Away { pub text: String, pub to: String, pub cwd: String, pub warned: bool }
-/// The scope bar's picker: what is typed, and which of the matches is picked.
-#[derive(Clone, Debug, Default)]
-pub struct Pick { pub typed: String, pub at: usize }
 /// What the archive view put aside, to come back to.
 #[derive(Clone, Debug, Default)]
 pub struct Back { pub sel: String, pub top: usize, pub filter: String, pub mode: Option<Mode>, pub value: String }
@@ -128,17 +125,9 @@ pub struct State {
     pub folded: std::collections::BTreeSet<String>,
     /// Whose board you see: "" this machine, "*" every machine, or one machine by name.
     pub scope: String,
-    /// Where the scope bar stands (update/scope.rs): 0 All (`scope` "*", or "" with no other machine), 1 one machine
-    /// (`scope`), 2 one project of it (`project`, a repo of the machine `project_on`).
-    pub level: u8, pub project: String, pub project_on: String,
-    /// The kinds row: the kind of row the list shows (update/kinds.rs); whether the scope bar or the kinds row has the
-    /// keys (tab moves them: update/kinds.rs).
-    pub kind: usize, pub bar_focus: bool, pub kinds_focus: bool,
-    /// The scope bar's picker, while it is open: what is typed, and which match is picked.
-    pub pick: Option<Pick>,
-    /// Where the scope bar and the kinds row were last drawn, for a click: the line, its first and last cell, and what
-    /// a click there does (view/scope_bar.rs).
-    pub bar_hits: Vec<(usize, usize, usize, String)>,
+    /// The filter row on top (update/shows.rs): which one shows, by its place (0 all); where each was drawn, for a
+    /// click (line, first and last cell, which); grouped by machine, the third way alt+s groups the list.
+    pub show: usize, pub show_n: Vec<usize>, pub show_hits: Vec<(usize, usize, usize, usize)>, pub by_machine: bool,
     pub filter: String, pub msg: String, pub msg_kind: Ink,
     pub chat_open: bool, pub chat_folded: bool, pub just_sent: HashMap<String, Sent>, pub chat_at: Option<ChatAt>, pub chat_fit: Option<ChatFit>, pub chat_rows: Option<(usize, usize)>,
     pub input: TextBox,
@@ -181,8 +170,7 @@ impl State {
             selection_rows: vec![], selection_layout: String::new(), sel: String::new(), top: 0, stick: String::new(), top_free: false,
             all_done: false, archive_view: false, archive_back: None, archive_undo: None, reply: false, reply_id: String::new(),
             side: false, full: false, panel_top: 0, panel_height: 1, panel_length: 0, width: 120,
-            mode: Mode::New, menu: None, ask: None, by_repo: false, draft_away: None, auto_open: false, auto_at: -1, folded: Default::default(), scope: String::new(),
-            level: 0, project: String::new(), project_on: String::new(), kind: 0, bar_focus: false, kinds_focus: false, pick: None, bar_hits: vec![],
+            mode: Mode::New, menu: None, ask: None, by_repo: false, draft_away: None, auto_open: false, auto_at: -1, folded: Default::default(), scope: String::new(), show: 0, show_n: vec![], show_hits: vec![], by_machine: false,
             filter: String::new(), msg: String::new(), msg_kind: Ink::Muted, chat_open: true, chat_folded: false, just_sent: HashMap::new(), chat_at: None, chat_fit: None, chat_rows: None,
             input: TextBox::default(), editing: None, edit_line: 0, setup: None, paste_text: String::new(), paste_at: 0, paste_more: 0, paste_room: 1, closing: None, leaving: false, leave_at: 0,
             attempt_at: HashMap::new(), pending: HashMap::new(), list_room: 0, list_tall: false, list_width: 0, fold_sel: String::new(), unread_top: 0, unread_max: 0, list_at: None, list_ids: vec![],

@@ -31,15 +31,15 @@ fn with_no_other_machine_alt_m_asks_for_them_and_shows_every_machine_only_once_t
     assert!(s.s.seeking && s.s.scope.is_empty());
     told(&mut s, vec![machine("otherbox")]);
     assert_eq!(s.s.scope, "*");
-    assert!(s.screen(120)[0].starts_with(" ○ All › ") && s.screen(120)[0].contains("otherbox"), "the scope bar offers it: {}", s.text());
-    // two machines: round, every machine (All), this machine, then the other one by itself
-    s.press(&["alt+m"]); assert_eq!((s.s.scope.as_str(), s.s.level), ("", 1));
+    assert!(s.text().contains("all machines: otherbox"), "{}", s.text());
+    // two machines: round as before, this machine, every machine, then the other one by itself
     s.press(&["alt+m"]); assert_eq!(s.s.scope, "otherbox");
-    s.press(&["alt+m"]); assert_eq!((s.s.scope.as_str(), s.s.level), ("*", 0));
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "");
+    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
     // the other machine is gone: every machine is this one again, and the board shows this machine's own
     told(&mut s, vec![]);
-    assert_eq!((s.s.scope.as_str(), s.s.level), ("", 0));
-    assert!(!s.screen(120)[0].contains("otherbox"), "{}", s.text());
+    assert_eq!(s.s.scope, "");
+    assert!(!s.text().contains("all machines"), "{}", s.text());
 }
 
 #[test]
@@ -48,8 +48,8 @@ fn a_board_kept_on_every_machine_says_it_is_asking_and_goes_back_to_this_machine
     w.add("Mine");
     let mut s = open(&w.root, 60);
     s.s.scope = "*".into();
-    assert!(s.screen(120)[0].starts_with(" ○ All › "), "{}", s.text());
+    assert!(s.text().contains("all machines: asking…"), "{}", s.text());
     told(&mut s, vec![]);
-    assert_eq!((s.s.scope.as_str(), s.s.level), ("", 0));
-    assert!(s.screen(120)[0].starts_with(" ○ All › "), "still All, of this machine alone: {}", s.text());
+    assert_eq!(s.s.scope, "");
+    assert!(!s.text().contains("all machines"), "{}", s.text());
 }

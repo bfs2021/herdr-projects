@@ -1,7 +1,7 @@
 == the list
- ○ All › this machine
- all · tasks · agents · coordinators · automations
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1 · Co 1
+
  ▾ working
  ◐ #2     Max length for task titles
           Drafting
@@ -20,9 +20,9 @@
 ────────────────────────────────────────────────────────────
   enter open this task's agent · ? all keys
 == the task beside it
- ○ All › this machine
- all · tasks · agents · coordinators · automations
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1 · Co 1
+ ▾ working
  ◐ #2     Max length for task titles
           Drafting
           █████░░░░░░░  40% 90m left                      1m
@@ -67,15 +67,15 @@
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole
                 task: a page of its text)
-   → ←          into a machine or a project: type to pick,
-                enter picks; ← back up
-   tab          move between the list, the scope bar and
-                the kinds row
+   tab          the next filter on top: all, needs you,
+                working, ready, to do, done, coordinators
    enter        send what is typed; else open this task's
                 agent, or fold a heading
    space        flip who you talk to: the Coordinator, or
                 this task's agent
- ↓ 63 more
+   esc          back, one step at a time (as a popup, the
+                board closes on the last one)
+ ↓ 60 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────
@@ -83,9 +83,9 @@
 ────────────────────────────────────────────────────────────
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
- ○ All › this machine
- all · tasks · agents · coordinators · automations
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1 · Co 1
+
  ▾ working
  ◐ #2     Max length for task titles
           Drafting

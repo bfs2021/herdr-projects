@@ -1,18 +1,18 @@
 == the list
- ○ All › +1
- all · tasks · agen…
- proj · 5 need you …
+ herdr-projects
 ▌◐ Max length for
 ▌  task titles
+▌  Found the cause;
+▌  now checking eve…
  + New task  added …
 ────────────────────
 ❯ Add a task
 ────────────────────
   enter open its ag…
 == the task beside it
- ○ All › +1
- all · tasks · agen…
- proj · 5 need you …
+ herdr-projects
+▌◐ Max length for
+▌  task titles
  + New task  added …
 ────────────────────
 ❯ Add a task
@@ -36,18 +36,18 @@
  plain keys
    ↑ ↓          move
                 bet…
- ↓ 258 more
+ ↓ 249 more
  + New task  added …
 ────────────────────
 ❯ Add a task
 ────────────────────
   ↑↓ pick a key
 == a draft
- ○ All › +1
- all · tasks · agen…
- proj · 5 need you …
+ herdr-projects
 ▌◐ Max length for
 ▌  task titles
+▌  Found the cause;
+▌  now checking eve…
  + New task  added …
 ────────────────────
 ❯ Hello 日本 🚀

@@ -1,7 +1,31 @@
 == the list
- ○ All › this machine
- all · tasks · agents · coordinators · automations
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
+ ✗ #14    Max length for task titles                                          1m
+          Stopped without a summary
+
+ ▾ ready to approve
+ ◆ #11    Max length for task titles                          R#1 PR#60       1m
+          Pass
+
+ ▾ working
+ ◐ #2     Max length for task titles                                          1m
+          Drafting
+ ◇ #4     Max length for task titles                                          1m
+          Starting
+▌◐ #5     Max length for task titles                                          1m
+▌         Found the cause; now checking every caller of the resize handler for …
+
+ ↓ 9 more · ↑ 4 more
+
+ + New task  added word for word
+────────────────────────────────────────────────────────────────────────────────
+❯ Add a task
+────────────────────────────────────────────────────────────────────────────────
+  enter open this task's agent · space talk to the agent · ? all keys
+== the task beside it
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 
@@ -17,30 +41,6 @@
 ▌◐ #5     Max length for task titles                                          1m
 ▌         Found the cause; now checking every caller of the resize handler for …
  ↓ 9 more · ↑ 4 more
-
- + New task  added word for word
-────────────────────────────────────────────────────────────────────────────────
-❯ Add a task
-────────────────────────────────────────────────────────────────────────────────
-  enter open this task's agent · space talk to the agent · ? all keys
-== the task beside it
- ○ All › this machine
- all · tasks · agents · coordinators · automations
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
-
- ▾ ready to approve
- ◆ #11    Max length for task titles                          R#1 PR#60       1m
-          Pass
-
- ▾ working
- ◐ #2     Max length for task titles                                          1m
-          Drafting
- ◇ #4     Max length for task titles                                          1m
-          Starting
-▌◐ #5     Max length for task titles                                          1m
-▌         Found the cause; now checking every caller of the resize handler for …
-
- ↓ 9 more · ↑ 5 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────
@@ -79,9 +79,8 @@
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its
                 text)
-   → ←          into a machine or a project: type to pick, enter picks; ← back
-                up
-   tab          move between the list, the scope bar and the kinds row
+   tab          the next filter on top: all, needs you, working, ready, to do,
+                done, coordinators
    enter        send what is typed; else open this task's agent, or fold a
                 heading
    space        flip who you talk to: the Coordinator, or this task's agent
@@ -91,7 +90,8 @@
    y  n         answer a question: y yes, n or esc no (enter never confirms)
 
  ctrl: does something
- ↓ 46 more
+   ctrl+l       yes: approve the merge, say yes, retry, take it as it is
+ ↓ 45 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────
@@ -99,9 +99,8 @@
 ────────────────────────────────────────────────────────────────────────────────
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
- ○ All › this machine
- all · tasks · agents · coordinators · automations
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 
@@ -116,6 +115,7 @@
           Starting
 ▌◐ #5     Max length for task titles                                          1m
 ▌         Found the cause; now checking every caller of the resize handler for …
+
  ↓ 9 more · ↑ 4 more
 
  + New task  added word for word

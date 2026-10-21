@@ -1,6 +1,6 @@
 //! The mouse wheel and the click: the wheel scrolls the chat's message under the pointer and the whole-task page, and
 //! moves between tasks over the list; a click on a row selects it, a click on a heading folds or unfolds it, a click on
-//! the scope bar goes to that step (update/scope.rs). While the box holds words, who they are for is
+//! the filter row shows that filter. While the box holds words, who they are for is
 //! locked: the wheel then moves the view of the list and never the selection, and a click selects nothing.
 use super::Effect;
 use crate::board::state::{Mode, State};
@@ -24,17 +24,17 @@ pub fn wheel(s: &mut State, y: usize, by: i64, _fx: &mut Vec<Effect>) {
 pub fn click(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
     if s.leaving || s.setup.is_some() || s.ask.is_some() || !s.paste_text.is_empty() || s.menu.is_some() || s.full || s.auto_open { return; }
     let Some((top, wide)) = s.list_at else { return };
-    // A click on the scope bar or the kinds row: a step, a choice, a kind (view/scope_bar.rs).
-    if let Some(what) = s.bar_hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).map(|h| h.3.clone()) {
+    // A click on the filter row shows that filter (view/shows_row.rs).
+    if let Some(n) = s.show_hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).map(|h| h.3) {
         if locked(s) { return s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); }
-        return super::scope::click(s, &what, fx);
+        return super::shows::set(s, n, fx);
     }
     let id = if x < wide && y >= top { s.list_ids.get(y - top).cloned().unwrap_or_default() } else { String::new() };
     if id.is_empty() { return; }
     if locked(s) { if id != s.sel { s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); } return; }
     s.stick.clear();
     // A click on a heading folds it or unfolds it, as on the web board.
-    if super::heads::is_head(&id) && !super::kinds::coords(s) { super::heads::toggle(s, &id, fx); return super::list::sync_reply(s); }
+    if super::heads::is_head(&id) && !super::shows::coords(s) { super::heads::toggle(s, &id, fx); return super::list::sync_reply(s); }
     s.sel = id;
     super::list::relist(s);
     super::list::sync_reply(s);

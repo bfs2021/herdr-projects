@@ -32,15 +32,15 @@ fn repo(host: &str, name: &str) -> String { format!("head:repo\t{host}\t{name}")
 #[test]
 fn every_machine_a_heading_its_repos_under_it_and_rows_with_the_number_alone() {
     let (_w, mut s) = two_machines();
-    s.press(&["alt+s"]); assert!(s.s.scope == "*" && s.s.by_repo);
+    s.press(&["alt+m", "alt+s"]); assert!(s.s.scope == "*" && s.s.by_repo);
     let t = s.screen(100).join("\n");
     let here = sw::shown::words::clean(&sw::remote::check::hostname());
     assert!(has(&t, &format!(r"{} ▾ proj · PRJ\n[ ▌]○ PRJ-\d+ +Mine", head(&regex::escape(&here)))), "this machine first, under its own name: {t}");
     // The repo the board is in comes first on every machine, as on one.
     assert!(has(&t, &format!(r"{} ▾ proj\n[ ▌]○ #151 +Theirs in proj[^\n]*\n\n ▾ crm\n[ ▌]○ #4 +Theirs in crm", head("otherbox"))), "{t}");
     assert!(!t.contains("otherbox#") && !t.contains("otherbox:"), "a row never names its machine, nor a heading the repo's machine: {t}");
-    // By status: the same machines, their status groups under them.
-    s.press(&["alt+s"]);
+    // By status (after by machine): the same machines, their status groups under them.
+    s.press(&["alt+s", "alt+s"]);
     let t = s.screen(100).join("\n");
     assert!(has(&t, &format!(r"{} ▾ to do\n[ ▌]○ #\d+ +Theirs in (crm|proj)[^\n]*\n[ ▌]○ #\d+ +Theirs", head("otherbox"))), "{t}");
     // One machine's board has no machine heading, by repo or by status.
@@ -52,7 +52,7 @@ fn every_machine_a_heading_its_repos_under_it_and_rows_with_the_number_alone() {
 #[test]
 fn enter_on_a_heading_folds_it_to_one_line_with_how_many_it_holds_and_unfolds_it_at_both_levels() {
     let (_w, mut s) = two_machines();
-    s.press(&["alt+s"]); assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m", "alt+s"]);
     // The arrows stop on each heading, which is selected as a row is.
     go(&mut s, &repo("otherbox", "crm"));
     assert!(s.screen(100).iter().any(|l| l.starts_with("▌▾ crm")), "{}", s.text());
@@ -72,7 +72,7 @@ fn enter_on_a_heading_folds_it_to_one_line_with_how_many_it_holds_and_unfolds_it
     let t = s.screen(100).join("\n");
     assert!(has(&t, r"\n ▸ crm  1 task\n") && t.contains("Theirs in proj"), "{t}");
     // By status, and on one machine: its status headings fold the same way.
-    s.press(&["alt+s", "alt+m"]); s.s.scope.clear(); sw::board::update::list::relist(&mut s.s);
+    s.press(&["alt+s", "alt+s", "alt+m"]); s.s.scope.clear(); sw::board::update::list::relist(&mut s.s);
     let todo = "head:status\t\tto do".to_string();
     go(&mut s, &todo);
     assert!(s.text().contains("enter fold this group"));

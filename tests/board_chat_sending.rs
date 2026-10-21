@@ -85,7 +85,7 @@ fn another_machines_coordinators_show_your_words_at_once_with_no_row_on_its_way_
     let mut s = open(&w.root, 34);
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: otherbox("Done.", quiet()) });
-    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]);
     s.s.sel = machine_id("otherbox"); s.load();
     s.press(&["space"]);
     s.typed("anything to do?");
@@ -117,13 +117,13 @@ fn another_machines_coordinators_show_your_words_at_once_with_no_row_on_its_way_
     s.load();
     assert_eq!(s.chat(120).boxed[..2].to_vec(), v(&["You:", "anything to do?"]));
     assert!(s.s.just_sent.is_empty(), "{:?}", s.s.just_sent);
-    // otherbox's board shown alone (the scope bar on otherbox): what you type goes to its machine coordinator, the same
+    // otherbox's own Coordinator (its board shown alone): the same
     s.s.scope = "otherbox".into(); s.s.reply = false; s.s.reply_id.clear(); sw::board::update::list::relist(&mut s.s);
     s.typed("and the crm repo?");
     let _ = s.hold("enter");
     let c = s.chat(120);
     assert_eq!(c.boxed[..2].to_vec(), v(&["You:", "and the crm repo?"]), "{}", c.lines.join("\n"));
-    assert!(c.who.contains("otherbox coordinator  sending…"), "{}", c.who);
+    assert!(c.who.contains("Coordinator on otherbox  sending…"), "{}", c.who);
     // that one failed: its row says why, and the chat no longer shows the words as sent
     let d = sw::store::inbox::new_dispatch("@otherbox and the crm repo?", obj(json!({ "remote": "otherbox" }))).unwrap();
     sw::store::inbox::set_dispatch(d.s("id"), obj(json!({ "state": "error", "msg": "otherbox did not answer" })));
@@ -140,7 +140,7 @@ fn a_task_agent_on_another_machine_shows_your_words_at_once_until_it_answers() {
     let mut s = open(&w.root, 34); s.s.side = false;
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: otherbox("Made f.", quiet()) });
-    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]);
     s.s.sel = "otherbox:proj/1".into(); sw::board::update::list::relist(&mut s.s);
     s.press(&["space"]);
     s.typed("g too");

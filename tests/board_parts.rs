@@ -71,7 +71,7 @@ fn done_comes_last_below_to_do_with_its_fold_line_at_the_bottom() {
     by_repo.extend(done[..5].iter().cloned()); by_repo.push(more.clone());
     assert_eq!(shape(&s), by_repo);
     s.press(&["up", "up", "up", "up", "up"]); assert_eq!(s.s.sel, older);
-    s.press(&["alt+s"]); assert_eq!(s.s.sel, older); assert_eq!(shape(&s), by_status);
+    s.press(&["alt+s", "alt+s"]); assert_eq!(s.s.sel, older); assert_eq!(shape(&s), by_status); // by machine, then by status
     sw::actions::filing::pin(&done[6]).unwrap(); s.press(&["alt+d"]); s.load();
     let mut pinned: Vec<String> = vec!["pinned".into(), done[6].clone(), "needs you".into(), asks.clone(), "working".into(), working.clone(), "to do".into(), newer.clone(), older.clone(), "done".into()];
     pinned.extend(done[..6].iter().cloned());

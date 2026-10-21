@@ -6,24 +6,14 @@ easy to guess:
 - **`Ctrl` does something** (approve, stop, archive, …).
 - **`Alt` only shows or hides a part of the screen**, and never changes anything.
 - **Plain keys** (`Enter`, `Tab`, `Space`, `Esc`, the arrows) move around and talk. Putting an agent on a task
-  (`Ctrl+S`) does something, so it is a `Ctrl` key; `Tab` moves between the list, the scope bar and the kinds row.
+  (`Ctrl+S`) does something, so it is a `Ctrl` key; `Tab` and `Shift+Tab` go round the [filter row](board.md#the-filter-row)
+  on top. (`Alt+↑` and `Alt+↓` are Herdr's own: the board does not take them.)
 
 No other chord does anything, and no key of an earlier version works as a second way to press one of these.
 
 Two keys bend the rule. `Ctrl+F` (find) only changes which tasks the list shows, so by the rule it would be an `Alt` key;
-it is the key every program finds with, so it stays. `Alt+M` only shows other machines, but it moves the scope bar, and
-the scope decides who the chat talks to: one machine shown by itself is that machine's machine coordinator. The chat
-says so.
-
-## The scope bar and the kinds row
-
-The plain arrows `→` and `←` move the [scope bar](board.md#the-scope-bar) on top (All › machine › project): `→` steps
-into the next level with a picker you type a name into (`Enter` picks, `Esc` cancels), `←` goes back up. They act only
-with the text box empty, where they had nothing to do: with a draft they move its cursor as ever. `Tab` moves the keys from
-the list to the scope bar (`←` `→` there go up a level and into the next, the step you are on lit), then to the
-[kinds row](board.md#the-kinds-row) under it (`←` `→` choose a kind), then back to the list; `Shift+Tab` goes the other
-way, and `Enter`, `↓` or `Esc` go back to the list. `Alt+↑` and `Alt+↓` are
-Herdr's own and the board does not take them.
+it is the key every program finds with, so it stays. `Alt+M` only shows other machines, but while one machine is shown by
+itself, what you type goes to that machine's Coordinator: the chat says so.
 
 ## Keys and the text box
 
@@ -208,8 +198,7 @@ below always use the PC names.
 |---|---|
 | `↑` `↓` | move between tasks and their headings, and on to the automations under them |
 | `Pgup` `Pgdn` | a page up or down: ten tasks in the list, a page of text in the whole task |
-| `→` `←` | the scope bar on top (All › machine › project): `→` steps into the next level, a machine or one of its projects. Typing then picks one by its name (letters in order, not side by side), `↑` `↓` go through those that match, `Enter` or `→` picks, `Esc` or `←` cancels. `←` goes back up a level. The scope decides who the chat talks to: All the Coordinator, a machine its machine coordinator, a project its project coordinator ([board.md](board.md#the-scope-bar)) |
-| `Tab` | move the keys between the list, the scope bar and the kinds row under it (all · tasks · agents · coordinators · automations): `Tab` goes list, scope bar, kinds row, list; shift+tab the other way. On the scope bar `←` `→` go up a level and into the next, the step you are on lit; on the kinds row they choose a kind (a click on a kind picks it too). `Enter`, `↓` or `Esc` go back to the list. The kind stays while the scope changes: on All, coordinators lists every coordinator of every machine, and `Enter` on one goes into its scope |
+| `Tab` | the filter row on top (All · Needs you · Working · Ready · To do · Done · Coordinators, each with its count): `Tab` moves to the next, shift+tab to the one before, a click picks one. The list then shows only the tasks of that status; Coordinators lists every coordinator (the main one, each machine's, each project's, on every machine) with where it stands and its last line, and `Enter` or `Space` on one talks to it ([board.md](board.md#the-filter-row)) |
 | `Enter` | send what you typed; with nothing typed, open the task's agent: its real herdr pane. The board keeps running in its own tab and is there as you left it; your key goes back to it (as a popup it closes, and your key opens it again where it was). On an automation's row: open the automation, whole ([automations.md](automations.md)). On a heading (a machine, a repo, a status group): fold it to its one line, which says how many tasks it holds, and unfold it; its caret says which it is, `▾` open, `▸` folded ([list-headings.md](list-headings.md)) |
 | `Space` | flip who you talk to: the selected task's agent, and back to the Coordinator. The chat says who. Nothing else changes it: while it is a task's agent, moving with `↑` `↓` makes it the agent of the task you moved to. On a task with no agent, your message puts one on it. On a machine's or a repo's heading: that machine's or repo's own coordinator. On an automation's row: turn the automation on or off |
 | `Esc` | back, one step at a time, and nothing else: find is left, a draft is put away, then the whole task, the filter and the archive close, then the chat's latest message is hidden, as `Alt+C` hides it. With none of those left it shows the same hint as `Ctrl+C`; the board as a popup (`board.open`) closes on it. It never shows the chat and never changes who you talk to |
@@ -243,9 +232,9 @@ below always use the PC names.
 | `Alt+P` | the side panel: the selected task, automation or coordinator (its row: its chat, and its autopilot while that is on), beside the list |
 | `Alt+T` | the whole task (on an automation's row: the whole automation; on a coordinator's row: the coordinator, with its last wakes while its autopilot is on), full screen, and back to the list |
 | `Alt+A` | the archive, and back to the board |
-| `Alt+S` | the list grouped by repo, each group under its repo's name (a row's tag never names a repo), or by status |
+| `Alt+S` | how the list is grouped, in turn: by status, by repo (each group under its repo's name; a row's tag never names a repo), by machine (each machine under its own heading, its tasks under it by how much they need you) |
 | `Alt+D` | every done task, or only the latest |
-| `Alt+M` | other machines: every machine (the scope bar's All), this machine only, then each machine by itself |
+| `Alt+M` | other machines: this machine only, every machine, then each machine by itself |
 
 **The text box's own** (not a key of the board, and not in the `?` menu)
 

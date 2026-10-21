@@ -135,7 +135,7 @@ fn another_machines_row_waits_for_that_machine_to_show_what_was_done() {
     let now = sw::clock::now();
     let theirs = |stage: &str, state: &str| Ok(json!({ "host": "otherbox", "version": "0.2.0", "tasks": [{ "id": "proj/151", "title": "Theirs", "state": state, "stage": stage, "at": now, "created": now }] }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: theirs("todo", "idle") });
-    assert_eq!(s.s.scope, "*");
+    s.press(&["alt+m"]);
     s.s.sel = "otherbox:proj/151".into(); sw::board::update::list::relist(&mut s.s);
     let fx = s.hold("ctrl+s");
     assert!(matches!(jobs(&fx).as_slice(), [Job::Far { action, .. }] if action == "delegate"), "{fx:?}");

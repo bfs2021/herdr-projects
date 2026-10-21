@@ -25,7 +25,7 @@ fn the_automations_are_a_group_of_the_main_list_with_keys_that_turn_fire_and_rem
     sw::clock::set(Some(sw::clock::now())); // "next in 2h" and "0s ago" stay so however long the drawing takes
     w.add("Mine");
     let mut s = open(&w.root, 44); s.s.side = false;
-    assert!(!s.lines()[2..].join("\n").contains("automations"), "none: no heading at all"); // under the kinds row
+    assert!(!s.text().contains("automations"), "none: no heading at all");
     let all = three(&w);
     l::turn(all[2].s("id"), false).unwrap(); s.load();
     let lines = s.screen(120);
@@ -33,14 +33,15 @@ fn the_automations_are_a_group_of_the_main_list_with_keys_that_turn_fire_and_rem
         " ⟳ on    Look for old dependencies  every 2h                                                             next in  2h",
         " ⟳ on    Release note after a merge  when a task is merged, in every repo                                    never fired",
         " ⟳ off   Nightly audit  daily 03:00                                                                          never fired"]);
-    assert!(lines[1].starts_with(" all · tasks") && lines[1].ends_with(" proj · PRJ · 1 to do"), "{}", lines[1]);
+    assert_eq!(lines[0], " herdr-projects  proj · PRJ");
+    assert!(lines[1].starts_with(" All 1 · Needs you 0 · Working 0 · Ready 0 · To do 1 · Done 0"), "the filter row: {}", lines[1]);
     // the arrows go from the tasks on to the automations' heading and their rows; the hint line shows the keys that act there
     s.press(&["down"]); assert_eq!(s.s.sel, "head:status\t\tautomations"); s.press(&["down"]); assert_eq!(s.s.sel, row_id(&all[0])); assert!(s.s.current().is_none());
     assert!(s.screen(120)[7].starts_with("▌⟳ on    Look for old dependencies "));
     assert_eq!(s.screen(140).last().unwrap(), "  enter open this automation · space turn this automation off · ctrl+s fire it now · ctrl+x remove it · ctrl+e its settings · ? all keys");
     // a narrow screen: two lines each, nothing cut
     let narrow = s.screen(60);
-    assert_eq!(narrow[7..14].to_vec(), vec![" ▾ automations", "▌⟳ on    Look for old dependencies", "▌        every 2h                                 next in 2h", " ⟳ on    Release note after a merge", "         when a task is merged, in every repo    never fired", " ⟳ off   Nightly audit", "         daily 03:00                             never fired"]);
+    assert_eq!(narrow[6..13].to_vec(), vec![" ▾ automations", "▌⟳ on    Look for old dependencies", "▌        every 2h                                 next in 2h", " ⟳ on    Release note after a merge", "         when a task is merged, in every repo    never fired", " ⟳ off   Nightly audit", "         daily 03:00                             never fired"]);
     for l in s.screen(30) { assert!(sw::text::width(&l) <= 30, "{l}"); }
     // space: off and on
     s.press(&["space"]); assert_eq!(sw::store::automations::automation(all[0].s("id")).unwrap().at("on"), &json!(false));

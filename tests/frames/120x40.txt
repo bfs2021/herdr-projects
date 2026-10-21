@@ -1,6 +1,6 @@
 == the list
- ○ All › this machine
- all · tasks · agents · coordinators · automations           proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
 
  ▾ needs you
  ? #9     Max length for task titles                                                                                  1m
@@ -40,30 +40,29 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
   enter open this task's agent · space talk to the agent · ctrl+x stop the agent · ? all keys
 == the task beside it
- ○ All › this machine                                                    │
- all · tasks · agents · coordinators · automations                       │  #5 Max length for task titles
- proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done              │
-                                                                         │  Status ────────────────────────────────────
- ▾ needs you                                                             │  State        ◐ working · for 1m
- ? #9     Max length for task titles                                  1m │  Progress     █████████░░░░░░ 60% · 11m left
-          Should the old settings file be removed, or kept for one more… │  Now          Found the cause; now checking
- @ #10    Max length for task titles                                  1m │               every caller of the resize
-          Needs a login                                                  │               handler for the same mistake
- ! #12    Max length for task titles                  R#1 PR#123456   1m │  On it        claude
-          The pull request's checks fail                                 │
- ✗ #13    Max length for task titles                                  1m │  Description ───────────────────────────────
-          Conflict with main                                             │  A task title should have a maximum length.
- ✗ #14    Max length for task titles                                  1m │  A longer one is cut between words.
-          Stopped without a summary                                      │  Second paragraph, with
-                                                                         │  a/very/long/path/that/has/no/space/in/it/at
- ▾ ready to approve                                                      │  /all/src/board/view/row-wrap.js and more
- ◆ #11    Max length for task titles                  R#1 PR#60       1m │  words after it.
-          Pass                                                           │
-                                                                         │  Settings ──────────────────────────────────
- ▾ working                                                               │  Reading its settings…
- ◐ #2     Max length for task titles                                  1m │
-          Drafting                                                       │  alt+t shows the whole task
- ◇ #4     Max length for task titles                                  1m │
+ herdr-projects  proj                                                    │
+ All 18 · Needs 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coords 1    │  #5 Max length for task titles
+                                                                         │
+ ▾ needs you                                                             │  Status ────────────────────────────────────
+ ? #9     Max length for task titles                                  1m │  State        ◐ working · for 1m
+          Should the old settings file be removed, or kept for one more… │  Progress     █████████░░░░░░ 60% · 11m left
+ @ #10    Max length for task titles                                  1m │  Now          Found the cause; now checking
+          Needs a login                                                  │               every caller of the resize
+ ! #12    Max length for task titles                  R#1 PR#123456   1m │               handler for the same mistake
+          The pull request's checks fail                                 │  On it        claude
+ ✗ #13    Max length for task titles                                  1m │
+          Conflict with main                                             │  Description ───────────────────────────────
+ ✗ #14    Max length for task titles                                  1m │  A task title should have a maximum length.
+          Stopped without a summary                                      │  A longer one is cut between words.
+                                                                         │  Second paragraph, with
+ ▾ ready to approve                                                      │  a/very/long/path/that/has/no/space/in/it/at
+ ◆ #11    Max length for task titles                  R#1 PR#60       1m │  /all/src/board/view/row-wrap.js and more
+          Pass                                                           │  words after it.
+                                                                         │
+ ▾ working                                                               │  Settings ──────────────────────────────────
+ ◐ #2     Max length for task titles                                  1m │  Reading its settings…
+          Drafting                                                       │
+ ◇ #4     Max length for task titles                                  1m │  alt+t shows the whole task
           Starting                                                       │
 ▌◐ #5     Max length for task titles                                  1m │
 ▌         Found the cause; now checking every caller of the resize hand… │
@@ -71,8 +70,9 @@
           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx… │
  ◇ #7     Max length for task titles                                  1m │
           Running the check · tests 31 of 47                             │
-                                                                         │
- ↓ 7 more                                                                │
+ ◑ #8     Max length for task titles                  R#1             1m │
+          Reading the diff.                                              │
+ ↓ 6 more                                                                │
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -126,8 +126,7 @@
  plain keys
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its text)
-   → ←          into a machine or a project: type to pick, enter picks; ← back up
-   tab          move between the list, the scope bar and the kinds row
+   tab          the next filter on top: all, needs you, working, ready, to do, done, coordinators
    enter        send what is typed; else open this task's agent, or fold a heading
    space        flip who you talk to: the Coordinator, or this task's agent
    esc          back, one step at a time (as a popup, the board closes on the last one)
@@ -155,7 +154,8 @@
    alt+p        show the side panel: this task, beside the list
    alt+t        show the whole task, full screen
    alt+a        show the archive
- ↓ 23 more
+   alt+s        group by repo: see which repo each task is in
+ ↓ 22 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -163,8 +163,8 @@
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
- ○ All › this machine
- all · tasks · agents · coordinators · automations           proj · 5 need you · 1 ready · 9 working · 2 to do · 1 done
+ herdr-projects  proj
+ All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
 
  ▾ needs you
  ? #9     Max length for task titles                                                                                  1m
