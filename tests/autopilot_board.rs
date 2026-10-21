@@ -185,9 +185,9 @@ fn another_machines_coordinator_shows_its_line_and_takes_its_keys_there_and_an_o
     let mut b = board(&w);
     sw::board::update::update(&mut b.s, sw::board::update::Event::Machines(sw::remote::machines()));
     for m in sw::remote::machines() { let a = sw::remote::ask_list(&m, 20000); sw::board::update::update(&mut b.s, sw::board::update::Event::Remote { label: m.label.clone(), answer: a }); }
-    b.press(&["alt+m"]); assert_eq!(b.s.scope, "*");
+    while b.s.scope != "*" { b.press(&["alt+m"]); }
     let lines = b.screen(160); let at = lines.iter().position(|l| l.contains("◎ ▸ vm-b")).unwrap_or_else(|| panic!("{lines:#?}"));
-    assert!(lines[at].contains("──") && lines[at].ends_with("1 of 5 added  last #3"), "its rule, then its columns: {lines:#?}");
+    assert!(!lines[at].contains("──") && lines[at].ends_with("1 of 5 added  last #3"), "no rule, its columns on the right: {lines:#?}");
     assert!(lines[at + 1].contains("Working · woke for its timer"), "{lines:#?}");
     assert!(line_with(&lines, "Coordinator").unwrap().contains("1 other on"), "the main row sums up every machine's: {lines:#?}");
     f.answers("vm-b", "do", &json!({ "ok": true, "msg": "Autopilot off for the vm-b coordinator." }));

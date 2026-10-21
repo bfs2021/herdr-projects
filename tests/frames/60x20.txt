@@ -1,6 +1,6 @@
 == the list
  herdr-projects  proj
- All 18 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1 · Co 1
+ All 18 · Co 1 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1
 
  ▾ working
  ◐ #2     Max length for task titles
@@ -21,7 +21,7 @@
   enter open this task's agent · ? all keys
 == the task beside it
  herdr-projects  proj
- All 18 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1 · Co 1
+ All 18 · Co 1 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1
  ▾ working
  ◐ #2     Max length for task titles
           Drafting
@@ -67,15 +67,15 @@
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole
                 task: a page of its text)
-   tab          the next filter on top: all, needs you,
-                working, ready, to do, done, coordinators
+   tab          the next filter on top: all, coordinators,
+                needs you, working, ready, to do, done,
+                automations
    enter        send what is typed; else open this task's
                 agent, or fold a heading
    space        flip who you talk to: the Coordinator, or
                 this task's agent
    esc          back, one step at a time (as a popup, the
-                board closes on the last one)
- ↓ 60 more
+ ↓ 61 more
 
  + New task  added word for word
 ────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
  herdr-projects  proj
- All 18 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1 · Co 1
+ All 18 · Co 1 · Need 5 · Work 9 · Rdy 1 · Todo 2 · Done 1
 
  ▾ working
  ◐ #2     Max length for task titles

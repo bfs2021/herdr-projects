@@ -43,6 +43,12 @@ fn tab_goes_round_the_filters_lit_in_their_own_colours_and_the_list_shows_only_t
     assert!(!l.iter().any(|x| x.starts_with(" ") && x.contains("──")), "no heading has a rule: {l:?}");
     // All is lit in the plain text colour, reversed
     assert_eq!(piece(&mut s, "All 9"), (Ink::Text, true));
+    // each item keeps a cell of room on each side, lit or not: lighting another moves nothing
+    s.lines(); let before = s.s.show_hits.clone();
+    s.press(&["tab"]); s.lines(); assert_eq!(s.s.show_hits, before, "the row does not move");
+    assert_eq!(piece(&mut s, "Coordinators 2"), (Ink::Accent, true));
+    assert!(s.inked(140)[1].0.iter().any(|p| p.inv && p.t == " Coordinators 2 "), "a cell of highlight on each side");
+    s.press(&["shift+tab"]);
     // tab: Coordinators, lit in the accent colour; then needs you only, in red
     s.press(&["tab"]); assert_eq!(s.s.show, 1); assert_eq!(piece(&mut s, "Coordinators 2"), (Ink::Accent, true));
     assert!(tasks_shown(&s).is_empty());
@@ -70,7 +76,7 @@ fn tab_goes_round_the_filters_lit_in_their_own_colours_and_the_list_shows_only_t
     assert_eq!(view.at("show"), &json!(2));
     // narrow: shorter names, then only the one shown
     assert!(s.screen(76)[1].contains("Coords 2 ·") && s.screen(76)[1].contains("Needs 1"), "{:?}", s.screen(76));
-    assert_eq!(s.screen(30)[1].trim(), "Needs you 1   tab next");
+    assert_eq!(s.screen(30)[1].trim(), "Needs you 1  tab next");
 }
 
 #[test]

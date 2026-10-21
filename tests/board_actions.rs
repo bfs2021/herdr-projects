@@ -76,7 +76,7 @@ fn ready_to_approve_the_merge_asks_first_the_menu_acts_remove_asks_and_messages_
     s.press(&["alt+a"]);
     s.s.sel = "proj/2".into(); s.load(); s.press(&["ctrl+p"]); assert_eq!(task("proj/2").at("pinned"), &json!(true));
     s.press(&["ctrl+f"]); assert!(s.text().contains("\nfind ❯ ")); s.typed("make"); s.press(&["enter"]);
-    assert!(has(&s.text(), r#"^ herdr-projects  proj · [^\n]*\n All [^\n]*\n filter "make" · 1 of 2 · esc clears "#), "{}", s.text());
+    assert!(has(&s.text(), r#"^ herdr-projects  proj · [^\n]*\n +All [^\n]*\n filter "make" · 1 of 2 · esc clears "#), "{}", s.text());
     s.press(&["esc"]); assert_eq!(s.s.filter, "");
     // ctrl+x on a task with no agent running asks to remove it; only y deletes
     s.s.sel = "proj/2".into(); s.load(); s.press(&["ctrl+x"]);

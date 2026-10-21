@@ -57,9 +57,10 @@ herdr-projects autopilot off [--machine | --project <repo> | --all]
 
 ## Where it shows
 
-- **Every coordinator has a row of its own**, read as a task agent's: the main one (wherever a Coordinator can run, not
-  under `coordinator.agent none`), and each machine's and project's that was ever talked to; the filter Coordinators
-  (`Shift+Tab`) shows every one ([machine and project coordinators](machine-and-project-coordinators.md)).
+- **The main Coordinator has a row of its own, on top of the list**, wherever a Coordinator can run (not under
+  `coordinator.agent none`). **A machine's row and a project's row stand for their coordinator**: a machine's with
+  every machine shown or grouped by machine, a project's grouped by repo; the filter Coordinators (`Tab`) leaves only
+  those ([machine and project coordinators](machine-and-project-coordinators.md)).
 - **While it is on, its row reads as a task's row**: autopilot's mark `◎` all the way left, in the column where a task
   has its mark and an automation its arrow, with the fold caret one step in, where a task's tag starts; the timing in
   the columns on the right, where a task keeps its progress and its time; and what it does now on the line under its
@@ -224,7 +225,7 @@ herdr-projects show --main-coordinator
   still wins for the chat it starts.
 
 On the board, `Ctrl+E` on a coordinator's row opens its settings page, in the task settings page's form and keys. Its
-own rows come first, under `This coordinator`; then for a machine coordinator your own settings, for a project's
+own rows come first, under `This coordinator`; then on this machine's row your own settings, on a project's row
 your entry for that repo. While autopilot is on, `Enter` on an autopilot row other than the goal saves it for this time
 (`*`), and a line under the rows says so. The goal always saves as this coordinator's own. `Ctrl+U` puts a row back.
 

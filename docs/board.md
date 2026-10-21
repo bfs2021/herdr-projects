@@ -46,36 +46,37 @@ board shows and how many tasks stand in each group are on the filter row under i
 
 ## The filter row
 
-**`vm-str ▾ │ All · Needs you · Working · Ready · To do · Done · Coordinators`, each with its count**, as in an agents
-command center. The one shown is lit; the others are greyed, a count of tasks that need you in red.
+**`vm-str ▾ │ All · Coordinators · Needs you · Working · Ready · To do · Done · Automations`, each with its count**, as
+in an agents command center. The one shown is lit in its own colour, the one its rows and marks have: `Needs you` red,
+`Working` amber, `Ready` green, `Coordinators` the accent, `Automations` the automations' colour, the others plain. The
+others are greyed, a count of tasks that need you in red.
 
 **Whose board comes first**, wherever there is another machine: `All machines ▾`, or the one machine shown (in yellow
 while it does not answer). `Alt+M` goes round: all machines, then each machine by itself in the order of Herdr's
-sidebar ([other machines](other-machines.md)); a click on it does the same. The counts are those of the machine shown.
+sidebar ([other machines](other-machines.md)); a click on it does the same. Every count is the machine's shown.
 
 | Filter | The list shows |
 |---|---|
-| `All` | every task in its group, the automations, and the coordinators that were ever talked to (the main one always) |
+| `All` | every task in its group, the automations and the Coordinator's row, as always |
+| `Coordinators` | only the Coordinator's row, each machine's row and its projects' rows (those with a project coordinator): the rows that are coordinators ([machine and project coordinators](machine-and-project-coordinators.md)) |
 | `Needs you`, `Working`, `Ready`, `To do` | only the tasks of that group (`Ready` is ready to approve) |
 | `Done` | every done task, not only the latest five |
-| `Coordinators` | the board with only the coordinators' rows left, in the same places and grouping: each machine's main one, its machine coordinator and its projects' (also one that never ran, so that your first message starts it), for the machine shown |
+| `Automations` | only the automations' rows, in their places |
 
 - **`Tab` shows the next filter, `Shift+Tab` the one before**, round and round. A click on one shows it. The filter
-  shown is kept with the board's view.
-- **A coordinator is a row**, drawn as a task agent's: its mark (working, idle, needs you, stopped, not started, `◎` on
-  autopilot), what it is (`Main coordinator`, `Machine coordinator`, `Project coordinator · herdr-projects`), the last
-  thing it said under it and its time on the right. `Enter` or `Space` on one talks to it; `Ctrl+S`, `Ctrl+X`, `Ctrl+E`
-  and `Alt+P` work on it as on a task ([machine and project coordinators](machine-and-project-coordinators.md)).
-- **Where the window is narrow** the names are shorter (`Needs`, `Coords`), then shortest (`Need`, `Work`, `Rdy`), then
-  the filters with nothing in them go; narrower still, only the one shown stands, with `tab next`.
-- Grouped by repo or by machine (`Alt+S`), a filter keeps only its tasks under each heading.
+  shown is kept with the board's view. Each filter keeps the grouping (`Alt+S`) and the headings of what it shows; a
+  machine or a repo with nothing that matches has none.
+- **A machine's row and a project's row are their coordinator's**, drawn as a task agent's row: its coordinator's mark
+  (working, idle, needs you, stopped, not started, `◎` on autopilot), no rule to the edge, the last thing it said under
+  it and its time on the right. `Enter` folds and unfolds it, `Space` talks to its coordinator.
+- **Where the window is narrow** the names are shorter (`Coords`, `Needs`, `Autos`), then shortest (`Co`, `Need`,
+  `Work`), then the filters with nothing in them go; narrower still, only the one shown stands, with `tab next`.
 
 ## Grouping: by status, by repo, by machine
 
 `Alt+S` groups the list one way after the other: **by status** (the five groups below), **by repo** (each repo under its
-name), **by machine** (each machine under its own heading, its tasks under it by how much they need you, with no
-status headings), and by status again. The coordinators' rows go with it: the main one and the machine's at the top of
-their machine's part, a project's there too or, grouped by repo, at the top of its repo's group.
+row, its project coordinator's), **by machine** (each machine under its row, its machine coordinator's, its tasks under
+it by how much they need you, with no status headings), and by status again.
 
 ## The list: five groups
 
@@ -557,7 +558,7 @@ are sent from another machine, so a count would not be true). All of that is in 
 - **With no task selected** (words on their way to another machine, an empty list), the chat names the Coordinator until
   a task is selected again.
 - **If the task you talk to goes away** (removed), you are back with the Coordinator, never on a neighbour's agent.
-- **On a coordinator's row**, `Enter` or `Space` talks to that coordinator
+- **On a machine's or a project's row**, `Space` talks to that machine's or that project's own coordinator
   ([machine and project coordinators](machine-and-project-coordinators.md)).
 
 ### What the chat is made of

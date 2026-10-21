@@ -1,6 +1,6 @@
 == the list
  herdr-projects  proj
- All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
+ All 18 · Coords 1 · Needs 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Autos 0
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 
@@ -25,7 +25,7 @@
   enter open this task's agent · space talk to the agent · ? all keys
 == the task beside it
  herdr-projects  proj
- All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
+ All 18 · Coords 1 · Needs 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Autos 0
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 
@@ -79,8 +79,8 @@
    ↑ ↓          move between tasks and headings
    pgup pgdn    a page of tasks up or down (in the whole task: a page of its
                 text)
-   tab          the next filter on top: all, needs you, working, ready, to do,
-                done, coordinators
+   tab          the next filter on top: all, coordinators, needs you, working,
+                ready, to do, done, automations
    enter        send what is typed; else open this task's agent, or fold a
                 heading
    space        flip who you talk to: the Coordinator, or this task's agent
@@ -100,7 +100,7 @@
   ↑↓ pick a key · enter press it · esc close the menu
 == a draft
  herdr-projects  proj
- All 18 · Needs you 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Coordinators 1
+ All 18 · Coords 1 · Needs 5 · Working 9 · Ready 1 · To do 2 · Done 1 · Autos 0
  ✗ #14    Max length for task titles                                          1m
           Stopped without a summary
 

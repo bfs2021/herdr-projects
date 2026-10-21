@@ -4,7 +4,7 @@
 It is one long-lived agent chat, not a call per message: everything you type goes into the same conversation, so
 "delegate that one too" works, and it can ask you something back.
 
-Each machine and each repo has a coordinator of its own too, beside this one: `Enter` or `Space` on its row
+Each machine and each repo has a coordinator of its own too, beside this one: `Space` on its machine's or its project's row
 ([machine and project coordinators](machine-and-project-coordinators.md)).
 
 - `Enter` sends your message. **It decides itself what to start**: say "and start it" and it puts an agent on what it adds.

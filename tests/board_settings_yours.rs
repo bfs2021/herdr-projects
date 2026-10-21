@@ -28,7 +28,7 @@ fn every_machine() -> (World, Board, String) {
     update(&mut b.s, Event::Machines(sw::remote::machines()));
     let now = sw::clock::now();
     update(&mut b.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "0.2.0", "tasks": [{ "id": "proj/151", "title": "Theirs", "state": "idle", "stage": "todo", "at": now, "created": now }] })) });
-    b.press(&["alt+m"]); assert_eq!(b.s.scope, "*");
+    for _ in 0..4 { if b.s.scope == "*" { break; } b.press(&["alt+m"]); } assert_eq!(b.s.scope, "*");
     (w, b, id)
 }
 

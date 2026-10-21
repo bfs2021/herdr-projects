@@ -2,38 +2,44 @@
 
 **Three levels you can talk to, each its own conversation.**
 
-| Level | Talk to it | Its row says | Named in the chat | Lives in Herdr |
-|---|---|---|---|---|
-| The [Coordinator](coordinator.md) | the chat, as always, or `Enter` on its row | `Main coordinator` | `Coordinator` | a `Coordinator` tab in the home space (`~`) |
-| A machine coordinator | `Enter` or `Space` on its row | `Machine coordinator` | after the machine: `vm-str coordinator`, `Mac coordinator` | a tab of that name in that machine's home space |
-| A project coordinator | `Enter` or `Space` on its row | `Project coordinator · herdr-projects` | after the repo: `herdr-projects coordinator`, `~ coordinator` for the home folder | a tab of that name in the repo's own space |
+| Level | Talk to it | Named | Lives in Herdr |
+|---|---|---|---|
+| The [Coordinator](coordinator.md) | the chat, as always | `Coordinator` | a `Coordinator` tab in the home space (`~`) |
+| A machine coordinator | `Space` on its machine's row | after the machine: `vm-str coordinator`, `Mac coordinator` | a tab of that name in that machine's home space |
+| A project coordinator | `Space` on its project's row (its repo's heading) | after the repo: `herdr-projects coordinator`, `~ coordinator` for the home folder | a tab of that name in the repo's own space |
 
 The Coordinator stays as it is. The others sit beside it: talking to one never touches the others.
 
-## Their rows
+## A machine's row and a project's row are its coordinator
 
-**Each coordinator is a row of the list, drawn as a task agent's**: a mark in the marks' column for where it stands, the
-same marks the chat's line has for a coordinator or an agent (working, idle, needs you, stopped, not started, `◎` on
-[autopilot](autopilot.md)), its name, the last thing it said on the line under it, and on the right how long ago it said
-it (on autopilot its timing: `2 of 5 added  last HSW-92  next in 40m`). No review tag, pull request or progress: a
-coordinator has none.
+**A machine's row** (its heading, with every machine shown or grouped by machine) **and a project's row** (a repo's
+heading, grouped by repo) stand for their coordinator, and are drawn as a task agent's row:
 
-- **Where it stands is where the grouping puts it** (`Alt+S`): the main one and the machine's at the top of their
-  machine's part (under the machine's heading with every machine shown), a project's beside them, or grouped by repo at
-  the top of its repo's group. Another machine's main Coordinator stands in that machine's part too.
-- **Under All** only those that were ever talked to show, and the main one. **The filter Coordinators** (`Shift+Tab`
-  from All, [the filter row](board.md#the-filter-row)) shows the board with only the coordinators' rows left, every one
-  of the machine shown: also a machine's that never ran and a project's used lately, so that your first message starts
-  it.
-- **Headings are only headings**: a machine's or a repo's folds and unfolds, and has no coordinator of its own.
+- **its coordinator's mark** in the marks' column, the same marks the chat's line has for a coordinator or an agent:
+  working, idle, needs you, stopped, not started, and autopilot's `◎` while that is on;
+- then its caret and its name, with **no rule** to the edge of the list;
+- on the right how long ago its coordinator last said something (on [autopilot](autopilot.md) its timing:
+  `2 of 5 added  last HSW-92  next in 40m`), and **under its name the last thing it said**. One that never said
+  anything has no second line. No review tag, pull request or progress: a coordinator has none.
+- `Enter` folds it and unfolds it, as any heading; `Space` talks to its coordinator.
+
+**The filter Coordinators** (`Tab` from All, [the filter row](board.md#the-filter-row)) leaves only the Coordinator's
+row, each machine's row and the rows of its projects that have a project coordinator, for the machine shown; its count
+is how many there are. `Enter` on a machine's row there folds its projects' rows away.
 
 ## Talking to one
 
-- **`Enter` or `Space` on its row** opens it in the chat. The chat names it (`herdr-projects coordinator  idle`), and so
-  does the box: `Send message to herdr-projects coordinator`. `Enter` sends, and it decides what to start, as the
-  Coordinator does.
-- **It follows the selection**, as a task's agent does: move to another coordinator's row and you talk to that one,
-  move to a task and you talk to its agent. `Space` again goes back to the Coordinator.
+- **`Space` on its row** opens it in the chat. The chat names it (`herdr-projects coordinator  idle`), and so does the
+  box: `Send message to herdr-projects coordinator`. `Enter` sends, and it decides what to start, as the Coordinator
+  does.
+- **A machine's row** shows with every machine (`Alt+M`, the filter row's first item) or grouped by machine (`Alt+S`);
+  **a project's row** grouped by repo (`Alt+S`), and under Coordinators. The home folder's tasks have one too.
+- **A repo with no tasks in view keeps its row**, folded (`0 tasks`), when it was used in the last 14 days (a task,
+  archived ones too) or has a project coordinator, so `Space` still reaches it. Older repos, and repos whose folder is
+  gone, have none.
+- **It follows the selection**, as a task's agent does: move to another machine's or project's row and you talk to that
+  one's coordinator, move to a task and you talk to its agent. `Space` again goes back to the Coordinator.
+- A status group's heading (`to do`, `done`) has none. `Space` there says so.
 
 Your first message starts it. Until then the chat says `not started: your first message starts it`.
 
@@ -57,13 +63,13 @@ Your first message starts it. Until then the chat says `not started: your first 
   type goes there. A machine on an older version has none: the chat says to update it there.
 - **Herdr's sidebar** names each as the board does, with where it stands and its last message.
 
-## A row is its coordinator
+## Its row's keys
 
-A coordinator's row stands for it, as a task's row stands for the task:
+As a task's row stands for the task:
 
-- `Alt+P` shows it beside the list, `Alt+T` whole, in the [task panel](task-panel.md)'s form.
-- `Ctrl+E` opens its settings page: its own rows first, under `This coordinator`, then for the machine's your own
-  settings, for a project's your entry for that repo.
+- `Alt+P` shows its coordinator beside the list, `Alt+T` whole, in the [task panel](task-panel.md)'s form.
+- `Ctrl+E` opens its settings page: its own rows first, under `This coordinator`, then on this machine's row your own
+  settings, on a project's your entry for that repo.
 - `Ctrl+S`, with nothing typed, puts it on [autopilot](autopilot.md) with its saved goal and settings; `Ctrl+X` takes it
   off. While on, its mark is autopilot's `◎`, its timing is on the right and what it does is under its name.
 

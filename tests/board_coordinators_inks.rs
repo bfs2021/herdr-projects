@@ -76,9 +76,9 @@ fn a_repos_coordinator_is_drawn_in_the_brighter_grey_and_a_machines_in_its_headi
         // this machine's coordinator: its heading's accent
         s.press(&["space"]); s.press(&["alt+s", "alt+s"]); // by machine, then by status
         update(&mut s.s, Event::Machines(sw::remote::machines()));
-        if s.s.scope != "*" { s.press(&["alt+m"]); }
+        while s.s.scope != "*" { s.press(&["alt+m"]); }
         s.s.sel = machine_id(""); s.load();
-        assert_eq!(inks_on(&s.inked(100), "▾", &head), vec![(MACHINE_INK, true)]);
+        assert_eq!(inks_on(&s.inked(100), &format!("▾ {head}"), &head), vec![(MACHINE_INK, true)]); // its row, not the filter row's ▾ beside the panel
         s.press(&["space"]);
         assert_eq!(box_ink(&s.s, None), MACHINE_INK);
         assert_eq!(inks_on(&s.inked(100), "coordinator  not started", &format!("{host} coordinator")), vec![(MACHINE_INK, true)]);

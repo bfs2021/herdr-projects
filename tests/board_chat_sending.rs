@@ -85,7 +85,7 @@ fn another_machines_coordinators_show_your_words_at_once_with_no_row_on_its_way_
     let mut s = open(&w.root, 34);
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: otherbox("Done.", quiet()) });
-    s.press(&["alt+m"]);
+    while s.s.scope != "*" { s.press(&["alt+m"]); }
     s.s.sel = machine_id("otherbox"); s.load();
     s.press(&["space"]);
     s.typed("anything to do?");
@@ -140,7 +140,7 @@ fn a_task_agent_on_another_machine_shows_your_words_at_once_until_it_answers() {
     let mut s = open(&w.root, 34); s.s.side = false;
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: otherbox("Made f.", quiet()) });
-    s.press(&["alt+m"]);
+    while s.s.scope != "*" { s.press(&["alt+m"]); }
     s.s.sel = "otherbox:proj/1".into(); sw::board::update::list::relist(&mut s.s);
     s.press(&["space"]);
     s.typed("g too");

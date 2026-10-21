@@ -75,7 +75,7 @@ fn space_on_a_machines_heading_talks_to_that_machines_coordinator_here_or_there(
     let far = |coords: Value| Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "none" }, "coordinators": coords,
         "tasks": [{ "id": "proj/1", "title": "Far away", "state": "idle", "stage": "todo", "at": now, "created": now, "snap": { "folder": "~/far" } }] }));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: far(json!({ "machine": { "state": "idle", "readable": true, "said": "Otherbox is quiet.", "talk": [{ "you": true, "text": "how is it?" }, { "you": false, "text": "Otherbox is quiet." }] } })) });
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    while s.s.scope != "*" { s.press(&["alt+m"]); }
     // this machine's heading: its machine coordinator, started here
     s.s.sel = machine_id(""); s.load();
     s.press(&["space"]);
@@ -134,7 +134,7 @@ fn words_put_away_for_a_headings_coordinator_come_back_only_to_it() {
     assert_eq!(s.s.value(), ""); assert_eq!(s.s.draft_away.as_ref().map(|d| d.to.clone()), Some(head.clone()));
     s.press(&["space"]); assert!(!s.s.reply);
     s.press(&["ctrl+z"]);
-    assert_eq!(s.s.value(), "", "not to the Coordinator"); assert!(s.s.msg.contains("Those words were for the proj coordinator. Select its heading and press space"), "{}", s.s.msg);
+    assert_eq!(s.s.value(), "", "not to the Coordinator"); assert!(s.s.msg.contains("Those words were for the proj coordinator. Select its row and press space"), "{}", s.s.msg);
     s.press(&["space"]); s.press(&["ctrl+z"]);
     assert_eq!(s.s.value(), "half a thought");
 }

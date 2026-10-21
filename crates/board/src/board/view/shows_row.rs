@@ -22,23 +22,27 @@ pub fn shows_line(s: &State, _t: &Theme, w: usize) -> (Inked, Vec<(usize, usize,
     let machine = (!s.remotes.is_empty() || s.all()).then(|| {
         let named = if s.scope == "*" { "All machines".to_string() } else { crate::board::update::remotes::shown(s, &s.scope) };
         let ok = s.scope.is_empty() || s.scope == "*" || s.remotes.get(&s.scope).is_some_and(|m| m.ok);
-        Inked::of(format!("{named} ▾"), if ok { Ink::Accent } else { Ink::Yellow }).bold().add(Inked::of(" │ ", Ink::Muted))
+        Inked::of(format!(" {named} ▾ "), if ok { Ink::Accent } else { Ink::Yellow }).bold()
     });
+    // Every item keeps a cell of room on each side, lit or not: the lit one's highlight takes it (` Needs you 1 `), and
+    // the row does not move when another is lit.
     let lay = |names: &[&str], only: u8| {
-        let (mut line, mut hits) = (Inked::plain(" "), vec![]);
-        if let Some(m) = &machine { let w = m.width(); line = line.add(m.clone()); hits.push((1, 1 + w.saturating_sub(3), MACHINE)); }
+        let (mut line, mut hits) = (Inked::new(), vec![]);
+        if let Some(m) = &machine { line = line.add(m.clone()); hits.push((0, line.width(), MACHINE)); line = line.add(Inked::of("│", Ink::Muted)); }
+        let mut first = true;
         for (n, name) in names.iter().enumerate() {
             let count = s.show_n.get(n).copied().unwrap_or(0);
             if (only == 2 && n != s.show) || (only == 1 && n != s.show && n != 0 && count == 0) { continue; }
-            if line.width() > 1 && !line.text().ends_with("│ ") { line = line.add(Inked::of(" · ", Ink::Muted)); }
+            if !first { line = line.add(Inked::of("·", Ink::Muted)); }
+            first = false;
             let lit = n == s.show;
             // The one shown is lit in its own colour (reversed: the colour is its ground); the others greyed.
-            let piece = if lit { Inked::of(format!(" {name} {count} "), INKS[n]).bold().inv() } else { Inked::of(*name, Ink::Muted).add(Inked::of(format!(" {count}"), if n == crate::board::update::shows::NEEDS && count > 0 { Ink::Red } else { Ink::Muted })) };
+            let piece = if lit { Inked::of(format!(" {name} {count} "), INKS[n]).bold().inv() } else { Inked::of(format!(" {name}"), Ink::Muted).add(Inked::of(format!(" {count}"), if n == crate::board::update::shows::NEEDS && count > 0 { Ink::Red } else { Ink::Muted })).add(Inked::plain(" ")) };
             let from = line.width();
             line = line.add(piece);
             hits.push((from, line.width(), n));
         }
-        if only == 2 { line = line.add(Inked::of(format!("  {} next", key_name("filter")), Ink::Muted)); }
+        if only == 2 { line = line.add(Inked::of(format!(" {} next", key_name("filter")), Ink::Muted)); }
         (line, hits)
     };
     let names: Vec<&str> = SHOWS.iter().map(|x| x.0).collect();

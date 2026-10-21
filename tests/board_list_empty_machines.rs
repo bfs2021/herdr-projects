@@ -18,7 +18,7 @@ fn empty_otherbox() -> (World, Board) {
     let mut s = open(&w.root, 40); s.s.side = false;
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "none" }, "coordinators": { "machine": { "state": "idle" } }, "tasks": [] })) });
-    s.press(&["alt+m"]); assert_eq!(s.s.scope, "*");
+    for _ in 0..4 { if s.s.scope == "*" { break; } s.press(&["alt+m"]); } assert_eq!(s.s.scope, "*");
     (w, s)
 }
 
@@ -26,7 +26,7 @@ fn empty_otherbox() -> (World, Board) {
 fn a_machine_with_no_task_has_its_heading_folded_and_space_there_talks_to_its_machine_coordinator() {
     let (_w, mut s) = empty_otherbox();
     let t = s.screen(100).join("\n");
-    assert!(has(&t, r"\n ▸ otherbox  0 tasks ─+"), "{t}");
+    assert!(has(&t, r"\n \S ▸ otherbox  0 tasks *\n"), "{t}");
     assert!(t.contains("Mine"), "{t}");
     assert!(!has(&t, r"▸ farbox|▾ farbox"), "a machine that did not answer has no heading, its line says why: {t}");
     // The arrows stop on it; enter has nothing to unfold, space talks to its machine coordinator.
@@ -35,7 +35,7 @@ fn a_machine_with_no_task_has_its_heading_folded_and_space_there_talks_to_its_ma
     assert!(t.contains("space talk to the otherbox coordinator") && !t.contains("unfold this machine"), "{t}");
     s.press(&["enter"]);
     assert!(s.s.msg.contains("No tasks on otherbox yet") && s.s.sel == machine_id("otherbox"), "{}", s.s.msg);
-    assert!(has(&s.screen(100).join("\n"), r"\n▌▸ otherbox  0 tasks ─+"), "still folded");
+    assert!(has(&s.screen(100).join("\n"), r"\n▌\S ▸ otherbox  0 tasks *\n"), "still folded");
     s.press(&["space"]);
     s.typed("set up the crm repo");
     let fx = s.hold("enter");
@@ -44,7 +44,7 @@ fn a_machine_with_no_task_has_its_heading_folded_and_space_there_talks_to_its_ma
     let now = sw::clock::now();
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "tasks": [{ "id": "crm/1", "title": "Set up crm", "state": "idle", "stage": "todo", "at": now, "created": now }] })) });
     let t = s.screen(100).join("\n");
-    assert!(has(&t, r"\n[ ▌]▾ otherbox ─+\n") && t.contains("Set up crm"), "{t}");
+    assert!(has(&t, r"\n[ ▌]\S ▾ otherbox *\n") && t.contains("Set up crm"), "{t}");
 }
 
 #[test]
@@ -54,10 +54,10 @@ fn this_machine_with_no_task_has_its_heading_too_and_a_filter_hides_the_empty_on
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     let now = sw::clock::now();
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "tasks": [{ "id": "proj/1", "title": "Theirs", "state": "idle", "stage": "todo", "at": now, "created": now }] })) });
-    s.press(&["alt+m"]);
+    for _ in 0..4 { if s.s.scope == "*" { break; } s.press(&["alt+m"]); } assert_eq!(s.s.scope, "*");
     let here = regex::escape(&sw::shown::words::clean(&sw::remote::check::hostname()));
     let t = s.screen(100).join("\n");
-    assert!(has(&t, &format!(r"\n[ ▌]▸ {here}  0 tasks ─+\n")) && has(&t, r"\n[ ▌]▾ otherbox ─+\n"), "{t}");
+    assert!(has(&t, &format!(r"\n[ ▌]\S ▸ {here}  0 tasks *\n")) && has(&t, r"\n[ ▌]\S ▾ otherbox *\n"), "{t}");
     s.press(&["ctrl+f"]); s.typed("Theirs");
     let t = s.screen(100).join("\n");
     assert!(!t.contains("0 tasks") && t.contains("Theirs"), "{t}");
