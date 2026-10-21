@@ -36,14 +36,15 @@ pub fn look_of(s: &State, t: &Target) -> Option<crate::coordinator::look::Look> 
     let m = s.remotes.get(&t.host)?;
     crate::coordinator::far::read(if t.to.is_empty() { &m.coord } else { m.coords.at(&t.to) })
 }
-/// The coordinator a heading stands for: a machine's heading, or a repo's. A status group's has none.
+/// The coordinator a coordinator's row stands for (coord_rows.rs: row_id): a machine's main Coordinator, its machine
+/// coordinator, or one of its projects'. A heading has none.
 pub fn of_head(s: &State, id: &str) -> Option<Target> {
     let rest = id.strip_prefix(HEAD)?;
     let parts: Vec<&str> = rest.split('\t').collect();
     match parts.as_slice() {
         ["main", host] => Some(Target { host: host.to_string(), to: String::new(), name: if host.is_empty() { crate::status_words::COORDINATOR.into() } else { format!("Coordinator on {host}") } }),
-        ["machine", host] => Some(Target { host: host.to_string(), to: "machine".into(), name: crate::coordinator::co::named(&label(s, host)) }),
-        ["repo", host, repo] => Some(Target { host: host.to_string(), to: format!("project:{repo}"), name: crate::coordinator::co::named(&crate::shown::words::repo_label(repo)) }),
+        ["cm", host] => Some(Target { host: host.to_string(), to: "machine".into(), name: crate::coordinator::co::named(&label(s, host)) }),
+        ["cp", host, repo] => Some(Target { host: host.to_string(), to: format!("project:{repo}"), name: crate::coordinator::co::named(&crate::shown::words::repo_label(repo)) }),
         _ => None,
     }
 }
@@ -56,15 +57,15 @@ pub fn wanted(s: &State) -> String { talking(s).or_else(|| of_head(s, &s.sel)).f
 /// selected row's, and with the list of coordinators every one ("*").
 pub fn looks_wanted(s: &State) -> Vec<String> {
     let mut out: Vec<String> = of_head(s, &s.sel).filter(|t| t.host.is_empty() && !t.to.is_empty()).map(|t| vec![t.to]).unwrap_or_default();
-    if super::shows::coords(s) { out.push("*".into()); }
+    if super::shows::keeps_coords(s) { out.push("*".into()); }
     out
 }
-/// Is this row still on the board: a task, or a heading.
-pub fn exists(s: &State, id: &str) -> bool { s.items.iter().any(|r| r.s("id") == id) || s.rows.iter().any(|r| matches!(r, Row::Head { id: h, .. } if h == id)) }
-/// Space on a heading: talk to its coordinator. A status group's heading has none: it says where they are.
+/// Is this row still on the board: a task, a heading or a coordinator's row.
+pub fn exists(s: &State, id: &str) -> bool { s.items.iter().any(|r| r.s("id") == id) || s.rows.iter().any(|r| matches!(r, Row::Head { id: h, .. } if h == id) || matches!(r, Row::Rec(o) if o.s("id") == id)) }
+/// Space on a coordinator's row: talk to it. A heading has none: it says where they are.
 pub fn flip(s: &mut State) -> bool {
     if !is_head(&s.sel) { return false; }
-    if of_head(s, &s.sel).is_none() { s.flash(format!("Space on a machine's heading or a repo's heading talks to its coordinator. {} groups the tasks by repo.", crate::board::keys::key_name("byRepo")), Ink::Muted); return true; }
+    if of_head(s, &s.sel).is_none() { s.flash(format!("Space on a coordinator's row talks to it: the main Coordinator, a machine's or a project's. {} lists them all.", crate::board::keys::key_name("filter")), Ink::Muted); return true; }
     s.reply = true; s.reply_id = s.sel.clone(); s.panel_top = 0;
     true
 }

@@ -64,8 +64,6 @@ pub fn selected(s: &State) -> Option<&Row> { if !is_head(&s.sel) { return None; 
 /// What enter does on the selected heading, in words: for the hint line ("" nothing).
 pub fn says(s: &State) -> Option<String> {
     let Some(Row::Head { machine, folded, empty, id, .. }) = selected(s) else { return None };
-    // In the list of coordinators enter talks to the one selected (shows.rs: talk).
-    if super::shows::coords(s) { return Some(if super::coords::talking(s).is_some() { String::new() } else { "talk to it".into() }); }
     if super::pilot::is_main(id) { return Some(String::new()); } // the main Coordinator's row folds nothing
     // An empty machine's has nothing to unfold.
     if *empty { return Some(String::new()); }

@@ -9,7 +9,6 @@ use crate::board::theme::Theme;
 use crate::json::*;
 use crate::shown::ink::{Ink, Inked};
 use crate::shown::queue::queued;
-use crate::shown::states::is_live;
 
 /// The most lines a live task's name takes, and the most what it says takes.
 const WRAP_LINES: usize = 2;
@@ -19,7 +18,7 @@ const SAY_MIN: usize = 20;
 const LONG_TAG: usize = 13;
 /// Every mark is one cell wide, in every theme (theme/marks.rs).
 const MARK: usize = 1;
-fn has_under(r: &Obj) -> bool { is_live(r) || is_auto(r) }
+fn has_under(r: &Obj) -> bool { super::fields::two_lines(r) || is_auto(r) }
 /// Does this row wrap? Live rows, automations and the selected one, on a narrow screen.
 pub fn wraps(s: &State, r: &Obj, tall: bool) -> bool { tall && (has_under(r) || r.s("id") == s.sel) }
 /// At most `max` lines of a wrapped text: the last one takes what is left and is cut at its end.
@@ -63,7 +62,7 @@ pub fn wrap_parts(s: &State, r: &Obj, width: usize, cells: Option<usize>) -> Par
 }
 /// The lines a row takes in the list.
 pub fn row_height(s: &State, r: &Obj, width: usize, tall: bool) -> usize {
-    if !wraps(s, r, tall) { return if is_live(r) { 2 } else { 1 }; }
+    if !wraps(s, r, tall) { return if super::fields::two_lines(r) { 2 } else { 1 }; }
     let p = wrap_parts(s, r, width, None);
     if has_under(r) { p.name.len() + p.says.len() + if p.lone { 0 } else { 1 } } else { p.name.len() }
 }

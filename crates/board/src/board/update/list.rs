@@ -72,6 +72,7 @@ pub fn relist(s: &mut State) {
         let mut names: Vec<String> = vec![];
         for r in &shown { let g = repo_name(r).to_string(); if !names.contains(&g) { names.push(g); } }
         for a in &s.autos { let g = a.t("repo"); if !names.contains(&g) { names.push(g); } }
+        for h in super::shows::hosts(s) { for (g, _) in super::coord_rows::of_machine(s, &h).1 { if !names.contains(&g) { names.push(g); } } }
         // A repo used lately with no task in view keeps its heading, for its project coordinator (heads.rs: empty_repo).
         if s.scope.is_empty() || s.scope == "*" { for g in &s.data.lately { if super::heads::empty_repo(s, "", g) && !names.contains(g) { names.push(g.clone()); } } }
         let here = s.data.repo.clone();
@@ -167,15 +168,15 @@ pub fn sync_reply(s: &mut State) {
 /// repo: after their repo's), and fold with their heading.
 pub fn fold_rows(s: &mut State) -> Vec<Row> {
     s.fold_sel = s.sel.clone();
-    // The list of coordinators is one of its own: a row for each, nothing folds (shows.rs).
-    if super::shows::coords(s) { let rows = super::shows::coord_rows(s); s.steps = rows.iter().filter_map(step_id).collect(); return rows; }
     let groups = s.grouped.clone();
     let parts = parts(s, &groups);
     let lay = |keep: usize, todos: usize, s: &State| -> Vec<Row> {
         let mut rows = vec![];
-        // The main Coordinator's row, on top: its coordinator's, as every heading's is (update/pilot.rs).
-        if let Some(id) = super::pilot::main_row(s).filter(|_| super::shows::keeps_all(s)) { rows.push(Row::Head { name: crate::status_words::COORDINATOR.into(), autos: false, id, machine: false, folded: 0, folded_autos: 0, empty: false }); }
+        let crec = |id: &String| super::coord_rows::rec(s, id).map(Row::Rec);
         for p in &parts {
+            // Its coordinators' rows (coord_rows.rs): the main and the machine's on top, a project's under its repo.
+            let (top, projects) = super::coord_rows::of_machine(s, &p.host);
+            let n_coords = top.len() + projects.len();
             let autos: Vec<Vec<Obj>> = p.groups.iter().map(|(name, _)| autos_in(s, &p.host, name)).collect();
             let n_autos: usize = autos.iter().map(|a| a.len()).sum();
             let n: usize = p.groups.iter().map(|(_, recs)| recs.len()).sum::<usize>() + n_autos;
@@ -183,24 +184,28 @@ pub fn fold_rows(s: &mut State) -> Vec<Row> {
             let has_bare = p.groups.iter().zip(&autos).any(|((name, recs), a)| bare(name, recs, a));
             // A machine's heading, with every machine shown: folded, its one line stands for all its groups. One with
             // nothing in view shows folded (`0 tasks`), so that its machine coordinator is still a space away.
-            if p.heading && (n > 0 || has_bare || super::heads::empty_shown(s)) {
+            if p.heading && (n > 0 || n_coords > 0 || has_bare || super::heads::empty_shown(s)) {
                 let id = machine_id(&p.host);
                 // Only empty repos' headings under it: nothing to fold.
                 let shut = super::heads::folded(s, &id) && n > 0;
-                rows.push(Row::Head { name: super::remotes::shown(s, &p.host), autos: false, id, machine: true, folded: if shut { n } else { 0 }, folded_autos: if shut { n_autos } else { 0 }, empty: n == 0 && !has_bare });
+                rows.push(Row::Head { name: super::remotes::shown(s, &p.host), autos: false, id, machine: true, folded: if shut { n } else { 0 }, folded_autos: if shut { n_autos } else { 0 }, empty: n == 0 && n_coords == 0 && !has_bare });
                 if shut { continue; }
             }
-            if n == 0 && !has_bare { continue; }
+            if n == 0 && n_coords == 0 && !has_bare { continue; }
+            rows.extend(top.iter().filter_map(crec));
+            if !s.by_repo { rows.extend(projects.iter().filter_map(|(_, id)| crec(id))); }
             for ((name, recs), autos) in p.groups.iter().zip(&autos) {
+                let mine: Vec<&String> = if s.by_repo { projects.iter().filter(|(r, _)| r == name).map(|(_, id)| id).collect() } else { vec![] };
                 // A repo used lately with nothing in view: its heading alone, folded (`0 tasks`).
-                let empty = bare(name, recs, autos);
-                if recs.is_empty() && autos.is_empty() && !empty { continue; }
+                let empty = bare(name, recs, autos) && mine.is_empty();
+                if recs.is_empty() && autos.is_empty() && !empty && mine.is_empty() { continue; }
                 let id = group_id(s, &p.host, name);
                 let shut = super::heads::folded(s, &id) && !empty;
                 let own = !s.by_repo && name == AUTOMATIONS;
                 // By machine, the machine's heading is the tasks' own: no group heading under it but its automations'.
                 if !(s.by_machine && name != AUTOMATIONS) { rows.push(Row::Head { name: name.clone(), autos: own, id, machine: false, folded: if shut { recs.len() + autos.len() } else { 0 }, folded_autos: if shut { autos.len() } else { 0 }, empty }); }
                 if shut || empty { continue; }
+                rows.extend(mine.into_iter().filter_map(crec));
                 let mut list = recs.clone();
                 list.sort_by(|a, b| (if s.by_repo || s.by_machine { rank(a).cmp(&rank(b)) } else { std::cmp::Ordering::Equal })
                     .then_with(|| if a.b("archivedAt") && b.b("archivedAt") { b.i("archivedAt").cmp(&a.i("archivedAt")) } else { std::cmp::Ordering::Equal })

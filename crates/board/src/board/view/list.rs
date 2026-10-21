@@ -21,12 +21,11 @@ pub fn hl(t: &Theme, line: &Inked, width: usize) -> Inked {
     let barred = if cut.text().starts_with(' ') { Inked::of("▌", Ink::Accent).add(cut.skip(1)) } else { cut };
     if t.paints_selection() { barred.on(Ink::Selection) } else { barred.inv() }
 }
-/// The header says where you are: whose tasks show (other machines in the accent colour), else the repo new tasks go
-/// to. Under it the filter row, with how many tasks each holds (shows_row.rs), where the list part has `h` lines enough
+/// The header says where you are: the repo new tasks go to (whose board shows is the filter row's first item). Under it the filter row, with how many tasks each holds (shows_row.rs), where the list part has `h` lines enough
 /// for it; a find has a line of its own under that.
 pub fn head_lines(s: &mut State, t: &Theme, w: usize, h: usize) -> Vec<Inked> {
-    let others: Vec<String> = crate::board::update::remotes::others(s).into_iter().map(|m| { let n = crate::board::update::remotes::shown(s, &m.machine.label); if m.ok { n } else { format!("{n} (no answer)") } }).collect();
-    let scope = if s.scope == "*" { format!("all machines: {}", if others.is_empty() { if s.listed_at.is_some() { "no others found" } else { "asking…" }.into() } else { others.join(", ") }) } else if s.all() { format!("only {}{}", s.scope, if s.remotes.get(&s.scope).map(|m| m.ok).unwrap_or(false) { "" } else { " (no answer)" }) } else { String::new() };
+    // Whose board shows is the filter row's first item (shows_row.rs), not the header's.
+    let scope = String::new();
     let n = counts(s);
     let c = |k: &str| n.get(k).copied().unwrap_or(0);
     // The counts of each status are on the filter row; the archive has none, so its count stays here.
@@ -34,7 +33,7 @@ pub fn head_lines(s: &mut State, t: &Theme, w: usize, h: usize) -> Vec<Inked> {
     let where_ = if s.archive_view { "archive".to_string() } else { crate::board::tags::repo_with_key(&repo_label(&s.data.repo), s.data.keys.get(&s.data.repo).map(|k| k.as_str()).unwrap_or("")) };
     let tally: Vec<String> = if s.archive_view { vec![format!("{} archived", c("archived"))] } else { vec![] };
     let mut rest: Vec<String> = vec![];
-    if scope.is_empty() { rest.push(where_); }
+    if s.scope.is_empty() || s.scope == "*" || s.archive_view { rest.push(where_); }
     rest.extend(tally);
     if !s.data.session.is_empty() && s.data.session != "default" { rest.push(format!("session {}", s.data.session)); }
     let rest = rest.join(" · ");
@@ -126,19 +125,15 @@ pub fn list_lines(s: &mut State, t: &Theme, width: usize, h: usize, screen: usiz
     let mut sections: Vec<Vec<Rec>> = vec![];
     let auto_rec = |a: &Obj| Rec::new(obj(json!({ "id": a.s("row"), "auto": a })));
     // A section is the rows of one heading of one kind: by repo, a repo's automations are a section after its tasks'.
-    let mut kind = false;
-    for r in &s.rows { let auto = matches!(r, Row::Auto(_)); if matches!(r, Row::Head { .. }) || sections.is_empty() || (auto != kind && matches!(r, Row::Rec(_) | Row::Auto(_))) { sections.push(vec![]); kind = auto; } match r { Row::Rec(o) => sections.last_mut().unwrap().push(o.clone()), Row::Auto(a) => sections.last_mut().unwrap().push(auto_rec(a)), _ => {} } }
+    // Tasks, automations and coordinators each a section of their own: their columns are not the same.
+    let kind_of = |r: &Row| match r { Row::Auto(_) => 1, Row::Rec(o) if super::fields::is_coord(o) => 2, _ => 0 };
+    let mut kind = 0;
+    for r in &s.rows { let auto = kind_of(r); if matches!(r, Row::Head { .. }) || sections.is_empty() || (auto != kind && matches!(r, Row::Rec(_) | Row::Auto(_))) { sections.push(vec![]); kind = auto; } match r { Row::Rec(o) => sections.last_mut().unwrap().push(o.clone()), Row::Auto(a) => sections.last_mut().unwrap().push(auto_rec(a)), _ => {} } }
     let flat: Vec<Rec> = sections.iter().flatten().cloned().collect();
     let lay = row_layout(s, t, &flat, width, &sections, screen);
     let rows = s.rows.clone();
     for (k, r) in rows.iter().enumerate() {
         match r {
-            // The list of coordinators: a row of two lines for each (coord_list.rs).
-            Row::Head { id, .. } if crate::board::update::shows::coords(s) => {
-                let all = super::coord_list::coord_lines(s, id, width);
-                let k = all.len();
-                for (n, text) in all.into_iter().enumerate() { lines.push(L { text, sel: *id == s.sel, head: false, n, rest: k - n, id: id.clone(), auto: false }); }
-            }
             Row::Head { id, .. } => {
                 if heading_height(&rows, k) > 1 { lines.push(L { head: true, ..line(Inked::new()) }); }
                 // An open heading at the foot of what shows goes with the empty line above it; a folded one is a row.

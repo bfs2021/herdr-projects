@@ -81,8 +81,8 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
         if enter { fx.push(Effect::Run(Job::StopDispatch { id: j.t("id") })); s.input.set_text(j.s("text")); return; }
         if start { return; }
     } }
-    // On a coordinator in the list of coordinators, with nothing typed: talk to it.
-    if enter && text.is_empty() && super::shows::coords(s) && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::shows::talk(s, &id); }
+    // On a coordinator's row, with nothing typed: talk to it.
+    if enter && text.is_empty() && r.is_none() && super::pilot::selected(s).is_some() { let id = s.sel.clone(); return super::shows::talk(s, &id); }
     // On a heading, with nothing typed: fold it, or unfold it.
     if enter && text.is_empty() && super::heads::selected(s).is_some() { let id = s.sel.clone(); return super::heads::toggle(s, &id, fx); }
     if enter { return act::enter(s, &text, r.as_ref(), fx); }

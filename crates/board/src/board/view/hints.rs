@@ -66,8 +66,16 @@ pub fn hints(s: &State, r: Option<&Obj>, who: Option<&Who>) -> (Vec<Hint>, Optio
     let leave: Option<Vec<Hint>> = if s.full { let mut v = vec![]; if s.panel_length > s.panel_height { v.push(Hint { key: arrows.clone(), words: "scroll the task".into(), stays: true, ..Default::default() }); } v.extend(back.clone()); Some(v) } else { None };
     if s.job().is_some() { let mut v = vec![hk(K::Stop, "stop sending this"), plain(enter, "take the words back to change")]; v.extend(leave.unwrap_or(vec![more])); return (v, chat_key); }
     if let Some(a) = s.auto() { return (auto_hints(s, a, &back, &more), chat_key); }
+    // A coordinator's row: enter (or space) talks to it, and space goes back; its autopilot's two keys.
+    if let (None, None, Some(c)) = (r, crate::board::update::heads::selected(s), crate::board::update::pilot::selected(s)) {
+        let mut v = if head.is_some() { vec![] } else { vec![Hint { lit: c.name.clone(), tint: c.ink(), ..hk(K::Enter, &format!("talk to the {}", c.name)) }] };
+        v.push(hk(K::Delegate, "autopilot on")); v.push(hk(K::Stop, "off"));
+        v.extend(back); v.extend(key);
+        if head.is_some() { v.push(Hint { stays: true, ..hk(K::Talk, "back to the Coordinator") }); } else { v.push(more); }
+        return (v, chat_key);
+    }
     if let Some(w) = crate::board::update::heads::says(s) {
-        // A machine's or a repo's heading: space talks to its coordinator, and back.
+        // A machine's or a repo's heading: what enter does there.
         let talk = if head.is_some() { Some(Hint { stays: true, ..hk(K::Talk, "back to the Coordinator") }) } else { crate::board::update::coords::of_head(s, &s.sel).map(|c| Hint { lit: c.name.clone(), tint: c.ink(), ..hk(K::Talk, &format!("talk to the {}", c.name)) }) };
         let mut v: Vec<Hint> = (!w.is_empty()).then(|| hk(K::Enter, &w)).into_iter().collect();
         if crate::board::update::archive_done::counts(s).map(|c| c.0 > 0).unwrap_or(false) { v.push(hk(K::Archive, "archive its done tasks")); }

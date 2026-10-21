@@ -1,4 +1,5 @@
-//! The filter row under the header: `All 48 · Needs you 3 · Working 2 · Ready 1 · To do 12 · Done 30 · Coordinators 4`,
+//! The filter row under the header: `vm-str ▾ │ All 48 · Needs you 3 · Working 2 · Ready 1 · To do 12 · Done 30 ·
+//! Coordinators 4`, whose board first (where there is another machine: `All machines`, or one machine),
 //! the one shown lit, the others greyed with their counts (a count of tasks that need you in red). Where it has no
 //! room, the names are said shorter (then shortest), those with nothing in them go, and where that is still too long only the one
 //! shown stands, with the key that moves on. Where each is drawn is kept for a click (update/mouse.rs).
@@ -8,17 +9,26 @@ use crate::board::theme::Theme;
 use crate::board::update::shows::SHOWS;
 use crate::shown::ink::{Ink, Inked};
 
+/// What a click on the machine item says it is, among the filters' places.
+pub const MACHINE: usize = usize::MAX;
 const SHORT: [&str; 7] = ["All", "Needs", "Working", "Ready", "To do", "Done", "Coords"];
 const TINY: [&str; 7] = ["All", "Need", "Work", "Rdy", "Todo", "Done", "Co"];
 /// The row, `w` cells wide, and where each filter landed: (first cell, last cell, which).
 pub fn shows_line(s: &State, t: &Theme, w: usize) -> (Inked, Vec<(usize, usize, usize)>) {
     // `only`: 0 every filter, 1 those with something in them (and the one shown), 2 the one shown alone.
+    // Whose board: the first item, where there is another machine (alt+m goes round, a click too).
+    let machine = (!s.remotes.is_empty() || s.all()).then(|| {
+        let named = if s.scope == "*" { "All machines".to_string() } else { crate::board::update::remotes::shown(s, &s.scope) };
+        let ok = s.scope.is_empty() || s.scope == "*" || s.remotes.get(&s.scope).is_some_and(|m| m.ok);
+        Inked::of(format!("{named} ▾"), if ok { Ink::Accent } else { Ink::Yellow }).bold().add(Inked::of(" │ ", Ink::Muted))
+    });
     let lay = |names: &[&str], only: u8| {
         let (mut line, mut hits) = (Inked::plain(" "), vec![]);
+        if let Some(m) = &machine { let w = m.width(); line = line.add(m.clone()); hits.push((1, 1 + w.saturating_sub(3), MACHINE)); }
         for (n, name) in names.iter().enumerate() {
             let count = s.show_n.get(n).copied().unwrap_or(0);
             if (only == 2 && n != s.show) || (only == 1 && n != s.show && n != 0 && count == 0) { continue; }
-            if line.width() > 1 { line = line.add(Inked::of(" · ", Ink::Muted)); }
+            if line.width() > 1 && !line.text().ends_with("│ ") { line = line.add(Inked::of(" · ", Ink::Muted)); }
             let lit = n == s.show;
             let named = if lit { Inked::of(*name, Ink::Accent).bold() } else { Inked::of(*name, Ink::Muted) };
             let num = Inked::of(format!(" {count}"), if n == 1 && count > 0 { Ink::Red } else if lit { Ink::Accent } else { Ink::Muted });

@@ -27,6 +27,7 @@ pub fn click(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
     // A click on the filter row shows that filter (view/shows_row.rs).
     if let Some(n) = s.show_hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).map(|h| h.3) {
         if locked(s) { return s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); }
+        if n == crate::board::view::shows_row::MACHINE { return super::remotes::next_scope(s, fx); }
         return super::shows::set(s, n, fx);
     }
     let id = if x < wide && y >= top { s.list_ids.get(y - top).cloned().unwrap_or_default() } else { String::new() };
@@ -34,7 +35,7 @@ pub fn click(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
     if locked(s) { if id != s.sel { s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); } return; }
     s.stick.clear();
     // A click on a heading folds it or unfolds it, as on the web board.
-    if super::heads::is_head(&id) && !super::shows::coords(s) { super::heads::toggle(s, &id, fx); return super::list::sync_reply(s); }
+    if super::heads::is_head(&id) && super::coords::of_head(s, &id).is_none() { super::heads::toggle(s, &id, fx); return super::list::sync_reply(s); }
     s.sel = id;
     super::list::relist(s);
     super::list::sync_reply(s);

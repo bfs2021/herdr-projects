@@ -17,8 +17,10 @@ fn coord_world(machines: &str) -> World {
     w
 }
 fn drain() { flush(); sw::runner::drain_jobs(&|job, id, extra| { sw::jobs::run_job(job, id, extra); flush(); }); }
-fn tasks_shown(s: &common::board::Board) -> Vec<String> { s.s.rows.iter().filter_map(|r| match r { Row::Rec(o) => Some(o.t("title")), _ => None }).collect() }
-fn heads(s: &common::board::Board) -> Vec<String> { s.s.rows.iter().filter_map(|r| match r { Row::Head { name, id, .. } if s.s.show == 6 || !sw::board::update::pilot::is_main(id) => Some(name.clone()), _ => None }).collect() }
+fn tasks_shown(s: &common::board::Board) -> Vec<String> { s.s.rows.iter().filter_map(|r| match r { Row::Rec(o) if !o.has("coord") => Some(o.t("title")), _ => None }).collect() }
+fn coords_shown(s: &common::board::Board) -> Vec<String> { s.s.rows.iter().filter_map(|r| match r { Row::Rec(o) if o.has("coord") => Some(o.t("title")), Row::Head { name, .. } => Some(format!("▾ {name}")), _ => None }).collect() }
+fn heads(s: &common::board::Board) -> Vec<String> { s.s.rows.iter().filter_map(|r| match r { Row::Head { name, .. } => Some(name.clone()), _ => None }).collect() }
+fn to_all(s: &mut common::board::Board) { for _ in 0..4 { if s.s.scope == "*" { return; } s.press(&["alt+m"]); } panic!("never every machine"); }
 
 #[test]
 fn tab_goes_round_the_filters_and_the_list_shows_only_that_status() {
@@ -29,11 +31,13 @@ fn tab_goes_round_the_filters_and_the_list_shows_only_that_status() {
     let mut s = open(&w.root, 40); s.s.side = false;
     let l = s.screen(120);
     assert_eq!(l[0], " herdr-projects  proj · PRJ");
-    assert_eq!(l[1], " All 9 · Needs you 1 · Working 0 · Ready 0 · To do 1 · Done 7 · Coordinators 2");
+    // a coordinator's row reads as a task agent's: its mark in the marks' column, no heading's rule
+    assert!(l.iter().any(|x| regex::Regex::new(r"^ · +Main coordinator$").unwrap().is_match(x)) && !l.iter().any(|x| x.starts_with(" ") && x.contains("──")), "{l:?}");
+    assert_eq!(l[1], " All 9 · Needs you 1 · Working 0 · Ready 0 · To do 1 · Done 7 · Coordinators 3");
     // tab: needs you only
     s.press(&["tab"]); assert_eq!(s.s.show, 1);
     assert_eq!(tasks_shown(&s), vec!["Asks you"]);
-    assert!(!s.s.rows.iter().any(|r| matches!(r, Row::Head { id, .. } if sw::board::update::pilot::is_main(id))), "no main Coordinator's row but under All");
+    assert!(!s.s.rows.iter().any(|r| matches!(r, Row::Rec(o) if o.has("coord"))), "no coordinator's row but under All and Coordinators");
     s.press(&["tab", "tab", "tab"]); assert_eq!(s.s.show, 4); assert_eq!(tasks_shown(&s), vec!["Plain to do"]);
     // done: every done task, not the latest five
     s.press(&["tab"]); assert_eq!(tasks_shown(&s).len(), 7, "{:?}", tasks_shown(&s));
@@ -57,34 +61,61 @@ fn tab_goes_round_the_filters_and_the_list_shows_only_that_status() {
 }
 
 #[test]
-fn coordinators_lists_every_coordinator_of_every_machine_and_enter_talks_to_it() {
+fn coordinators_is_a_filter_its_rows_stand_where_the_grouping_puts_them_for_the_machine_shown() {
     let w = coord_world("otherbox");
     w.add("Fix the login");
     w.script(json!({ "coordinator": [{ "said": "Proj is quiet." }] }));
     let host = sw::shown::words::clean(&sw::remote::check::hostname());
     let mut s = open(&w.root, 40); s.s.side = false;
-    // start this machine's project coordinator, so it is one of them
-    s.press(&["alt+s"]); s.s.sel = sw::board::update::heads::group_id(&s.s, "", "proj"); s.load();
-    s.press(&["space"]); s.typed("hello"); s.press(&["enter"]); drain(); s.press(&["space"]);
+    // under All: the main Coordinator's row only, as a task agent's row
+    assert_eq!(coords_shown(&s), vec!["Main coordinator", "▾ to do"]);
+    // Coordinators, this machine: its main, its machine's (never ran) and its project's (used lately)
+    s.press(&["shift+tab"]); assert_eq!(s.s.show, 6);
+    assert_eq!(coords_shown(&s), vec!["Main coordinator", "Machine coordinator", "Project coordinator · proj"]);
+    assert!(tasks_shown(&s).is_empty());
+    let t = s.text();
+    assert!(t.contains("not started: your first message starts it") && !t.lines().any(|x| x.starts_with(" ") && x.contains("──")), "{t}");
+    // enter on one: the chat talks to it; what you type goes to it
+    s.s.sel = sw::board::update::coord_rows::row_id("", "project:proj"); s.load();
+    assert!(s.text().contains("enter talk to the proj coordinator"), "{}", s.text());
+    s.press(&["enter"]); assert!(s.text().contains("Send message to proj coordinator"), "{}", s.text());
+    s.typed("hello"); s.press(&["enter"]); drain(); s.load();
+    assert!(s.text().contains("Proj is quiet."), "{}", s.text());
+    s.press(&["space"]);
+    // by repo: the project's under its repo's heading
+    s.press(&["alt+s"]);
+    assert_eq!(coords_shown(&s), vec!["Main coordinator", "Machine coordinator", "▾ proj", "Project coordinator · proj"]);
+    s.press(&["alt+s", "alt+s"]);
+    // every machine: each machine's coordinators under its heading; the count follows the machine shown
     update(&mut s.s, Event::Machines(sw::remote::machines()));
     let answer = json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "working", "readable": true, "said": "Far main is busy." },
         "coordinators": { "machine": { "state": "idle", "said": "Far machine is quiet." }, "project:far": { "state": "idle", "said": "Far project." } }, "tasks": [] });
     update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(answer) });
-    s.press(&["shift+tab"]); assert_eq!(s.s.show, 6); s.load(); s.load();
-    let names = heads(&s);
-    assert_eq!(names, vec!["Coordinator".to_string(), format!("{host} coordinator"), "proj coordinator".into(), "Coordinator on otherbox".into(), "otherbox coordinator".into(), "far coordinator".into()]);
+    to_all(&mut s);
+    let mut want: Vec<String> = vec![format!("▾ {host}"), "Main coordinator".into(), "Machine coordinator".into(), "Project coordinator · proj".into(), "▾ otherbox".into(), "Main coordinator".into(), "Machine coordinator".into(), "Project coordinator · far".into()];
+    if sw::board::update::remotes::place(&s.s, "otherbox") < sw::board::update::remotes::place(&s.s, "") { want.rotate_left(4); }
+    assert_eq!(coords_shown(&s), want);
+    assert!(s.screen(140)[1].starts_with(" All machines ▾ │ All 1 · ") && s.screen(140)[1].ends_with("Coordinators 6"), "{:?}", s.screen(140));
     let t = s.text();
-    assert!(t.contains("Proj is quiet.") && t.contains("Far main is busy.") && t.contains("far coordinator · otherbox") && t.contains("not started: your first message starts it"), "{t}");
-    assert!(s.screen(120)[1].ends_with("Coordinators 6"), "{:?}", s.screen(120));
-    assert!(!t.contains("Fix the login"), "{t}");
-    // enter on one: the chat talks to it
-    s.s.sel = format!("head:repo\totherbox\tfar"); s.load();
+    assert!(t.contains("Far main is busy.") && t.contains("Far project."), "{t}");
+    // one machine shown: its coordinators only, and the count is its
+    s.press(&["alt+m"]); while s.s.scope != "otherbox" { s.press(&["alt+m"]); }
+    assert_eq!(coords_shown(&s), vec!["Main coordinator", "Machine coordinator", "Project coordinator · far"]);
+    assert!(s.screen(140)[1].starts_with(" otherbox ▾ │ ") && s.screen(140)[1].ends_with("Coordinators 3"), "{:?}", s.screen(140));
+    // enter on its main Coordinator: what you type goes to that machine's
+    s.s.sel = sw::board::update::coord_rows::row_id("otherbox", ""); s.load();
     s.press(&["enter"]);
-    assert!(s.text().contains("Send message to far coordinator"), "{}", s.text());
-    // enter on the main Coordinator: the chat is the Coordinator's
-    s.s.sel = sw::board::update::pilot::main_id(""); s.load();
-    s.press(&["enter"]); assert!(s.s.reply, "by its row");
-    assert!(s.text().contains("Send message to Coordinator"), "{}", s.text());
+    assert!(s.text().contains("Send message to Coordinator on otherbox"), "{}", s.text());
+    s.typed("hello far");
+    let fx = s.hold("enter");
+    let jobs: Vec<String> = fx.iter().filter_map(|e| match e { sw::board::update::Effect::Run(j) => Some(format!("{j:?}")), _ => None }).collect();
+    assert!(jobs.iter().any(|j| j.starts_with("Dispatch") && j.contains("hello far") && j.contains("otherbox")), "{jobs:?}");
+    // a click on the machine item goes round as alt+m does
+    s.lines();
+    let (y, x, _, _) = *s.s.show_hits.iter().find(|h| h.3 == sw::board::view::shows_row::MACHINE).unwrap();
+    let was = s.s.scope.clone();
+    let fx = update(&mut s.s, Event::Click { x: x as u16, y: y as u16 }); s.run(fx);
+    assert_ne!(s.s.scope, was);
 }
 
 #[test]
@@ -99,32 +130,4 @@ fn alt_s_groups_by_status_by_repo_by_machine_and_round_again() {
     assert_eq!(heads(&s), vec![host.clone()], "the machine's heading alone, no status heading under it");
     assert_eq!(tasks_shown(&s).len(), 2);
     s.press(&["alt+s"]); assert!(!s.s.by_machine && !s.s.by_repo); assert_eq!(heads(&s), vec!["to do"]);
-}
-
-#[test]
-fn enter_on_this_machines_coordinator_talks_to_it_whatever_machine_shows_and_the_count_holds() {
-    let w = coord_world("otherbox");
-    w.add("Fix the login");
-    w.script(json!({ "coordinator": [{ "said": "Proj is quiet." }] }));
-    let mut s = open(&w.root, 40); s.s.side = false;
-    // a project coordinator, saved: counted under every filter, not only under Coordinators
-    s.press(&["alt+s"]); s.s.sel = sw::board::update::heads::group_id(&s.s, "", "proj"); s.load();
-    s.press(&["space"]); s.typed("hello"); s.press(&["enter"]); drain(); s.press(&["space", "alt+s", "alt+s"]); s.load();
-    let n = |s: &mut common::board::Board| s.screen(120)[1].clone();
-    assert!(n(&mut s).ends_with("Coordinators 3"), "{}", n(&mut s));
-    s.press(&["shift+tab"]); s.load(); assert!(n(&mut s).ends_with("Coordinators 3"), "{}", n(&mut s));
-    s.press(&["tab"]); s.load(); assert!(n(&mut s).ends_with("Coordinators 3"), "{}", n(&mut s));
-    // one other machine's board shown: its Coordinator is the chat's own, yet enter on this machine's goes here
-    update(&mut s.s, Event::Machines(sw::remote::machines()));
-    update(&mut s.s, Event::Remote { label: "otherbox".into(), answer: Ok(json!({ "host": "otherbox", "version": "9.0.0", "coordinator": { "state": "idle" }, "coordinators": {}, "tasks": [] })) });
-    s.s.scope = "otherbox".into();
-    s.press(&["shift+tab"]); assert!(sw::board::update::shows::coords(&s.s));
-    s.s.sel = sw::board::update::pilot::main_id(""); s.load();
-    assert!(s.text().contains("enter talk to it"), "{}", s.text());
-    s.press(&["enter"]);
-    assert!(s.text().contains("Send message to Coordinator") && !s.text().contains("enter talk to it"), "{}", s.text());
-    s.typed("hello local coordinator");
-    let fx = s.hold("enter");
-    let jobs: Vec<String> = fx.iter().filter_map(|e| match e { sw::board::update::Effect::Run(j) => Some(format!("{j:?}")), _ => None }).collect();
-    assert!(jobs.iter().any(|j| j.starts_with("CoordSend") && j.contains("hello local coordinator")) && !jobs.iter().any(|j| j.starts_with("Dispatch")), "{jobs:?}");
 }
