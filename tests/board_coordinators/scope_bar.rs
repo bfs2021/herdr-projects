@@ -149,3 +149,12 @@ fn a_picker_longer_than_the_bar_keeps_the_picked_one_in_view() {
     assert!(l[0].contains("project-18") && l[0].contains("‹") && !l[0].contains("project-00"), "{l:?}");
     s.press(&["enter"]); assert_eq!(s.s.project, "project-18");
 }
+
+#[test]
+fn a_step_that_has_no_room_on_a_narrow_bar_is_counted_never_cut() {
+    let w = coord_world();
+    let mut s = open(&w.root, 24);
+    s.s.data.host = "runnervm8k3b6-a-long-host-name".into();
+    s.s.data.lately = vec!["proj".into()];
+    for width in [24, 20] { let l = &s.screen(width)[0]; assert!(l.starts_with(" ○ All ›") && (l.contains("runnervm8k3b6-a-long-host-name") || l.ends_with("+1")) && !l.contains('…'), "at {width}: {l}"); }
+}
