@@ -240,6 +240,51 @@ pub fn skill_dir(kind: &str) -> Option<PathBuf> {
     let home = match kind { "claude" => claude_home(), "codex" => codex_home(), "pi" => pi_home(), _ => return None };
     home.exists().then(|| home.join("skills"))
 }
+/// Whether Codex's TOML settings already carry `projects.<root>`, whichever quoting style wrote it.
+///
+/// A plain string search only understood the double-quoted header this function writes; Codex rewrites the
+/// header with single quotes, so the next call appended a second table and made the file invalid (#314).
+/// `None` means the file is not valid TOML, so it must not be appended to.
+fn codex_project_trusted(text: &str, root: &str) -> Option<bool> {
+    let doc: toml::Value = toml::from_str(text).ok()?;
+    Some(doc.get("projects").and_then(|projects| projects.get(root)).is_some())
+}
+
+#[cfg(test)]
+mod codex_trust_tests {
+    use super::codex_project_trusted;
+
+    #[test]
+    fn finds_the_single_quoted_header_codex_writes() {
+        let text = "[projects.'/work/repo']\ntrust_level = 'trusted'\n";
+        assert_eq!(codex_project_trusted(text, "/work/repo"), Some(true));
+    }
+
+    #[test]
+    fn finds_our_double_quoted_header() {
+        let text = "[projects.\"/work/repo\"]\ntrust_level = \"trusted\"\n";
+        assert_eq!(codex_project_trusted(text, "/work/repo"), Some(true));
+    }
+
+    #[test]
+    fn finds_a_dotted_key() {
+        let text = "projects.\"/work/repo\".trust_level = \"trusted\"\n";
+        assert_eq!(codex_project_trusted(text, "/work/repo"), Some(true));
+    }
+
+    #[test]
+    fn does_not_confuse_another_project() {
+        let text = "[projects.'/work/other']\ntrust_level = 'trusted'\n";
+        assert_eq!(codex_project_trusted(text, "/work/repo"), Some(false));
+    }
+
+    #[test]
+    fn refuses_an_unparseable_file() {
+        let text = "[projects.'/work/repo']\ntrust_level = 'trusted'\n[projects.\"/work/repo\"]\ntrust_level = \"trusted\"\n";
+        assert_eq!(codex_project_trusted(text, "/work/repo"), None);
+    }
+}
+
 /// Mark a repo as trusted in the program's own settings, so a new worktree starts without its "trust this folder?"
 /// dialog. Claude keeps trust per repository root in ~/.claude.json; Codex in ~/.codex/config.toml (a command-line
 /// override does not count, so the table is appended to the file once).
@@ -257,8 +302,13 @@ pub fn trust(kind: &str, root: &Path) -> bool {
         "codex" => {
             let file = codex_file();
             let text = match fs::read_to_string(&file) { Ok(t) => t, Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(), Err(_) => return false };
+            match codex_project_trusted(&text, &root_s) {
+                Some(true) => return true,
+                // Codex rewrites the file itself, and a file we cannot parse is one to leave alone.
+                None if !text.trim().is_empty() => return false,
+                _ => {}
+            }
             let head = format!("[projects.{}]", serde_json::to_string(&root_s).unwrap_or_default());
-            if text.contains(&head) { return true; }
             if let Some(d) = file.parent() { let _ = fs::create_dir_all(d); }
             let add = format!("{}\n{head}\ntrust_level = \"trusted\"\n", if !text.is_empty() && !text.ends_with('\n') { "\n" } else { "" });
             fs::OpenOptions::new().create(true).append(true).open(&file).and_then(|mut f| std::io::Write::write_all(&mut f, add.as_bytes())).is_ok()
